@@ -258,96 +258,123 @@ export default function AuctionHero() {
 
           {/* Live Bid Info */}
           <div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p className="text-xs text-muted mb-1">Current Bid</p>
-                <p className="text-2xl font-semibold text-gold">
-                  {currentBidSol !== null
-                    ? chainAuction.state.currentBid.isZero()
-                      ? "No bids"
-                      : `${currentBidSol} SOL`
-                    : "-- SOL"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted mb-1">Time Left</p>
-                <p className="text-2xl font-semibold">{countdown}</p>
-              </div>
-            </div>
-
-            {/* Bid form — shown when auction is active */}
-            {auctionActive ? (
-              <div className="mt-4 space-y-3">
-                {minBidSol && (
-                  <p className="text-xs text-muted">
-                    Minimum bid: {minBidSol} SOL
-                  </p>
-                )}
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      step="0.001"
-                      min={minBidSol || "0"}
-                      value={bidInput}
-                      onChange={(e) => setBidInput(e.target.value)}
-                      className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold"
-                      placeholder={minBidSol || "0.000"}
-                      disabled={!wallet.publicKey || bidding}
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
-                      SOL
-                    </span>
+            {chainAuction ? (
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-muted mb-1">Current Bid</p>
+                    <p className="text-2xl font-semibold text-gold">
+                      {chainAuction.state.currentBid.isZero()
+                        ? "No bids"
+                        : `${currentBidSol} SOL`}
+                    </p>
                   </div>
-                  {wallet.publicKey ? (
-                    <button
-                      onClick={placeBid}
-                      disabled={bidding}
-                      className="px-4 py-2 bg-gold text-background text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-                    >
-                      {bidding ? "Sending…" : "Place Bid"}
-                    </button>
-                  ) : (
-                    <WalletMultiButton
-                      style={{
-                        backgroundColor: "#d4a843",
-                        color: "#09090b",
-                        fontSize: "0.875rem",
-                        fontWeight: 600,
-                        borderRadius: 0,
-                        height: "auto",
-                        padding: "0.5rem 1rem",
-                        lineHeight: 1.5,
-                      }}
-                    />
-                  )}
+                  <div>
+                    <p className="text-xs text-muted mb-1">Time Left</p>
+                    <p className="text-2xl font-semibold">{countdown}</p>
+                  </div>
                 </div>
 
-                {txError && (
-                  <p className="text-xs text-red-400">{txError}</p>
-                )}
-                {txSuccess && (
-                  <p className="text-xs text-green-400 break-all">
-                    Bid placed!{" "}
-                    <a
-                      href={`https://explorer.solana.com/tx/${txSuccess}?cluster=devnet`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline"
-                    >
-                      View tx
-                    </a>
+                {auctionActive ? (
+                  <div className="space-y-3">
+                    {minBidSol && (
+                      <p className="text-xs text-muted">
+                        Minimum bid: {minBidSol} SOL
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          step="0.001"
+                          min={minBidSol || "0"}
+                          value={bidInput}
+                          onChange={(e) => setBidInput(e.target.value)}
+                          className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold"
+                          placeholder={minBidSol || "0.000"}
+                          disabled={!wallet.publicKey || bidding}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
+                          SOL
+                        </span>
+                      </div>
+                      {wallet.publicKey ? (
+                        <button
+                          onClick={placeBid}
+                          disabled={bidding}
+                          className="px-4 py-2 bg-gold text-background text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                        >
+                          {bidding ? "Sending…" : "Place Bid"}
+                        </button>
+                      ) : (
+                        <WalletMultiButton
+                          style={{
+                            backgroundColor: "#d4a843",
+                            color: "#09090b",
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                            borderRadius: 0,
+                            height: "auto",
+                            padding: "0.5rem 1rem",
+                            lineHeight: 1.5,
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {txError && (
+                      <p className="text-xs text-red-400">{txError}</p>
+                    )}
+                    {txSuccess && (
+                      <p className="text-xs text-green-400 break-all">
+                        Bid placed!{" "}
+                        <a
+                          href={`https://explorer.solana.com/tx/${txSuccess}?cluster=devnet`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline"
+                        >
+                          View tx
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                ) : chainAuction.state.settled ? (
+                  <p className="text-xs text-muted">
+                    This auction has been settled.
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted">
+                    Auction has ended — awaiting settlement.
                   </p>
                 )}
-              </div>
-            ) : chainAuction?.state.settled ? (
-              <p className="text-xs text-muted mt-2">
-                This auction has been settled.
-              </p>
+              </>
             ) : (
-              <p className="text-xs text-muted mt-2">
-                Auction not yet started for this NFT.
-              </p>
+              /* No on-chain auction yet — show schedule fallback */
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-muted mb-1">Auction Date</p>
+                    <p className="text-2xl font-semibold">
+                      {new Date(
+                        auctionData.date + "T00:00:00Z"
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted mb-1">Opens</p>
+                    <p className="text-2xl font-semibold">Midnight UTC</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted">
+                  Auction opens at midnight UTC on auction day. Come back then
+                  to place your bid.
+                </p>
+              </>
             )}
           </div>
         </div>
