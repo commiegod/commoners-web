@@ -16,18 +16,17 @@ export default function RecentAuctions() {
     <section>
       <h2 className="font-blackletter text-2xl text-gold mb-6">Auction Schedule</h2>
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {entries.map(({ date, name, image }) => (
+        {entries.map(({ date, name }) => (
           <div
             key={date}
             className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden"
           >
-            <img
-              src={image}
-              alt={name}
-              className="w-full aspect-square object-cover"
-            />
+            {/* Placeholder — artwork revealed on auction day */}
+            <div className="w-full aspect-square bg-border/30 flex items-center justify-center">
+              <span className="font-blackletter text-2xl text-muted/30">?</span>
+            </div>
             <div className="p-2">
-              <p className="text-sm font-medium truncate">{name}</p>
+              <p className="text-sm font-medium truncate text-muted">Commoner</p>
               <p className="text-xs text-muted">{date}</p>
             </div>
           </div>

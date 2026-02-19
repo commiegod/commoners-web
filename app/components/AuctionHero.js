@@ -357,11 +357,12 @@ export default function AuctionHero() {
                     <p className="text-xs text-muted mb-1">Auction Date</p>
                     <p className="text-2xl font-semibold">
                       {new Date(
-                        auctionData.date + "T00:00:00Z"
+                        auctionData.date + "T12:00:00Z"
                       ).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
+                        timeZone: "UTC",
                       })}
                     </p>
                   </div>
