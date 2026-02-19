@@ -517,7 +517,17 @@ export default function GovernancePage() {
 
       {/* Governance rules summary */}
       <div className="mb-8 bg-card border border-border p-4">
-        <h2 className="font-blackletter text-gold mb-3">Voting Rules</h2>
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="font-blackletter text-gold">Voting Rules</h2>
+          <a
+            href="/docs/governance-v1.2.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted hover:text-gold transition-colors"
+          >
+            Governance Doc v1.2 ↗
+          </a>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 text-xs text-muted">
           <div><span className="text-foreground">Eligibility</span> — Hold ≥1 Commoner NFT</div>
           <div><span className="text-foreground">Voting power</span> — 1 vote per NFT held</div>
