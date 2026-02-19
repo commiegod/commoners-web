@@ -3,203 +3,319 @@
     "nftId": "BZLErDt9T5ina3nz4o3BGpbwpDwzuGoCRmcPd1rxAh1W",
     "name": "MidEvil #5",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/5.png",
-    "traits": ["Brown", "Gorilla", "Green Shades"],
+    "traits": [
+      "Olive",
+      "Eagle",
+      "Midchanic Jacket"
+    ],
     "seller": null
   },
   "2026-02-19": {
     "nftId": "4XF9WA5JQ1Ad3oWTEuPXz5MfX5basMpGzmex4xZGxf8Q",
     "name": "MidEvil #32",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/32.png",
-    "traits": ["Brown", "Ape", "Green Shades"],
+    "traits": [
+      "Brick",
+      "Creature",
+      "Joust Club"
+    ],
     "seller": null
   },
   "2026-02-20": {
     "nftId": "7Lv3427dHQLHNQYSpAmpZvgW7jXuC3nFnvXTc7BxTs9L",
     "name": "MidEvil #35",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/35.png",
-    "traits": ["Brown", "Creature", "Bear Suit"],
+    "traits": [
+      "Brown",
+      "Creature",
+      "Bear Suit"
+    ],
     "seller": "HPntWteDbtxXTq9UbAAFSAt98rwoWxrSX3kixijyMXed"
   },
   "2026-02-21": {
     "nftId": "FKFAcRoxNEAiEUeBhy6nzhQHfQsHNWK92wnzZfsNh2T3",
     "name": "MidEvil #37",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/37.png",
-    "traits": ["Tan", "Ape", "Chain Mail"],
+    "traits": [
+      "Olive",
+      "Creature",
+      "Field Jacket"
+    ],
     "seller": null
   },
   "2026-02-22": {
     "nftId": "8kvZkj4W6BnJcdrG5GAmoWfBPJiagf8osrfS8qaZJU26",
     "name": "MidEvil #44",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/44.png",
-    "traits": ["Blue", "Ape", "Chain Mail"],
+    "traits": [
+      "Heaven",
+      "Red Goblin",
+      "Midpunk"
+    ],
     "seller": null
   },
   "2026-02-23": {
     "nftId": "GpaYZHqTyjkNxB7wNUB83HcvCDjEkwGEjS8ZZW2nLK9B",
     "name": "MidEvil #76",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/76.png",
-    "traits": ["Brown", "Tiger", "Bear Suit"],
+    "traits": [
+      "Brick",
+      "Creature",
+      "Goat Fleece"
+    ],
     "seller": null
   },
   "2026-02-24": {
     "nftId": "Bpg5GPJU3GX8mW4ujMHTgpY5UTvdgzAQp5PJwjMzhHax",
     "name": "MidEvil #79",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/79.png",
-    "traits": ["Tan", "Gorilla", "Wolf of Camelot"],
+    "traits": [
+      "Brick",
+      "Wolf",
+      "Knights Helm"
+    ],
     "seller": null
   },
   "2026-02-25": {
     "nftId": "9V35BVr5EoVNzTGb4nWtR6NnMpijNbTw5hXKfVhSFW4n",
     "name": "MidEvil #130",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/130.png",
-    "traits": ["Tan", "Creature", "Chain Mail"],
+    "traits": [
+      "Brown",
+      "Gravel",
+      "Dreads"
+    ],
     "seller": null
   },
   "2026-02-26": {
     "nftId": "9chLBPskHM5MaqQKzrrtA4hcM6bqJpAtiU7hPZUU8F9R",
     "name": "MidEvil #204",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/204.png",
-    "traits": ["Brown", "Bear", "Bear Suit"],
+    "traits": [
+      "Mud",
+      "Alien",
+      "Revelry Shirt"
+    ],
     "seller": null
   },
   "2026-02-27": {
     "nftId": "4WevVPcWsV4FEDzwaibnqs59EjrmSbegrgSaTUBC5QiS",
     "name": "MidEvil #325",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/325.png",
-    "traits": ["Tan", "Gorilla", "Revelry Shirt"],
+    "traits": [
+      "Olive",
+      "Sand",
+      "Prince Hair"
+    ],
     "seller": null
   },
   "2026-02-28": {
     "nftId": "7mdwTyFUAJJsoka7CuoThemqzEczMAwrxPwkCFKBckxn",
     "name": "MidEvil #326",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/326.png",
-    "traits": ["Blue", "Bear", "Rangers Cloak"],
+    "traits": [
+      "Mud",
+      "Tiger",
+      "Goat Fleece"
+    ],
     "seller": null
   },
   "2026-03-01": {
     "nftId": "D4pZuCBnFs7n6d2ZtSBc12Mojo6btatvAceE1bxmUGWz",
     "name": "MidEvil #371",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/371.png",
-    "traits": ["Brown", "Tiger", "Revelry Shirt"],
+    "traits": [
+      "Olive",
+      "Radio",
+      "Peasant"
+    ],
     "seller": null
   },
   "2026-03-02": {
     "nftId": "A28UDNTfz2yeupUzn8erTDJjdNUE6DsWi2e4wSeXbqKp",
     "name": "MidEvil #413",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/413.png",
-    "traits": ["Blue", "Gorilla", "Chain Mail"],
+    "traits": [
+      "Tan",
+      "Red Goblin",
+      "Lads Cut"
+    ],
     "seller": null
   },
   "2026-03-03": {
     "nftId": "Api7SB6K4LsgEk6chCVtp8YJYmWRiAxg2S8urNeGw8PS",
     "name": "MidEvil #454",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/454.png",
-    "traits": ["Brown", "Wolf", "Chain Mail"],
+    "traits": [
+      "Blue",
+      "X-Ray",
+      "Sweater"
+    ],
     "seller": null
   },
   "2026-03-04": {
     "nftId": "GFJD4H7LmX1zGH897YdfWQgoKgSbCmvD6saSrURQEj3s",
     "name": "MidEvil #525",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/525.png",
-    "traits": ["Brown", "Creature", "Wolf of Camelot"],
+    "traits": [
+      "Mud",
+      "Saxon",
+      "Peasant"
+    ],
     "seller": null
   },
   "2026-03-05": {
     "nftId": "2uYuYcjosWL5xEQEnsa51aHirkd6NLxRR7jZaaHvXEZq",
     "name": "MidEvil #559",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/559.png",
-    "traits": ["Brown", "Bear", "Chain Mail"],
+    "traits": [
+      "Mud",
+      "Olive",
+      "Dreads"
+    ],
     "seller": null
   },
   "2026-03-06": {
     "nftId": "6eQZAXm9SFJ7sCnYmVpb6AMeLqta5SHjaLaEswZoQdK8",
     "name": "MidEvil #566",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/566.png",
-    "traits": ["Tan", "Wolf", "Chain Mail"],
+    "traits": [
+      "Brick",
+      "Dragon",
+      "Knights Beard"
+    ],
     "seller": null
   },
   "2026-03-07": {
     "nftId": "8aofSjBjzFhntEd1Xjjud3zbFn6AutW2HSRqKNTAHXwn",
     "name": "MidEvil #741",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/741.png",
-    "traits": ["Tan", "Bear", "Wolf of Camelot"],
+    "traits": [
+      "Brown",
+      "Tiger",
+      "Midtallica Tee"
+    ],
     "seller": null
   },
   "2026-03-08": {
     "nftId": "GENgfUiTupvbnhP88a6VhBtiWAAn1VUnBCRFPTsL5cSf",
     "name": "MidEvil #772",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/772.png",
-    "traits": ["Blue", "Creature", "Rangers Cloak"],
+    "traits": [
+      "Blue",
+      "Tiger",
+      "Midtallica Tee"
+    ],
     "seller": null
   },
   "2026-03-09": {
     "nftId": "2nXNnGSJo14FnN2h2aNGguCuUkaX3kfnXH6SXAQNiP1Z",
     "name": "MidEvil #780",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/780.png",
-    "traits": ["Brown", "Ape", "Rangers Cloak"],
+    "traits": [
+      "Brick",
+      "Eagle",
+      "Angler Saxon"
+    ],
     "seller": null
   },
   "2026-03-10": {
     "nftId": "47CNzgCcDRRBxQ4is2K1Dn55v8RKP3U6JELA9kuGjEue",
     "name": "MidEvil #827",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/827.png",
-    "traits": ["Brown", "Wolf", "Bear Suit"],
+    "traits": [
+      "Brick",
+      "Sand",
+      "Midtallica Tee"
+    ],
     "seller": null
   },
   "2026-03-11": {
     "nftId": "J3KkwhzEWbjdWcTmPk1TCMGeUQfgieVjciAK2MLdj2Ni",
     "name": "MidEvil #857",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/857.png",
-    "traits": ["Tan", "Gorilla", "Green Shades"],
+    "traits": [
+      "Tan",
+      "Gorilla",
+      "Green Shades"
+    ],
     "seller": null
   },
   "2026-03-12": {
     "nftId": "2XsM5DHv4wqmp6zFDjWgFPQEyNgkruAHtNZ8wgzuhP9f",
     "name": "MidEvil #891",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/891.png",
-    "traits": ["Blue", "Gorilla", "Rangers Cloak"],
+    "traits": [
+      "Mud",
+      "X-Ray",
+      "Midtallica Tee"
+    ],
     "seller": null
   },
   "2026-03-13": {
     "nftId": "4gyF2YaBQEyk1zKAGLKsf3zCQozBfMGMwMfr9yETvrrP",
     "name": "MidEvil #921",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/921.png",
-    "traits": ["Tan", "Bear", "Chain Mail"],
+    "traits": [
+      "Brick",
+      "Wolf",
+      "Revelry Shirt"
+    ],
     "seller": null
   },
   "2026-03-14": {
     "nftId": "EWytX73z1whNx3yLJMKPW5uBUz2qqomyo1GK6qidCoV2",
     "name": "MidEvil #927",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/927.png",
-    "traits": ["Brown", "Creature", "Rangers Cloak"],
+    "traits": [
+      "Tan",
+      "Gorilla",
+      "Cloak of Fire"
+    ],
     "seller": null
   },
   "2026-03-15": {
     "nftId": "7Ls6mnWMvFTSWGsMGkKHRaMQXT2ovRSUCCJVGirhmbMs",
     "name": "MidEvil #972",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/972.png",
-    "traits": ["Brown", "Tiger", "Green Shades"],
+    "traits": [
+      "Olive",
+      "Creature",
+      "Letterman"
+    ],
     "seller": null
   },
   "2026-03-16": {
     "nftId": "EZ7ugQZpWzhZBhYweXWEFUt5T1dNt7F1EYBqToaCcMAK",
     "name": "MidEvil #982",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/982.png",
-    "traits": ["Tan", "Bear", "Green Shades"],
+    "traits": [
+      "Brick",
+      "Wolf",
+      "Caravaggio"
+    ],
     "seller": null
   },
   "2026-03-17": {
     "nftId": "E2FWBZ4heYcGi3vt2Nxj7rh6XQpGzY4fPiUoXp2UUuHp",
     "name": "MidEvil #993",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/993.png",
-    "traits": ["Brown", "Tiger", "Rangers Cloak"],
+    "traits": [
+      "Mud",
+      "Eagle",
+      "Angler Saxon"
+    ],
     "seller": null
   },
   "2026-03-18": {
     "nftId": "FCkxZ53kJX8dFQrgh6xvkgqSbAAm8gd1Eq1gzGjgNLRY",
     "name": "MidEvil #1000",
     "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/1000.png",
-    "traits": ["Brown", "Bear", "Wolf of Camelot"],
+    "traits": [
+      "Olive",
+      "Red Goblin",
+      "Crazy Eyes"
+    ],
     "seller": null
   }
 }
