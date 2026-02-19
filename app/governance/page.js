@@ -1,6 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useWallet } from "@solana/wallet-adapter-react";
+
+const WalletMultiButton = dynamic(
+  () =>
+    import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
+  { ssr: false }
+);
+
+// ── proposal data ─────────────────────────────────────────────────────────────
 
 const PROPOSALS = [
   {
@@ -41,6 +51,8 @@ const STATUS_STYLES = {
   failed: "bg-red-500/10 text-red-400 border border-red-500/20",
 };
 
+// ── sub-components ────────────────────────────────────────────────────────────
+
 function VoteBar({ votes }) {
   const total = votes.yes + votes.no + votes.abstain;
   if (total === 0) return null;
@@ -50,67 +62,41 @@ function VoteBar({ votes }) {
   return (
     <div className="mt-4">
       <div className="flex h-2 overflow-hidden bg-border rounded-full">
-        <div className="bg-green-500 transition-all" style={{ width: `${yesPct}%` }} />
-        <div className="bg-red-500 transition-all" style={{ width: `${noPct}%` }} />
+        <div
+          className="bg-green-500 transition-all"
+          style={{ width: `${yesPct}%` }}
+        />
+        <div
+          className="bg-red-500 transition-all"
+          style={{ width: `${noPct}%` }}
+        />
       </div>
       <div className="flex justify-between mt-1.5 text-xs text-muted">
-        <span className="text-green-400">{votes.yes} Yes ({yesPct}%)</span>
+        <span className="text-green-400">
+          {votes.yes} Yes ({yesPct}%)
+        </span>
         <span>{votes.abstain} Abstain</span>
-        <span className="text-red-400">{votes.no} No ({noPct}%)</span>
+        <span className="text-red-400">
+          {votes.no} No ({noPct}%)
+        </span>
       </div>
     </div>
   );
 }
 
-function WalletConnect({ connected, address, onConnect, onDisconnect }) {
-  if (connected) {
-    return (
-      <div className="flex items-center gap-2 flex-wrap justify-end">
-        <span className="text-xs text-muted font-mono">{address}</span>
-        <button
-          onClick={onDisconnect}
-          className="px-3 py-1.5 text-xs border border-border text-muted hover:text-foreground transition-colors"
-        >
-          Disconnect
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={onConnect}
-      className="px-4 py-2 bg-gold text-background text-sm font-semibold hover:bg-gold/90 transition-colors shrink-0"
-    >
-      Connect Wallet
-    </button>
-  );
-}
+// ── page ──────────────────────────────────────────────────────────────────────
 
 export default function GovernancePage() {
-  const [connected, setConnected] = useState(false);
-  const [address, setAddress] = useState(null);
-  const [isHolder, setIsHolder] = useState(false);
+  const { connected, publicKey } = useWallet();
   const [voted, setVoted] = useState({});
-
-  function handleConnect() {
-    // Placeholder — will integrate @solana/wallet-adapter-react
-    // and verify Commoner holdings via Helius RPC
-    setConnected(true);
-    setAddress("Topoz...axV");
-    setIsHolder(true);
-  }
-
-  function handleDisconnect() {
-    setConnected(false);
-    setAddress(null);
-    setIsHolder(false);
-    setVoted({});
-  }
 
   function handleVote(proposalId, choice) {
     setVoted((v) => ({ ...v, [proposalId]: choice }));
   }
+
+  const shortAddress = publicKey
+    ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
+    : null;
 
   const activeProposals = PROPOSALS.filter((p) => p.status === "active");
   const pastProposals = PROPOSALS.filter((p) => p.status !== "active");
@@ -119,33 +105,37 @@ export default function GovernancePage() {
     <div className="max-w-3xl">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-8">
-        <h1 className="font-blackletter text-3xl text-gold shrink-0">Governance</h1>
-        <WalletConnect
-          connected={connected}
-          address={address}
-          onConnect={handleConnect}
-          onDisconnect={handleDisconnect}
+        <h1 className="font-blackletter text-3xl text-gold shrink-0">
+          Governance
+        </h1>
+        <WalletMultiButton
+          style={{
+            backgroundColor: connected ? "transparent" : "#d4a843",
+            border: connected ? "1px solid #d4a843" : "none",
+            color: connected ? "#d4a843" : "#09090b",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            borderRadius: 0,
+            height: "auto",
+            padding: "0.5rem 1rem",
+            lineHeight: 1.5,
+          }}
         />
       </div>
 
-      {/* Holder status */}
+      {/* Wallet status bar */}
       {connected && (
-        <div
-          className={`mb-8 px-4 py-3 text-sm ${
-            isHolder
-              ? "bg-green-500/10 border border-green-500/20 text-green-400"
-              : "bg-red-500/10 border border-red-500/20 text-red-400"
-          }`}
-        >
-          {isHolder
-            ? "Commoner holder verified — you may vote on active proposals."
-            : "No Commoner NFTs found in this wallet. Voting requires a Commoner."}
+        <div className="mb-8 px-4 py-3 text-sm bg-green-500/10 border border-green-500/20 text-green-400 flex items-center justify-between gap-4">
+          <span>Wallet connected — you may vote on active proposals.</span>
+          <span className="font-mono text-xs opacity-70">{shortAddress}</span>
         </div>
       )}
 
       {/* Active proposals */}
       <section className="mb-10">
-        <h2 className="font-blackletter text-xl text-gold mb-4">Active Proposals</h2>
+        <h2 className="font-blackletter text-xl text-gold mb-4">
+          Active Proposals
+        </h2>
         {activeProposals.length === 0 ? (
           <div className="bg-card border border-border p-6 text-center text-muted">
             No active proposals.
@@ -153,10 +143,15 @@ export default function GovernancePage() {
         ) : (
           <div className="space-y-4">
             {activeProposals.map((p) => (
-              <div key={p.id} className="bg-card border border-border p-4 sm:p-5">
+              <div
+                key={p.id}
+                className="bg-card border border-border p-4 sm:p-5"
+              >
                 <div className="flex items-start justify-between gap-4 mb-2">
                   <h3 className="font-semibold">{p.title}</h3>
-                  <span className={`text-xs px-2 py-0.5 shrink-0 ${STATUS_STYLES[p.status]}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 shrink-0 ${STATUS_STYLES[p.status]}`}
+                  >
                     {p.status.toUpperCase()}
                   </span>
                 </div>
@@ -164,13 +159,17 @@ export default function GovernancePage() {
                 <p className="text-xs text-muted">
                   Proposed by {p.proposedBy} &middot; Ends {p.endsAt}
                 </p>
+
                 <VoteBar votes={p.votes} />
 
-                {connected && isHolder && (
+                {connected ? (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {voted[p.id] ? (
                       <p className="text-sm text-gold">
-                        You voted: {voted[p.id].toUpperCase()}
+                        You voted:{" "}
+                        <span className="font-semibold">
+                          {voted[p.id].toUpperCase()}
+                        </span>
                       </p>
                     ) : (
                       <>
@@ -195,11 +194,9 @@ export default function GovernancePage() {
                       </>
                     )}
                   </div>
-                )}
-
-                {!connected && (
+                ) : (
                   <p className="mt-4 text-xs text-muted">
-                    Connect a Commoner wallet to vote.
+                    Connect your wallet to vote.
                   </p>
                 )}
               </div>
@@ -210,13 +207,20 @@ export default function GovernancePage() {
 
       {/* Past proposals */}
       <section>
-        <h2 className="font-blackletter text-xl text-gold mb-4">Past Proposals</h2>
+        <h2 className="font-blackletter text-xl text-gold mb-4">
+          Past Proposals
+        </h2>
         <div className="space-y-4">
           {pastProposals.map((p) => (
-            <div key={p.id} className="bg-card border border-border p-4 sm:p-5">
+            <div
+              key={p.id}
+              className="bg-card border border-border p-4 sm:p-5"
+            >
               <div className="flex items-start justify-between gap-4 mb-2">
                 <h3 className="font-semibold">{p.title}</h3>
-                <span className={`text-xs px-2 py-0.5 shrink-0 ${STATUS_STYLES[p.status]}`}>
+                <span
+                  className={`text-xs px-2 py-0.5 shrink-0 ${STATUS_STYLES[p.status]}`}
+                >
                   {p.status.toUpperCase()}
                 </span>
               </div>
@@ -231,7 +235,7 @@ export default function GovernancePage() {
       </section>
 
       <p className="mt-10 text-xs text-muted text-center">
-        On-chain vote recording and wallet verification via Helius RPC coming in Phase 2.
+        On-chain vote recording and Commoner holder verification coming in Phase 2.
       </p>
     </div>
   );
