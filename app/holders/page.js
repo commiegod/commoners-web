@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import commoners from "../../data/commoners.json";
-import { RPC_URL } from "../../lib/programClient";
+
+// Commoners are mainnet NFTs — always query mainnet DAS regardless of which
+// devnet RPC the auction program uses.
+const MAINNET_RPC =
+  process.env.NEXT_PUBLIC_HELIUS_MAINNET_RPC_URL ||
+  "https://api.mainnet-beta.solana.com";
 
 const CACHE_KEY = "holders_v1";
 const CACHE_TTL = 5 * 60 * 1000;
@@ -37,7 +42,7 @@ async function loadHolders(skipCache = false) {
     } catch (_) {}
   }
 
-  const res = await fetch(RPC_URL, {
+  const res = await fetch(MAINNET_RPC, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
