@@ -5,7 +5,6 @@ import { PublicKey, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
-import schedule from "../../data/auction-schedule.json";
 import bounties from "../../data/bounties.json";
 import idl from "../../lib/idl.json";
 import {
@@ -15,21 +14,7 @@ import {
   findAuctionByMint,
   computeMinNextBid,
 } from "../../lib/programClient";
-
-// ── helpers ─────────────────────────────────────────────────────────────────
-
-function getAuctionForDate(dateStr) {
-  const entry = schedule[dateStr];
-  if (!entry) return null;
-  const bountyData = bounties[dateStr] || { human: [], ai: [] };
-  return { date: dateStr, ...entry, bounty: bountyData };
-}
-
-function getNextUpcomingAuction(today) {
-  const dates = Object.keys(schedule).sort();
-  const next = dates.find((d) => d >= today);
-  return next ? getAuctionForDate(next) : null;
-}
+import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
 function formatCountdown(endTimeSecs) {
   const now = Math.floor(Date.now() / 1000);
@@ -74,6 +59,7 @@ function Skeleton() {
 export default function AuctionHero() {
   const { connection } = useConnection();
   const wallet = useWallet();
+  const { slots, loading: scheduleLoading } = useAuctionSchedule();
 
   const [auctionData, setAuctionData] = useState(null);
   const [label, setLabel] = useState("TODAY'S AUCTION");
@@ -87,29 +73,29 @@ export default function AuctionHero() {
 
   const countdownRef = useRef(null);
 
-  // Load schedule data on mount
+  // Derive today's or next upcoming auction from live slot data
   useEffect(() => {
+    if (scheduleLoading) return;
     const today = new Date().toISOString().split("T")[0];
-    const todayAuction = getAuctionForDate(today);
-    if (todayAuction) {
-      setAuction(todayAuction, "TODAY'S AUCTION");
+    const todaySlot = slots.find((s) => s.dateStr === today);
+    if (todaySlot) {
+      setAuctionData({ ...todaySlot, date: todaySlot.dateStr });
+      setLabel("TODAY'S AUCTION");
     } else {
-      const next = getNextUpcomingAuction(today);
-      if (next) setAuction(next, `UPCOMING · ${next.date}`);
+      const next = slots.find((s) => s.dateStr >= today);
+      if (next) {
+        setAuctionData({ ...next, date: next.dateStr });
+        setLabel(`UPCOMING · ${next.dateStr}`);
+      }
     }
     setMounted(true);
-  }, []);
-
-  function setAuction(data, lbl) {
-    setAuctionData(data);
-    setLabel(lbl);
-  }
+  }, [slots, scheduleLoading]);
 
   // Fetch live chain state for the current NFT
   const fetchChainState = useCallback(async () => {
-    if (!auctionData?.nftId) return;
+    if (!auctionData?.nftMint) return;
     try {
-      const mint = new PublicKey(auctionData.nftId);
+      const mint = new PublicKey(auctionData.nftMint);
       const result = await findAuctionByMint(connection, mint);
       setChainAuction(result);
     } catch (e) {
