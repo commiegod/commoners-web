@@ -79,12 +79,20 @@ export default function AuctionHero() {
     const today = new Date().toISOString().split("T")[0];
     const todaySlot = slots.find((s) => s.dateStr === today);
     if (todaySlot) {
-      setAuctionData({ ...todaySlot, date: todaySlot.dateStr });
+      setAuctionData({
+        ...todaySlot,
+        date: todaySlot.dateStr,
+        bounty: bounties[todaySlot.dateStr] || { human: [], ai: [] },
+      });
       setLabel("TODAY'S AUCTION");
     } else {
       const next = slots.find((s) => s.dateStr >= today);
       if (next) {
-        setAuctionData({ ...next, date: next.dateStr });
+        setAuctionData({
+          ...next,
+          date: next.dateStr,
+          bounty: bounties[next.dateStr] || { human: [], ai: [] },
+        });
         setLabel(`UPCOMING · ${next.dateStr}`);
       }
     }
