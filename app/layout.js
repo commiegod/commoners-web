@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "./components/Nav";
 import { Providers } from "./providers";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >
         <Providers>
+          <ErrorBoundary>
           <Nav />
           <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
             {children}
@@ -34,6 +36,7 @@ export default function RootLayout({ children }) {
               The Commoner&apos;s SubDAO &middot; 3-Trait MidEvils
             </div>
           </footer>
+          </ErrorBoundary>
         </Providers>
       </body>
     </html>
