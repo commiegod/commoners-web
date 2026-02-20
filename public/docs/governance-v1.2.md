@@ -40,7 +40,7 @@ There is no tiering, ranking, or special treatment within the Commoner's SubDAO.
 
 The following data was collected on-chain at founding and represents the verified membership of the Commoner's SubDAO.
 
-> *Tables: 120 NFTs, 73 holders, trait distribution data — see original .docx for formatted tables.*
+> *Tables: 120 NFTs, holder distribution, trait distribution data — see original .docx for formatted tables.*
 
 ### Trait Composition
 
@@ -246,5 +246,5 @@ The following decisions are intentionally left for the founding community to res
 
 ---
 
-**120 NFTs. 73 Holders. One Mission.**
+**120 NFTs. One Mission.**
 **We use self-interest to build something selfless.**
