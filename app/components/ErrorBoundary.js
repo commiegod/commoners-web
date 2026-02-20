@@ -16,7 +16,7 @@ export default class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div className="p-8 font-mono text-sm">
-          <p className="text-red-400 font-bold mb-2">Client error:</p>
+          <p className="text-red-600 font-bold mb-2">Client error:</p>
           <pre className="text-muted whitespace-pre-wrap break-all">
             {this.state.error?.message}
             {"\n\n"}

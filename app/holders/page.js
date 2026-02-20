@@ -146,7 +146,7 @@ export default function HoldersPage() {
       </div>
 
       {error && (
-        <p className="text-red-400 text-sm mb-4">Failed to load: {error}</p>
+        <p className="text-red-600 text-sm mb-4">Failed to load: {error}</p>
       )}
 
       {/* Leaderboard */}

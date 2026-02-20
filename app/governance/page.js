@@ -23,9 +23,9 @@ const WalletMultiButton = dynamic(
 
 const STATUS_STYLES = {
   active: "bg-gold/10 text-gold border border-gold/30",
-  passed: "bg-green-500/10 text-green-400 border border-green-500/20",
-  failed: "bg-red-500/10 text-red-400 border border-red-500/20",
-  queued: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  passed: "bg-green-50 text-green-700 border border-green-300",
+  failed: "bg-red-50 text-red-700 border border-red-300",
+  queued: "bg-blue-50 text-blue-700 border border-blue-300",
 };
 
 const VOTE_STORAGE_KEY = "governance_votes_v1";
@@ -85,11 +85,11 @@ function VoteBar({ votes, thresholds }) {
           />
         </div>
         <div className="flex justify-between mt-1.5 text-xs text-muted">
-          <span className="text-green-400">
+          <span className="text-green-700">
             {votes.yes} Yes ({yesPct}%)
           </span>
           <span>{votes.abstain} Abstain</span>
-          <span className="text-red-400">
+          <span className="text-red-600">
             {votes.no} No ({noPct}%)
           </span>
         </div>
@@ -97,11 +97,11 @@ function VoteBar({ votes, thresholds }) {
 
       {/* Quorum + threshold status */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-        <span className={quorumMet ? "text-green-400" : "text-muted"}>
+        <span className={quorumMet ? "text-green-700" : "text-muted"}>
           Quorum: {total}/{thresholds.quorum} NFTs ({quorumPct}%){" "}
           {quorumMet ? "✓" : `— need ${thresholds.quorum - total} more`}
         </span>
-        <span className={majorityMet && quorumMet ? "text-green-400" : "text-muted"}>
+        <span className={majorityMet && quorumMet ? "text-green-700" : "text-muted"}>
           Threshold: {thresholds.majority}%{" "}
           {majorityMet ? "✓" : `— at ${yesPct}%`}
         </span>
@@ -124,7 +124,7 @@ function ThresholdBadge({ thresholds, type }) {
         72h window
       </span>
       {thresholds.needsFutarchy && (
-        <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400">
+        <span className="px-1.5 py-0.5 bg-blue-50 border border-blue-300 text-blue-700">
           + futarchy (Phase 4)
         </span>
       )}
@@ -227,13 +227,13 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => onVote(proposal.id, "yes")}
-                className="px-4 py-1.5 bg-green-500/10 border border-green-500/30 text-green-400 text-sm hover:bg-green-500/20 transition-colors"
+                className="px-4 py-1.5 bg-green-50 border border-green-300 text-green-700 text-sm hover:bg-green-100 transition-colors"
               >
                 Vote Yes
               </button>
               <button
                 onClick={() => onVote(proposal.id, "no")}
-                className="px-4 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/20 transition-colors"
+                className="px-4 py-1.5 bg-red-50 border border-red-300 text-red-700 text-sm hover:bg-red-100 transition-colors"
               >
                 Vote No
               </button>
@@ -376,7 +376,7 @@ ${form.description}`;
           {solAmount > 0 && (
             <p className="text-xs mt-1">
               {solAmount > 20 ? (
-                <span className="text-blue-400">
+                <span className="text-blue-700">
                   Requires 75% supermajority + futarchy market (Phase 4)
                 </span>
               ) : solAmount >= 5 ? (
@@ -480,9 +480,9 @@ export default function GovernancePage() {
         </h1>
         <WalletMultiButton
           style={{
-            backgroundColor: connected ? "transparent" : "#d4a843",
-            border: connected ? "1px solid #d4a843" : "none",
-            color: connected ? "#d4a843" : "#09090b",
+            backgroundColor: connected ? "transparent" : "#b8860b",
+            border: connected ? "1px solid #b8860b" : "none",
+            color: connected ? "#b8860b" : "#ffffff",
             fontSize: "0.875rem",
             fontWeight: 600,
             borderRadius: 0,
@@ -500,8 +500,8 @@ export default function GovernancePage() {
             checkingHolder
               ? "bg-border/20 border border-border text-muted"
               : commonerCount > 0
-              ? "bg-green-500/10 border border-green-500/20 text-green-400"
-              : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400"
+              ? "bg-green-50 border border-green-300 text-green-700"
+              : "bg-yellow-50 border border-yellow-300 text-yellow-700"
           }`}
         >
           <span>
@@ -606,8 +606,8 @@ export default function GovernancePage() {
       </section>
 
       {/* Phase 4 notice */}
-      <div className="mt-10 bg-blue-500/5 border border-blue-500/15 p-4 text-xs text-muted space-y-1">
-        <p className="text-blue-400 font-medium">Phase 4 — On-chain Governance</p>
+      <div className="mt-10 bg-blue-50 border border-blue-200 p-4 text-xs text-muted space-y-1">
+        <p className="text-blue-700 font-medium">Phase 4 — On-chain Governance</p>
         <p>
           Votes are currently stored locally and counted off-chain. Phase 4 deploys
           the on-chain treasury program and integrates MetaDAO futarchy markets for

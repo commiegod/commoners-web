@@ -296,15 +296,15 @@ export default function AuctionHero() {
                         <button
                           onClick={placeBid}
                           disabled={bidding}
-                          className="px-4 py-2 bg-gold text-background text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                          className="px-4 py-2 bg-gold text-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
                         >
                           {bidding ? "Sending…" : "Place Bid"}
                         </button>
                       ) : (
                         <WalletMultiButton
                           style={{
-                            backgroundColor: "#d4a843",
-                            color: "#09090b",
+                            backgroundColor: "#b8860b",
+                            color: "#ffffff",
                             fontSize: "0.875rem",
                             fontWeight: 600,
                             borderRadius: 0,
@@ -317,10 +317,10 @@ export default function AuctionHero() {
                     </div>
 
                     {txError && (
-                      <p className="text-xs text-red-400">{txError}</p>
+                      <p className="text-xs text-red-600">{txError}</p>
                     )}
                     {txSuccess && (
-                      <p className="text-xs text-green-400 break-all">
+                      <p className="text-xs text-green-700 break-all">
                         Bid placed!{" "}
                         <a
                           href={`https://explorer.solana.com/tx/${txSuccess}?cluster=devnet`}

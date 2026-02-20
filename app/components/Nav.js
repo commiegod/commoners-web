@@ -53,8 +53,8 @@ export default function Nav() {
           <WalletMultiButton
             style={{
               backgroundColor: "transparent",
-              border: "1px solid #d4a843",
-              color: "#d4a843",
+              border: "1px solid #b8860b",
+              color: "#b8860b",
               fontSize: "0.75rem",
               borderRadius: 0,
               height: "auto",

@@ -167,8 +167,8 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
             </p>
             <WalletMultiButton
               style={{
-                backgroundColor: "#d4a843",
-                color: "#09090b",
+                backgroundColor: "#b8860b",
+                color: "#ffffff",
                 borderRadius: 0,
                 fontSize: "0.875rem",
               }}
@@ -179,7 +179,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
             Scanning wallet…
           </p>
         ) : step === "done" ? (
-          <p className="text-green-400 text-sm text-center py-8">
+          <p className="text-green-700 text-sm text-center py-8">
             Slot registered! Refreshing schedule…
           </p>
         ) : (
@@ -261,12 +261,12 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
               </div>
             </div>
 
-            {txError && <p className="text-xs text-red-400">{txError}</p>}
+            {txError && <p className="text-xs text-red-600">{txError}</p>}
 
             <button
               onClick={submit}
               disabled={!selectedMint || !selectedDate || step === "submitting"}
-              className="w-full py-2 bg-gold text-background text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="w-full py-2 bg-gold text-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {step === "submitting" ? "Submitting…" : "Register Slot"}
             </button>

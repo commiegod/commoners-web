@@ -12,11 +12,11 @@ const CACHE_KEY = "treasury_v1";
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
 const LABEL_META = {
-  "Auction Fee":         { cls: "bg-green-900/30 text-green-400 border-green-800/40",  sign: "+" },
-  "Donation":            { cls: "bg-blue-900/30 text-blue-400 border-blue-800/40",    sign: "+" },
-  "Artist Bounty":       { cls: "bg-orange-900/30 text-orange-400 border-orange-800/40", sign: "−" },
-  "Holder Distribution": { cls: "bg-purple-900/30 text-purple-400 border-purple-800/40", sign: "−" },
-  "Disbursement":        { cls: "bg-amber-900/30 text-amber-400 border-amber-800/40", sign: "−" },
+  "Auction Fee":         { cls: "bg-green-100 text-green-700 border-green-300",  sign: "+" },
+  "Donation":            { cls: "bg-blue-100 text-blue-700 border-blue-300",    sign: "+" },
+  "Artist Bounty":       { cls: "bg-orange-100 text-orange-700 border-orange-300", sign: "−" },
+  "Holder Distribution": { cls: "bg-purple-100 text-purple-700 border-purple-300", sign: "−" },
+  "Disbursement":        { cls: "bg-amber-100 text-amber-700 border-amber-300", sign: "−" },
 };
 
 function classifyTx(programs, solChange, memo) {
@@ -277,7 +277,7 @@ export default function TreasuryPage() {
             <p className="text-xs text-muted tracking-widest uppercase mb-1">
               Total In (last 50 txs)
             </p>
-            <p className="text-xl font-semibold text-green-400">
+            <p className="text-xl font-semibold text-green-700">
               +{totalIn.toFixed(4)} SOL
             </p>
           </div>
@@ -285,7 +285,7 @@ export default function TreasuryPage() {
             <p className="text-xs text-muted tracking-widest uppercase mb-1">
               Total Out (last 50 txs)
             </p>
-            <p className="text-xl font-semibold text-amber-400">
+            <p className="text-xl font-semibold text-amber-700">
               {totalOut.toFixed(4)} SOL
             </p>
           </div>
@@ -293,7 +293,7 @@ export default function TreasuryPage() {
       )}
 
       {error && (
-        <p className="text-red-400 text-sm mb-4">Failed to load: {error}</p>
+        <p className="text-red-600 text-sm mb-4">Failed to load: {error}</p>
       )}
 
       {/* Transaction feed */}
@@ -333,7 +333,7 @@ export default function TreasuryPage() {
                   <div className="flex items-baseline justify-between gap-2">
                     <span
                       className={`text-base font-semibold ${
-                        isIn ? "text-green-400" : "text-amber-400"
+                        isIn ? "text-green-700" : "text-amber-700"
                       }`}
                     >
                       {isIn ? "+" : ""}
