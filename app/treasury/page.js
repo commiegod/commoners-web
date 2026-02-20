@@ -44,6 +44,11 @@ function extractMemo(instructions) {
   return null;
 }
 
+// Extract Helius API key from the devnet RPC URL env var
+const HELIUS_KEY = (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "").match(
+  /api-key=([^&]+)/
+)?.[1];
+
 async function loadTreasuryData(skipCache = false) {
   if (!skipCache) {
     try {
@@ -63,64 +68,107 @@ async function loadTreasuryData(skipCache = false) {
   const coder = new BorshAccountsCoder(idl);
   const cfgState = coder.decode("ProgramConfig", cfgInfo.data);
   const treasury = cfgState.treasury.toBase58();
-
   const treasuryPk = new PublicKey(treasury);
 
-  const [balanceLamports, sigInfos] = await Promise.all([
-    connection.getBalance(treasuryPk),
-    connection.getSignaturesForAddress(treasuryPk, { limit: 50 }),
-  ]);
+  // Balance via standard RPC (single lightweight call)
+  const balanceLamports = await connection.getBalance(treasuryPk);
 
-  const sigs = sigInfos.filter((s) => !s.err).map((s) => s.signature);
+  let transactions = [];
 
-  const parsed = await connection.getParsedTransactions(sigs, {
-    maxSupportedTransactionVersion: 0,
-    commitment: "confirmed",
-  });
+  if (HELIUS_KEY) {
+    // Use Helius Enhanced Transactions API — one request, pre-parsed, no batch limit
+    const url = `https://api-devnet.helius.xyz/v0/addresses/${treasury}/transactions?api-key=${HELIUS_KEY}&limit=25`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status} : ${await res.text()}`);
+    const enhanced = await res.json();
 
-  const transactions = parsed
-    .map((tx, i) => {
-      if (!tx || tx.meta?.err) return null;
+    transactions = (Array.isArray(enhanced) ? enhanced : [])
+      .map((tx) => {
+        if (tx.transactionError) return null;
 
-      const keys = tx.transaction.message.accountKeys;
-      const idx = keys.findIndex(
-        (k) => k.pubkey?.toBase58?.() === treasury
-      );
-      if (idx < 0) return null;
+        // SOL change for the treasury wallet
+        const datum = (tx.accountData || []).find((a) => a.account === treasury);
+        const solChange = (datum?.nativeBalanceChange ?? 0) / LAMPORTS_PER_SOL;
+        if (Math.abs(solChange) < 0.000005) return null;
 
-      const solChange =
-        (tx.meta.postBalances[idx] - tx.meta.preBalances[idx]) / LAMPORTS_PER_SOL;
+        // Programs involved (check top-level + inner instructions)
+        const allIx = [
+          ...(tx.instructions || []),
+          ...(tx.instructions || []).flatMap((ix) => ix.innerInstructions || []),
+        ];
+        const programs = new Set(allIx.map((ix) => ix.programId).filter(Boolean));
 
-      // Ignore fee-only dust (tx fee deductions < 0.00001 SOL)
-      if (Math.abs(solChange) < 0.000005) return null;
+        // Memo text
+        const memoIx = allIx.find((ix) => ix.programId === MEMO_PROGRAM);
+        let memo = null;
+        if (memoIx?.data) {
+          try { memo = Buffer.from(memoIx.data, "base64").toString("utf8"); } catch (_) {}
+        }
 
-      const instructions = tx.transaction.message.instructions;
-      const programs = new Set(
-        instructions.map((ix) => ix.programId?.toBase58?.() ?? "").filter(Boolean)
-      );
-      const memo = extractMemo(instructions);
-      const label = classifyTx(programs, solChange, memo);
+        // Counterparty from nativeTransfers
+        const transfers = tx.nativeTransfers || [];
+        const counterparty =
+          solChange > 0
+            ? transfers.find((t) => t.toUserAccount === treasury)?.fromUserAccount
+            : transfers.find((t) => t.fromUserAccount === treasury)?.toUserAccount;
 
-      // Counterparty: the other non-system account involved
-      const counterparty = keys
-        .find(
-          (k) =>
-            k.pubkey?.toBase58?.() !== treasury &&
-            k.pubkey?.toBase58?.() !== "11111111111111111111111111111111" &&
-            k.pubkey?.toBase58?.() !== AUCTION_PROGRAM
-        )
-        ?.pubkey?.toBase58?.() ?? null;
+        const label = classifyTx(programs, solChange, memo);
 
-      return {
-        signature: sigs[i],
-        blockTime: tx.blockTime,
-        solChange,
-        label,
-        memo,
-        counterparty,
-      };
-    })
-    .filter(Boolean);
+        return {
+          signature: tx.signature,
+          blockTime: tx.timestamp,
+          solChange,
+          label,
+          memo,
+          counterparty: counterparty || null,
+        };
+      })
+      .filter(Boolean);
+  } else {
+    // Fallback: chunked getParsedTransactions (5 at a time) if no Helius key
+    const sigInfos = await connection.getSignaturesForAddress(treasuryPk, { limit: 20 });
+    const sigs = sigInfos.filter((s) => !s.err).map((s) => s.signature);
+
+    const chunks = [];
+    for (let i = 0; i < sigs.length; i += 5) chunks.push(sigs.slice(i, i + 5));
+
+    for (const chunk of chunks) {
+      const parsed = await connection.getParsedTransactions(chunk, {
+        maxSupportedTransactionVersion: 0,
+        commitment: "confirmed",
+      });
+      for (let i = 0; i < parsed.length; i++) {
+        const tx = parsed[i];
+        if (!tx || tx.meta?.err) continue;
+        const keys = tx.transaction.message.accountKeys;
+        const idx = keys.findIndex((k) => k.pubkey?.toBase58?.() === treasury);
+        if (idx < 0) continue;
+        const solChange =
+          (tx.meta.postBalances[idx] - tx.meta.preBalances[idx]) / LAMPORTS_PER_SOL;
+        if (Math.abs(solChange) < 0.000005) continue;
+        const instructions = tx.transaction.message.instructions;
+        const programs = new Set(
+          instructions.map((ix) => ix.programId?.toBase58?.() ?? "").filter(Boolean)
+        );
+        const memo = extractMemo(instructions);
+        const label = classifyTx(programs, solChange, memo);
+        const counterparty =
+          keys.find(
+            (k) =>
+              k.pubkey?.toBase58?.() !== treasury &&
+              k.pubkey?.toBase58?.() !== "11111111111111111111111111111111"
+          )?.pubkey?.toBase58?.() ?? null;
+        transactions.push({
+          signature: chunk[i],
+          blockTime: tx.blockTime,
+          solChange,
+          label,
+          memo,
+          counterparty,
+        });
+      }
+    }
+  }
 
   const data = {
     treasury,
