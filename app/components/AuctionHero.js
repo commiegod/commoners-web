@@ -126,7 +126,7 @@ export default function AuctionHero() {
       return;
     }
     const tick = () =>
-      setCountdown(formatCountdown(chainAuction.state.endTime.toNumber()));
+      setCountdown(formatCountdown(chainAuction.state.end_time.toNumber()));
     tick();
     countdownRef.current = setInterval(tick, 1000);
     return () => clearInterval(countdownRef.current);
@@ -163,11 +163,11 @@ export default function AuctionHero() {
       });
       const program = new Program(idl, provider);
 
-      const auctionId = chainAuction.state.auctionId;
+      const auctionId = chainAuction.state.auction_id;
       const [bidVault] = bidVaultPDA(auctionId);
       const [config] = configPDA();
       const prevBidder =
-        chainAuction.state.currentBidder ?? wallet.publicKey;
+        chainAuction.state.current_bidder ?? wallet.publicKey;
 
       const sig = await program.methods
         .placeBid(bidLamports)
@@ -209,7 +209,7 @@ export default function AuctionHero() {
   const auctionActive =
     chainAuction && !chainAuction.state.settled && countdown !== "Ended";
   const currentBidSol = chainAuction
-    ? lamportsToSol(chainAuction.state.currentBid)
+    ? lamportsToSol(chainAuction.state.current_bid)
     : null;
   const minBidSol = chainAuction
     ? (computeMinNextBid(chainAuction.state).toNumber() / LAMPORTS_PER_SOL).toFixed(3)
@@ -258,7 +258,7 @@ export default function AuctionHero() {
                   <div>
                     <p className="text-xs text-muted mb-1">Current Bid</p>
                     <p className="text-2xl font-semibold text-gold">
-                      {chainAuction.state.currentBid.isZero()
+                      {chainAuction.state.current_bid.isZero()
                         ? "No bids"
                         : `${currentBidSol} SOL`}
                     </p>
