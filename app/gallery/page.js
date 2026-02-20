@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import commoners from "../../data/commoners.json";
+import rarityData from "../../data/rarity.json";
+
+const RARITY = rarityData.rankings; // mint → { rank, score }
 
 // Precompute trait type → sorted unique values
 const TRAIT_MAP = {};
@@ -25,11 +28,6 @@ function nftNumber(name) {
 function shortAddr(addr) {
   return addr.slice(0, 4) + "…" + addr.slice(-4);
 }
-
-// Stable random order generated once per page load
-const RANDOM_ORDER = commoners.nfts
-  .map((_, i) => i)
-  .sort(() => Math.random() - 0.5);
 
 export default function GalleryPage() {
   const [search, setSearch] = useState("");
@@ -66,12 +64,10 @@ export default function GalleryPage() {
       list.sort((a, b) => nftNumber(a.name) - nftNumber(b.name));
     } else if (sort === "number-desc") {
       list.sort((a, b) => nftNumber(b.name) - nftNumber(a.name));
-    } else if (sort === "name-asc") {
-      list.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sort === "random") {
-      const pos = new Map(RANDOM_ORDER.map((idx, pos) => [idx, pos]));
-      const all = commoners.nfts;
-      list.sort((a, b) => (pos.get(all.indexOf(a)) ?? 0) - (pos.get(all.indexOf(b)) ?? 0));
+    } else if (sort === "rarity-asc") {
+      list.sort((a, b) => (RARITY[a.id]?.rank ?? 999) - (RARITY[b.id]?.rank ?? 999));
+    } else if (sort === "rarity-desc") {
+      list.sort((a, b) => (RARITY[b.id]?.rank ?? 999) - (RARITY[a.id]?.rank ?? 999));
     }
 
     return list;
@@ -127,8 +123,8 @@ export default function GalleryPage() {
           >
             <option value="number-asc">Number ↑</option>
             <option value="number-desc">Number ↓</option>
-            <option value="name-asc">Name A–Z</option>
-            <option value="random">Shuffle</option>
+            <option value="rarity-asc">Rarity (rarest first)</option>
+            <option value="rarity-desc">Rarity (common first)</option>
           </select>
 
           {/* Divider */}
@@ -227,6 +223,11 @@ export default function GalleryPage() {
                 <p className="text-[11px] font-medium text-white/90 truncate leading-tight">
                   {nft.name}
                 </p>
+                {RARITY[nft.id] && (
+                  <p className="text-[10px] text-gold/70 leading-tight">
+                    #{RARITY[nft.id].rank} / 120
+                  </p>
+                )}
               </div>
             </button>
           ))}
@@ -276,9 +277,16 @@ export default function GalleryPage() {
             />
 
             <div className="p-4">
-              <h2 className="font-blackletter text-2xl text-gold mb-3">
-                {selected.name}
-              </h2>
+              <div className="flex items-baseline justify-between mb-3">
+                <h2 className="font-blackletter text-2xl text-gold">
+                  {selected.name}
+                </h2>
+                {RARITY[selected.id] && (
+                  <span className="text-xs text-gold/70 border border-gold/30 px-2 py-0.5">
+                    #{RARITY[selected.id].rank} / 120
+                  </span>
+                )}
+              </div>
 
               {/* Traits */}
               <div className="flex flex-wrap gap-2 mb-4">

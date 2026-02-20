@@ -1,0 +1,487 @@
+{
+  "generatedAt": "2026-02-20T21:51:39.784Z",
+  "method": "sum of (N / trait_count) per trait, ranked within 120 Commoners",
+  "total": 120,
+  "rankings": {
+    "6eQZAXm9SFJ7sCnYmVpb6AMeLqta5SHjaLaEswZoQdK8": {
+      "rank": 1,
+      "score": 246.67
+    },
+    "7MKp8DqRvmhk972njHZuBLkw3U7TQ38MafYDDSJz8HmL": {
+      "rank": 2,
+      "score": 245.71
+    },
+    "6hzhE9embR3SvPoD3Ko4XN1xwj8v6UPFfVnBYwbcG6hj": {
+      "rank": 3,
+      "score": 245.22
+    },
+    "8kvZkj4W6BnJcdrG5GAmoWfBPJiagf8osrfS8qaZJU26": {
+      "rank": 4,
+      "score": 190
+    },
+    "5pf4G2yKW1M9ndjZ1ZmuKQfdykTBHMJkyHruUuiNUdLq": {
+      "rank": 5,
+      "score": 190
+    },
+    "8nkr1TvDQaagAfV7oLbktzAUb9s22ZKcADAdTbvivrfY": {
+      "rank": 6,
+      "score": 185.22
+    },
+    "HXT5LRtdY3kiCE7viQSM3HfgVTJ7XmEmRXHEHJBpBpGB": {
+      "rank": 7,
+      "score": 184
+    },
+    "EENuLRU3f68qZxWhAtSs5oueZ1pMZHgkEVZAcxfa4qjN": {
+      "rank": 8,
+      "score": 170.91
+    },
+    "2nxEprh1iAFKAWa6xh8KwyiZaPKfLh2wKBzbAiCbgKCP": {
+      "rank": 9,
+      "score": 170
+    },
+    "33Kb11AcDL1f3ksQpE4jGe7h4y4jCzebHmtxnTeYKx8m": {
+      "rank": 10,
+      "score": 165.45
+    },
+    "FCkxZ53kJX8dFQrgh6xvkgqSbAAm8gd1Eq1gzGjgNLRY": {
+      "rank": 11,
+      "score": 157.06
+    },
+    "8S15S7mp4NNmvTjBhPAJaCb5rx3jNCQnSEyvJz4zEYVR": {
+      "rank": 12,
+      "score": 155.71
+    },
+    "2MSFxG9pyKFaziUMQykYBWB74aMbj3Tx4DXYiwCYZr1U": {
+      "rank": 13,
+      "score": 155.71
+    },
+    "EfE3srXdNGfCjESwVMc5r7BLXLTypM5QGhCqVGADFHU8": {
+      "rank": 14,
+      "score": 151.06
+    },
+    "D4pZuCBnFs7n6d2ZtSBc12Mojo6btatvAceE1bxmUGWz": {
+      "rank": 15,
+      "score": 151.06
+    },
+    "12azmF8mQcVCoZhfWrvxZ2VpNzNh9PKWgbXjace21dmW": {
+      "rank": 16,
+      "score": 149.71
+    },
+    "9chLBPskHM5MaqQKzrrtA4hcM6bqJpAtiU7hPZUU8F9R": {
+      "rank": 17,
+      "score": 149.22
+    },
+    "3vNjVmtndzfZDjegyUnVFwb6V48WftHyq9HLk4JuBCLh": {
+      "rank": 18,
+      "score": 149.22
+    },
+    "4WevVPcWsV4FEDzwaibnqs59EjrmSbegrgSaTUBC5QiS": {
+      "rank": 19,
+      "score": 147.06
+    },
+    "9BRkErYQ2H7VPZMcNSsa8pdrRbSCso5tBpadVuiMFodb": {
+      "rank": 20,
+      "score": 145.71
+    },
+    "GoLrQSqZopF4M2cwMGJabVk9gmERHnfHUByEbqNRdqJw": {
+      "rank": 21,
+      "score": 142.06
+    },
+    "8FM3tMW5ScJgQPoEZhY8f9QLQuUD84xdkrehriEabFNh": {
+      "rank": 22,
+      "score": 140.71
+    },
+    "54HRNGEfvshqvc12kNDhWBHimbmMsziusZseqapKc2PN": {
+      "rank": 23,
+      "score": 140.22
+    },
+    "J3KkwhzEWbjdWcTmPk1TCMGeUQfgieVjciAK2MLdj2Ni": {
+      "rank": 24,
+      "score": 136.36
+    },
+    "2bT94NfPy3x4ekvoJG7Fvjq1W921CYzyU41Rbx3E74dw": {
+      "rank": 25,
+      "score": 136.36
+    },
+    "7Ls6mnWMvFTSWGsMGkKHRaMQXT2ovRSUCCJVGirhmbMs": {
+      "rank": 26,
+      "score": 136.29
+    },
+    "HNyeE7sThMr9atcDjRULpCEzYnnTU2St1EtyDQfcVmvm": {
+      "rank": 27,
+      "score": 136.13
+    },
+    "4XF9WA5JQ1Ad3oWTEuPXz5MfX5basMpGzmex4xZGxf8Q": {
+      "rank": 28,
+      "score": 135.9
+    },
+    "92ysaidecWcJCrMskrZc6pn7AqHEuVa8PeAv1VsaBVC1": {
+      "rank": 29,
+      "score": 135.71
+    },
+    "FDz7G2i4bN8oVMZjw2TWRuHG4WBVnFhTAdmaB55nAFgb": {
+      "rank": 30,
+      "score": 134.69
+    },
+    "33hwdinaRm6UNed9qyULdq4un1ZgWiySbiCnX3P9B64B": {
+      "rank": 31,
+      "score": 134.69
+    },
+    "Bpg5GPJU3GX8mW4ujMHTgpY5UTvdgzAQp5PJwjMzhHax": {
+      "rank": 32,
+      "score": 134.67
+    },
+    "7Xee4MprBycfMuyfCWDLbTgKMi2H3UmpN2wxQ2RmKdmP": {
+      "rank": 33,
+      "score": 134.45
+    },
+    "8xAxWXhbf248uFTpLnWy4cbGALX42VE76WWuGR2V9bN7": {
+      "rank": 34,
+      "score": 133.22
+    },
+    "EXuSDNdsPWrJPXGvv5cE1gUD5o7iUpWgtDLv63FDGfDy": {
+      "rank": 35,
+      "score": 126.67
+    },
+    "4tGfaAMDJDM745J7yu9vzZhuQKcvnaFsMjuxCLn4hwLY": {
+      "rank": 36,
+      "score": 125.22
+    },
+    "FKiZjBCxuBK9XNZKDo9yjsBHEFFvmeDgSTk6iukNJacL": {
+      "rank": 37,
+      "score": 109.23
+    },
+    "EhH5SiYaTqgwmZxS7bRjGYBvKvSoVnzye73LiA1SUvy1": {
+      "rank": 38,
+      "score": 97.06
+    },
+    "Api7SB6K4LsgEk6chCVtp8YJYmWRiAxg2S8urNeGw8PS": {
+      "rank": 39,
+      "score": 95.71
+    },
+    "A28UDNTfz2yeupUzn8erTDJjdNUE6DsWi2e4wSeXbqKp": {
+      "rank": 40,
+      "score": 95.45
+    },
+    "AeBZGUZfyNVwcf4yCjJqQ5rZvDr3UssXnbN2AKYt1Nh9": {
+      "rank": 41,
+      "score": 89.71
+    },
+    "4J9YDurobY1AKJiGbiN3Vu4Yb21tfv6uHbPYxrxFBQ6d": {
+      "rank": 42,
+      "score": 89.22
+    },
+    "GLZ6D5WXkpRmUwfVRFTjPMM4PWizCJmw8GqAEeFRNSWo": {
+      "rank": 43,
+      "score": 88
+    },
+    "E9v6iYtuJvQjuhD31QzxL2moNtpZPWc5YYPSTJ67n7zh": {
+      "rank": 44,
+      "score": 85.71
+    },
+    "CUGyH5TBRjaGtVMWXuCGK6fcRRRhtzUHUxxYqKCWLH8K": {
+      "rank": 45,
+      "score": 85.71
+    },
+    "9X22sDpqbQGTuVbErRjZnvW8UvCTmmCsCzEkBc8Zioaa": {
+      "rank": 46,
+      "score": 85.71
+    },
+    "Ea3ydh3x5JeiYphdiQxPZKk1i82iEFaqYp3dS7Y11u87": {
+      "rank": 47,
+      "score": 85.45
+    },
+    "39VK8sABt56KKjiP9GSmcjwdabLLSF8YQKupSGXKhMXL": {
+      "rank": 48,
+      "score": 85.45
+    },
+    "3hSz2c9bCuYJTp1drj15FRHb5H5Fo5J8jyA4PoR42WFZ": {
+      "rank": 49,
+      "score": 85.22
+    },
+    "7oXgJ9qydwzYL1CVwCMV2mTXp1bsgzoJiooqgy9kByjV": {
+      "rank": 50,
+      "score": 85
+    },
+    "48mVrh62iqUudynU5EeJ9L7xibqsVRrQ5jmuQ4wnUNz7": {
+      "rank": 51,
+      "score": 80.71
+    },
+    "D1YL38gPL8mGcRhxMpReFqsJrJLP1ZjTdcvdgoVX3tPE": {
+      "rank": 52,
+      "score": 80
+    },
+    "4G868todGDDWSPJjeWBjQa2MKjzX5pakAPwbb3emZSC1": {
+      "rank": 53,
+      "score": 77.97
+    },
+    "2nXNnGSJo14FnN2h2aNGguCuUkaX3kfnXH6SXAQNiP1Z": {
+      "rank": 54,
+      "score": 76.67
+    },
+    "EWytX73z1whNx3yLJMKPW5uBUz2qqomyo1GK6qidCoV2": {
+      "rank": 55,
+      "score": 76.36
+    },
+    "CT2PNa6ZDuPYqabnbk1VKvLwW4JJiKXMEpe4z7eHP5jA": {
+      "rank": 56,
+      "score": 76.29
+    },
+    "9o1SqB6xCWPkf5zJPgtVddrVnUoD2hXVs1RgzDWLJF6G": {
+      "rank": 57,
+      "score": 75.71
+    },
+    "E2FWBZ4heYcGi3vt2Nxj7rh6XQpGzY4fPiUoXp2UUuHp": {
+      "rank": 58,
+      "score": 75.22
+    },
+    "2uYuYcjosWL5xEQEnsa51aHirkd6NLxRR7jZaaHvXEZq": {
+      "rank": 59,
+      "score": 75.22
+    },
+    "J5eMLph9LybxtTrg3Tiy4tK2XCUs8oLSeEtYbD6n45cX": {
+      "rank": 60,
+      "score": 74.95
+    },
+    "9xtAHamCqBZvBzH7tZ8kfmVWxJivNPpg2sy8yQZ89pGU": {
+      "rank": 61,
+      "score": 74.95
+    },
+    "3xa5FYNN4sUsNu4GKmR99APRi2ULgF49yc3kUwAWZ3Rd": {
+      "rank": 62,
+      "score": 73.45
+    },
+    "9jL2QXcCEpXPSEPrRPM4tyTsL5W2TBmcFTAyuaSrAdE2": {
+      "rank": 63,
+      "score": 71.06
+    },
+    "GX1gtgj1JS38qsgGbW5ZsQVhv8Qnk4mAtS7k6JiFHVxF": {
+      "rank": 64,
+      "score": 70
+    },
+    "7aTMhCKX95aWFStL7x2V6fSMGDCwau4NxxRpx9ReFDcw": {
+      "rank": 65,
+      "score": 69.45
+    },
+    "52Gd9yhYrsCZwHvd5qQfwPRrNdudZXwbmvjhRbGuTS13": {
+      "rank": 66,
+      "score": 69.45
+    },
+    "GFJD4H7LmX1zGH897YdfWQgoKgSbCmvD6saSrURQEj3s": {
+      "rank": 67,
+      "score": 69.22
+    },
+    "8kwWk6zWpiKFLy8HMSnd3xeRiwKnc5gw4vWkFYs9YDM1": {
+      "rank": 68,
+      "score": 66.67
+    },
+    "CsaeTJRj8wQ78jzaY5LZp3L9xGGRESXvGwo8yvmVjR6N": {
+      "rank": 69,
+      "score": 65.71
+    },
+    "7q1rGEjtLM9aZYkKYnfdstj37dJNL1NrniA9aWQWNvQv": {
+      "rank": 70,
+      "score": 65.22
+    },
+    "9V35BVr5EoVNzTGb4nWtR6NnMpijNbTw5hXKfVhSFW4n": {
+      "rank": 71,
+      "score": 65
+    },
+    "5SgxtVEXeMd1N5k3oRhPkjwQvrztQSqnc1NPPxfuyWKW": {
+      "rank": 72,
+      "score": 60.71
+    },
+    "HoFHX1AnBYdZRv2Qn5z6hN188AEHR2U2oZUi8tvpNxcG": {
+      "rank": 73,
+      "score": 59.45
+    },
+    "EjvTTjAcc6eJ16Tsjb3LrKhEW8hgD6zAiwpLkaJhKJZN": {
+      "rank": 74,
+      "score": 59.23
+    },
+    "88Zmi3YPhAbnBJyw1ZgP2RvoF8aq7bMsRZcR2chYtLbc": {
+      "rank": 75,
+      "score": 58
+    },
+    "BZLErDt9T5ina3nz4o3BGpbwpDwzuGoCRmcPd1rxAh1W": {
+      "rank": 76,
+      "score": 57.06
+    },
+    "EtxYN43XXNE49TMPL33MVT19NNruUMXiwQJ5KmTWGtCb": {
+      "rank": 77,
+      "score": 56.67
+    },
+    "9wFiZSQyH6aMeJai5bxMxZEimX7mugT7wr8WkQEyne3W": {
+      "rank": 78,
+      "score": 56.36
+    },
+    "FKFAcRoxNEAiEUeBhy6nzhQHfQsHNWK92wnzZfsNh2T3": {
+      "rank": 79,
+      "score": 56.29
+    },
+    "AsM55NBodEJD1XrzndkrrjA4xATikfQUcaR31hm38UdU": {
+      "rank": 80,
+      "score": 56.29
+    },
+    "BzEUTW53GpHzkqwU5QGyuaKFdfothc1A2rU9AY4paWZj": {
+      "rank": 81,
+      "score": 56.13
+    },
+    "5yqpQCR5M4Xzo6D7wetKB42bn2QRHoHDcUjNWrvbhoco": {
+      "rank": 82,
+      "score": 55.9
+    },
+    "3DVvMDqd2EZ41kcnVjj8RReq5gVUveTKEYv9iFprSySa": {
+      "rank": 83,
+      "score": 55.71
+    },
+    "EoV1eTe4B9ckzifG1yntg8U6MuLYdVBtDM4UtPrdNxHe": {
+      "rank": 84,
+      "score": 54.69
+    },
+    "9j8beZ9QhovCV6dCE6kDD3TanACNQ6WaNiV9htPk4NNf": {
+      "rank": 85,
+      "score": 54
+    },
+    "AsnBsNNFeKHKHKSDbFRW5TbaxLdX9yBC3mdGwfwBuQba": {
+      "rank": 86,
+      "score": 53.71
+    },
+    "52d3Fkt9aiVc5ZcBW3pQ365Hy27QAyUuAPTYC6bs7VJ2": {
+      "rank": 87,
+      "score": 53.22
+    },
+    "2XsM5DHv4wqmp6zFDjWgFPQEyNgkruAHtNZ8wgzuhP9f": {
+      "rank": 88,
+      "score": 52.36
+    },
+    "Hfp1ZyTG4eWQqEprprMwwmR72ifkChLkp21YU7ViqVxP": {
+      "rank": 89,
+      "score": 50.67
+    },
+    "DKcwCAopFjxAAVDgC1e8cagUN2XSZgaRajnDsRZy2w3E": {
+      "rank": 90,
+      "score": 49.45
+    },
+    "HcEDq8SAtYr8NiHk2BMqiTVd8DyJKsXJpmEtH8HeQP5W": {
+      "rank": 91,
+      "score": 49.23
+    },
+    "HW8fhoiWr6tW194UA7owCcgkCzbde9v7CCJHNzm7v4Fs": {
+      "rank": 92,
+      "score": 46.36
+    },
+    "EZ7ugQZpWzhZBhYweXWEFUt5T1dNt7F1EYBqToaCcMAK": {
+      "rank": 93,
+      "score": 44.67
+    },
+    "47CNzgCcDRRBxQ4is2K1Dn55v8RKP3U6JELA9kuGjEue": {
+      "rank": 94,
+      "score": 43.81
+    },
+    "JDeykd4JBWPkzdBrfWqVfzsv6Ph6CWVYXYGC4HpAA2rF": {
+      "rank": 95,
+      "score": 42
+    },
+    "AzRzNJaUn4qkaU45To8BET44WBkTX44W2b8Jq519fif1": {
+      "rank": 96,
+      "score": 41.06
+    },
+    "AwKUxj4LSo2pNaK2oBY3bSLWd38rDkVoVFmPXqjqUDQT": {
+      "rank": 97,
+      "score": 41.06
+    },
+    "BcrEbv7A9QhSkYbVLj9KWnH3tuAga5ChEe518mj3KjCA": {
+      "rank": 98,
+      "score": 40.67
+    },
+    "5NLZ5G19r7o3nZpcLMCzjwvyoVSb9iKpbfBArewWj1fj": {
+      "rank": 99,
+      "score": 40.36
+    },
+    "GpaYZHqTyjkNxB7wNUB83HcvCDjEkwGEjS8ZZW2nLK9B": {
+      "rank": 100,
+      "score": 39.9
+    },
+    "94TAdHYpGyg9qrWtuPF5MNagb2mwn5Wm5KaURJRcxxqn": {
+      "rank": 101,
+      "score": 39.9
+    },
+    "6DZzBjDVbhM9crXkSpHfZVQ9yJ3eHb7NmEXni4tFrkHe": {
+      "rank": 102,
+      "score": 39.9
+    },
+    "JAJQ9aZiJGnyBKkB3DPyq8XVA7rd9zPX382nGyvzzzro": {
+      "rank": 103,
+      "score": 39.23
+    },
+    "5fQeHhF38wGaDbWoehSC4ag8aWS4sE1v4qquzJkMKFYr": {
+      "rank": 104,
+      "score": 39.2
+    },
+    "5GygUBn2xvz3qFbYRVBoztjfVEpkuSiBViEnGGaDKmoJ": {
+      "rank": 105,
+      "score": 38.69
+    },
+    "4gyF2YaBQEyk1zKAGLKsf3zCQozBfMGMwMfr9yETvrrP": {
+      "rank": 106,
+      "score": 38.67
+    },
+    "7mdwTyFUAJJsoka7CuoThemqzEczMAwrxPwkCFKBckxn": {
+      "rank": 107,
+      "score": 38.45
+    },
+    "ALgLHvxrfJxro3kPAbZHYWXEJS75DDScuKNrYHvKFbRm": {
+      "rank": 108,
+      "score": 38
+    },
+    "14Tu92QT3kzgqYReSqMQwEKhHYzSgZgpK3o9utK4NKST": {
+      "rank": 109,
+      "score": 37.58
+    },
+    "7yYqTZ7uhw2UD1NdCK7R9pXt7Gn2JCER5SJYQVRrRc4L": {
+      "rank": 110,
+      "score": 37.45
+    },
+    "E1DkohJSSfTNhGje98rJ2k2fUeCXZV9bgT3DEZCzKULL": {
+      "rank": 111,
+      "score": 37.22
+    },
+    "5rmxYbTx4hCdxmX6QGmXcCt7Z6sdU548xtdJZj5c5PWM": {
+      "rank": 112,
+      "score": 37.22
+    },
+    "7ACb67JXUuJq6ZyLDRNxkB4J41xDX2iFtAcVYmdgcL9N": {
+      "rank": 113,
+      "score": 36.67
+    },
+    "8aofSjBjzFhntEd1Xjjud3zbFn6AutW2HSRqKNTAHXwn": {
+      "rank": 114,
+      "score": 36.37
+    },
+    "HtAdERt1VEHpKzQZ2BKDtaJvt6E4GJ32UZiXBWhKji1H": {
+      "rank": 115,
+      "score": 36.29
+    },
+    "8AiNaWNWrse7hSzf4qarMpJZXCJUoKG4BkueyiDkZugm": {
+      "rank": 116,
+      "score": 35.22
+    },
+    "3BkD6CCCjw453gjMbjv34HaGetA3yvG3gfXQXB2YnbyS": {
+      "rank": 117,
+      "score": 34.45
+    },
+    "GENgfUiTupvbnhP88a6VhBtiWAAn1VUnBCRFPTsL5cSf": {
+      "rank": 118,
+      "score": 32.09
+    },
+    "BCNdebNxS55hrtZZs9rFzrjwVa87wxncKjb3jCxWgdD1": {
+      "rank": 119,
+      "score": 31.83
+    },
+    "D8vwQ2Ad4ji7AvsieCNM3xvXLxWSVpVhQ4TampdGbywc": {
+      "rank": 120,
+      "score": 30.6
+    }
+  }
+}
