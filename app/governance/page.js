@@ -305,7 +305,7 @@ ${form.description}`;
         <div className="flex gap-2 mt-4">
           <button
             onClick={() => navigator.clipboard?.writeText(markdownPreview)}
-            className="px-4 py-1.5 bg-gold text-black text-sm font-semibold hover:bg-gold/90 transition-colors"
+            className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             Copy
           </button>
@@ -410,7 +410,7 @@ ${form.description}`;
         <button
           type="submit"
           disabled={!form.title.trim() || !form.description.trim()}
-          className="px-4 py-1.5 bg-gold text-black text-sm font-semibold hover:bg-gold/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Preview
         </button>
@@ -480,9 +480,9 @@ export default function GovernancePage() {
         </h1>
         <WalletMultiButton
           style={{
-            backgroundColor: connected ? "transparent" : "#b8860b",
-            border: connected ? "1px solid #b8860b" : "none",
-            color: connected ? "#b8860b" : "#ffffff",
+            backgroundColor: connected ? "transparent" : "#1a1a1a",
+            border: connected ? "1px solid #1a1a1a" : "none",
+            color: connected ? "#1a1a1a" : "#f5f5f5",
             fontSize: "0.875rem",
             fontWeight: 600,
             borderRadius: 0,
@@ -540,6 +540,22 @@ export default function GovernancePage() {
         </div>
       </div>
 
+      {/* How It Works */}
+      <div className="mb-8 bg-card border border-border p-4">
+        <h2 className="font-blackletter text-gold mb-3">How It Works</h2>
+        <ol className="space-y-2 text-sm text-muted">
+          <li>
+            <span className="text-foreground font-medium">1. Draft your proposal</span> — choose a type, write a title and description, and note any treasury ask.
+          </li>
+          <li>
+            <span className="text-foreground font-medium">2. Post to #governance on Discord</span> — share your proposal for community discussion before it goes to a vote.
+          </li>
+          <li>
+            <span className="text-foreground font-medium">3. Community votes for 72 hours</span> — if it meets the required threshold and quorum, it enters the execution queue.
+          </li>
+        </ol>
+      </div>
+
       {/* Submit proposal */}
       {connected && commonerCount > 0 && !showForm && (
         <div className="mb-6">
@@ -568,7 +584,7 @@ export default function GovernancePage() {
         </h2>
         {activeProposals.length === 0 ? (
           <div className="bg-card border border-border p-6 text-center text-muted">
-            No active proposals.
+            No active proposals yet. Connect your wallet and hold a Commoner NFT to be the first to submit.
           </div>
         ) : (
           <div className="space-y-4">

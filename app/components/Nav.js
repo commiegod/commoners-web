@@ -15,6 +15,7 @@ const WalletMultiButton = dynamic(
 
 const links = [
   { href: "/gallery", label: "Gallery" },
+  { href: "/bounty", label: "Bounty" },
   { href: "/holders", label: "Holders" },
   { href: "/treasury", label: "Treasury" },
   { href: "/governance", label: "Governance" },
@@ -53,8 +54,8 @@ export default function Nav() {
           <WalletMultiButton
             style={{
               backgroundColor: "transparent",
-              border: "1px solid #b8860b",
-              color: "#b8860b",
+              border: "1px solid #1a1a1a",
+              color: "#1a1a1a",
               fontSize: "0.75rem",
               borderRadius: 0,
               height: "auto",

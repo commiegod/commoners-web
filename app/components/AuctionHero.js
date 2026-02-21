@@ -296,15 +296,15 @@ export default function AuctionHero() {
                         <button
                           onClick={placeBid}
                           disabled={bidding}
-                          className="px-4 py-2 bg-gold text-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                          className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
                         >
                           {bidding ? "Sending…" : "Place Bid"}
                         </button>
                       ) : (
                         <WalletMultiButton
                           style={{
-                            backgroundColor: "#b8860b",
-                            color: "#ffffff",
+                            backgroundColor: "#1a1a1a",
+                            color: "#f5f5f5",
                             fontSize: "0.875rem",
                             fontWeight: 600,
                             borderRadius: 0,

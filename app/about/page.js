@@ -1,101 +1,199 @@
 export default function AboutPage() {
   return (
     <div className="max-w-2xl">
-      <h1 className="font-blackletter text-3xl text-gold mb-6">About</h1>
+      <h1 className="font-blackletter text-3xl text-gold mb-10">About</h1>
 
-      <div className="space-y-8">
+      <div className="space-y-10">
+        {/* 1. Mission */}
         <section>
-          <h2 className="font-blackletter text-xl text-gold mb-3">Mission</h2>
+          <h2 className="font-blackletter text-xl text-gold mb-3">
+            What is the Commoner&apos;s SubDAO
+          </h2>
           <p className="text-muted leading-relaxed">
-            The Commoner&apos;s SubDAO is governed by the holders of the 120
-            identified 3-trait MidEvils NFTs. We run daily
-            auctions where any MidEvil can be listed for sale, commission artist
-            bounty artwork for each auctioned piece, and govern the SubDAO
-            through simple yes/no proposals.
+            The Commoner&apos;s SubDAO turns individual self-interest into
+            collective good. Holders of the 120 identified 3-trait MidEvils
+            govern a shared treasury, run daily auctions, and commission artwork
+            — building a community-owned institution on Solana that rewards
+            participation and grows in value with every auction.
           </p>
         </section>
 
+        {/* 2. Who are Commoners */}
         <section>
-          <h2 className="font-blackletter text-xl text-gold mb-3">How It Works</h2>
-          <div className="space-y-4 text-muted leading-relaxed">
-            <div className="bg-card border border-border p-4">
-              <h3 className="text-foreground font-medium mb-1">
-                Daily Auctions
-              </h3>
-              <p>
-                Each day, one MidEvil NFT is featured in an auction. Any MidEvil
-                holder can list their NFT — it doesn&apos;t have to be a Commoner.
-                The seller receives the proceeds minus a fee that goes to the
-                SubDAO treasury. In the future, a minimum COMMON token balance
-                will be required to list.
-              </p>
-            </div>
-            <div className="bg-card border border-border p-4">
-              <h3 className="text-foreground font-medium mb-1">
-                Artist Bounties
-              </h3>
-              <p>
-                Both human artists and AI tools are used to create artwork
-                inspired by each day&apos;s featured NFT. Submissions are displayed
-                alongside the original on the auction page.
-              </p>
-            </div>
-            <div className="bg-card border border-border p-4">
-              <h3 className="text-foreground font-medium mb-1">Governance</h3>
-              <p>
-                The SubDAO is governed by Commoner holders (3-trait MidEvils)
-                through simple yes/no proposals.
-              </p>
-            </div>
-            <div className="bg-card border border-border p-4">
-              <h3 className="text-foreground font-medium mb-1">
-                COMMON Token
-              </h3>
-              <p>
-                A COMMON token is planned to gate auction access and align
-                incentives. Holding a minimum amount of COMMON will be required
-                to list a MidEvil for auction, opening participation beyond just
-                Commoner holders.
-              </p>
-            </div>
+          <h2 className="font-blackletter text-xl text-gold mb-3">
+            Who Are Commoners
+          </h2>
+          <p className="text-muted leading-relaxed">
+            In the MidEvils collection, most NFTs carry 4–8 visible traits.
+            Commoners are the rare subset with exactly 3 non-&quot;None&quot; traits —
+            Background, Skin, and one additional trait — making them the
+            simplest, most minimal characters in the set. There are exactly 120
+            of them. Each Commoner NFT grants 1 vote in SubDAO governance.
+          </p>
+        </section>
+
+        {/* 3. Daily Auctions */}
+        <section>
+          <h2 className="font-blackletter text-xl text-gold mb-3">
+            Daily Auctions
+          </h2>
+          <ul className="text-muted leading-relaxed space-y-2 list-disc list-inside">
+            <li>Any MidEvil NFT (not just Commoners) can be listed for auction.</li>
+            <li>Each auction runs for 24 hours starting at midnight UTC.</li>
+            <li>
+              A fee on the final sale price is sent to the SubDAO treasury;
+              proceeds go to the seller.
+            </li>
+            <li>
+              During the bootstrapping phase, the founder curates the schedule.
+              Long-term, COMMON holders list directly.
+            </li>
+            <li>
+              If no bids are placed, the auction ends with no fee charged and
+              the NFT returned to the seller.
+            </li>
+          </ul>
+        </section>
+
+        {/* 4. Governance */}
+        <section>
+          <h2 className="font-blackletter text-xl text-gold mb-3">
+            Governance
+          </h2>
+          <p className="text-muted leading-relaxed mb-4">
+            Governance operates in three layers:
+          </p>
+          <ul className="text-muted leading-relaxed space-y-2 list-disc list-inside mb-4">
+            <li>
+              <span className="text-foreground font-medium">NFT Vote (Layer 1)</span> — 51% yes majority, 24/120 quorum required.
+              Standard proposals, parameter changes, bounties, and
+              treasury requests under 5 SOL.
+            </li>
+            <li>
+              <span className="text-foreground font-medium">Futarchy Prioritization (Layer 2, Phase 4)</span> — MetaDAO
+              prediction markets rank competing proposals by expected impact.
+              Active from Phase 4 onwards.
+            </li>
+            <li>
+              <span className="text-foreground font-medium">Treasury Supermajority (Layer 3)</span> — higher thresholds
+              for large treasury actions.
+            </li>
+          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border border-border">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Treasury Ask
+                  </th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Majority
+                  </th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Quorum
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2 text-muted">&lt; 5 SOL</td>
+                  <td className="px-3 py-2">51%</td>
+                  <td className="px-3 py-2">24 / 120</td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2 text-muted">5 – 20 SOL</td>
+                  <td className="px-3 py-2">67%</td>
+                  <td className="px-3 py-2">36 / 120</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 text-muted">&gt; 20 SOL</td>
+                  <td className="px-3 py-2">75% + futarchy</td>
+                  <td className="px-3 py-2">36 / 120</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <section>
-          <h2 className="font-blackletter text-xl text-gold mb-3">What is a Commoner?</h2>
-          <p className="text-muted leading-relaxed">
-            In the MidEvils collection, most NFTs have 4–8 visible traits.
-            Commoners are the rare subset with exactly 3 non-&quot;None&quot; traits —
-            making them the simplest, most minimal characters in the collection.
-            There are only 120 of them. Commoner holders govern the SubDAO.
-          </p>
-        </section>
-
+        {/* 5. COMMON Token */}
         <section>
           <h2 className="font-blackletter text-xl text-gold mb-3">
-            Who can auction a MidEvil?
+            COMMON Token
           </h2>
-          <p className="text-muted leading-relaxed">
-            Any MidEvil from the full collection can be listed in a daily
-            auction — not just Commoners. During the bootstrapping period, the
-            founder curates the schedule. Long-term, COMMON token holders will
-            be able to list their MidEvils directly.
+          <p className="text-muted leading-relaxed mb-4">
+            Fixed supply of 1,000,000 COMMON. Purpose: auction fee waiver,
+            bounty rewards, and futarchy market participation (Phase 4).
           </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border border-border">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Allocation
+                  </th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Amount
+                  </th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
+                    Purpose
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2">Holder Airdrop</td>
+                  <td className="px-3 py-2 text-muted">250,000 (25%)</td>
+                  <td className="px-3 py-2 text-muted">
+                    Distributed to Commoner NFT holders
+                  </td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2">Auction Rewards</td>
+                  <td className="px-3 py-2 text-muted">400,000 (40%)</td>
+                  <td className="px-3 py-2 text-muted">
+                    Earned by bidders and sellers over time
+                  </td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2">Treasury</td>
+                  <td className="px-3 py-2 text-muted">200,000 (20%)</td>
+                  <td className="px-3 py-2 text-muted">
+                    Governed by SubDAO for bounties and ops
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2">Team</td>
+                  <td className="px-3 py-2 text-muted">150,000 (15%)</td>
+                  <td className="px-3 py-2 text-muted">
+                    Founder allocation, vested over 12 months
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
+        {/* 6. Links */}
         <section>
-          <h2 className="font-blackletter text-xl text-gold mb-3">Governance Document</h2>
-          <p className="text-muted leading-relaxed mb-3">
-            The full governance framework (v1.2) defines voting rules, treasury
-            management, and proposal procedures.
-          </p>
-          <a
-            href="/docs/governance-v1.2.md"
-            target="_blank"
-            className="inline-block px-4 py-2 border border-gold/30 text-gold text-sm hover:bg-gold/10 transition-colors"
-          >
-            View Governance Doc (v1.2)
-          </a>
+          <h2 className="font-blackletter text-xl text-gold mb-3">Links</h2>
+          <div className="flex flex-wrap gap-4">
+            <a
+              href="/GOVERNANCE.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
+            >
+              Governance Doc ↗
+            </a>
+            <a
+              href="https://github.com/commonersdao"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
+            >
+              GitHub README ↗
+            </a>
+          </div>
         </section>
       </div>
     </div>
