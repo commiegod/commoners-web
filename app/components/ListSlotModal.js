@@ -6,6 +6,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import commoners from "../../data/commoners.json";
+import schedule from "../../data/auction-schedule.json";
 import idl from "../../lib/idl.json";
 import { PROGRAM_ID, configPDA, slotPDA } from "../../lib/programClient";
 
@@ -19,6 +20,19 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
 const COMMONER_MINTS = new Set(commoners.nfts.map((n) => n.id));
 const COMMONER_BY_MINT = Object.fromEntries(
   commoners.nfts.map((n) => [n.id, n])
+);
+
+// On devnet: any NFT in the wallet is listable (not just Commoners).
+// We use auction-schedule.json to show names/images for the minted test NFTs.
+const IS_DEVNET =
+  (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "").includes("devnet") ||
+  (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "") === "";
+
+const SCHEDULE_BY_MINT = Object.fromEntries(
+  Object.values(schedule).map((entry) => [
+    entry.nftId,
+    { id: entry.nftId, name: entry.name, image: entry.image, traits: entry.traits },
+  ])
 );
 
 function getAta(owner, mint) {
@@ -53,7 +67,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
   const [myNfts, setMyNfts] = useState([]);
   const [selectedMint, setSelectedMint] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [reserveSol, setReserveSol] = useState("0.1");
+  const [reserveSol, setReserveSol] = useState(IS_DEVNET ? "0.05" : "0.1");
   const [txError, setTxError] = useState(null);
 
   const availableDates = getAvailableDates(takenDates);
@@ -78,12 +92,21 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
       for (const { account } of tokenAccounts) {
         const mint = new PublicKey(account.data.slice(0, 32)).toBase58();
         const amount = new BN(account.data.slice(64, 72), "le");
-        if (amount.eqn(1) && COMMONER_MINTS.has(mint)) {
+        const decimals = account.data[44]; // byte 44 = decimals in token account layout
+        // Accept: amount=1, decimals=0 (NFT-like token)
+        // On devnet: accept any such token. On mainnet: restrict to Commoner mints.
+        if (amount.eqn(1) && decimals === 0 && (IS_DEVNET || COMMONER_MINTS.has(mint))) {
           ownedMints.push(mint);
         }
       }
 
-      setMyNfts(ownedMints.map((m) => COMMONER_BY_MINT[m]));
+      const nfts = ownedMints.map((m) => {
+        if (COMMONER_BY_MINT[m]) return COMMONER_BY_MINT[m];
+        if (SCHEDULE_BY_MINT[m]) return SCHEDULE_BY_MINT[m];
+        // Fallback for unknown devnet tokens
+        return { id: m, name: `NFT ${m.slice(0, 4)}…${m.slice(-4)}`, image: null, traits: [] };
+      });
+      setMyNfts(nfts);
     } catch (e) {
       console.error("Wallet scan failed:", e);
       setMyNfts([]);
@@ -191,7 +214,9 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
               </label>
               {myNfts.length === 0 ? (
                 <p className="text-sm text-muted">
-                  No MidEvil Commoners found in this wallet.
+                  {IS_DEVNET
+                    ? "No devnet NFTs found. Run scripts/mint-devnet-nfts.ts to mint test tokens to this wallet."
+                    : "No MidEvil Commoners found in this wallet."}
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
