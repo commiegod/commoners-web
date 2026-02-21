@@ -599,7 +599,7 @@ export default function GovernancePage() {
         <div className="flex items-baseline justify-between mb-3">
           <h2 className="font-blackletter text-gold">Voting Rules</h2>
           <a
-            href="https://github.com/commiegod/commoners-web/blob/main/web/GOVERNANCE.md"
+            href="https://github.com/commiegod/commoners-web/blob/main/GOVERNANCE.md"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-muted hover:text-gold transition-colors"

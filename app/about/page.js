@@ -121,8 +121,10 @@ export default function AboutPage() {
             COMMON Token
           </h2>
           <p className="text-muted leading-relaxed mb-4">
-            Fixed supply of 1,000,000 COMMON. Purpose: auction fee waiver,
-            bounty rewards, and futarchy market participation (Phase 4).
+            Fixed supply of 1,000,000 COMMON. No team or founder allocation —
+            all distribution is community-driven. Purpose: auction fee waiver,
+            artist bounty rewards, DAO liquidity, and futarchy market
+            participation (Phase 4).
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border border-border">
@@ -142,30 +144,30 @@ export default function AboutPage() {
               <tbody>
                 <tr className="border-b border-border">
                   <td className="px-3 py-2">Holder Airdrop</td>
-                  <td className="px-3 py-2 text-muted">250,000 (25%)</td>
+                  <td className="px-3 py-2 text-muted">700,000 (70%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Distributed to Commoner NFT holders
+                    Distributed to all 120 Commoner holders, proportional to NFTs held
                   </td>
                 </tr>
                 <tr className="border-b border-border">
-                  <td className="px-3 py-2">Auction Rewards</td>
-                  <td className="px-3 py-2 text-muted">400,000 (40%)</td>
+                  <td className="px-3 py-2">Bounty Rewards</td>
+                  <td className="px-3 py-2 text-muted">150,000 (15%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Earned by bidders and sellers over time
+                    Artist bounty pool; DAO can vote to replenish via open-market buys
                   </td>
                 </tr>
                 <tr className="border-b border-border">
-                  <td className="px-3 py-2">Treasury</td>
-                  <td className="px-3 py-2 text-muted">200,000 (20%)</td>
+                  <td className="px-3 py-2">DAO Liquidity</td>
+                  <td className="px-3 py-2 text-muted">100,000 (10%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Governed by SubDAO for bounties and ops
+                    SOL/COMMON liquidity pool managed by treasury; LP fees build the treasury
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2">Team</td>
-                  <td className="px-3 py-2 text-muted">150,000 (15%)</td>
+                  <td className="px-3 py-2">Future Emissions</td>
+                  <td className="px-3 py-2 text-muted">50,000 (5%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Founder allocation, vested over 12 months
+                    Locked; released only by governance vote
                   </td>
                 </tr>
               </tbody>
@@ -178,7 +180,7 @@ export default function AboutPage() {
           <h2 className="font-blackletter text-xl text-gold mb-3">Links</h2>
           <div className="flex flex-wrap gap-4">
             <a
-              href="https://github.com/commiegod/commoners-web/blob/main/web/GOVERNANCE.md"
+              href="https://github.com/commiegod/commoners-web/blob/main/GOVERNANCE.md"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
