@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Script from "next/script";
 import bounties from "../../data/bounties.json";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
@@ -91,10 +92,12 @@ export default function BountyPage() {
     setSubmitting(true);
     setSubmitResult(null);
     try {
+      const turnstileToken =
+        e.target["cf-turnstile-response"]?.value || "";
       const res = await fetch("/api/bounty-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       const json = await res.json();
       if (json.ok) {
@@ -303,6 +306,13 @@ export default function BountyPage() {
             <p className="text-sm text-red-600">{submitResult}</p>
           ) : null}
 
+          {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <div
+              className="cf-turnstile"
+              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            />
+          )}
+
           <button
             type="submit"
             disabled={submitting}
@@ -311,6 +321,14 @@ export default function BountyPage() {
             {submitting ? "Submitting…" : "Submit"}
           </button>
         </form>
+
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <Script
+            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+            async
+            defer
+          />
+        )}
       </section>
 
       {/* ── Section 3: Image Wall ── */}

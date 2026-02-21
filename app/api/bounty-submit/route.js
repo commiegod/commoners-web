@@ -4,13 +4,41 @@ import { getFile, putFile } from "../../../lib/githubApi";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { date, imageUrl, artistName, type, solanaAddress } = body;
+    const { date, imageUrl, artistName, type, solanaAddress, turnstileToken } = body;
 
     if (!date || !imageUrl || !artistName || !type || !solanaAddress) {
       return NextResponse.json(
         { error: "Missing required fields: date, imageUrl, artistName, type, solanaAddress" },
         { status: 400 }
       );
+    }
+
+    // ── Turnstile verification (skipped if secret not configured) ─────────────
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: "Please complete the captcha." },
+          { status: 400 }
+        );
+      }
+      const verify = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            secret: process.env.TURNSTILE_SECRET_KEY,
+            response: turnstileToken,
+          }),
+        }
+      );
+      const verifyData = await verify.json();
+      if (!verifyData.success) {
+        return NextResponse.json(
+          { error: "Captcha verification failed. Please try again." },
+          { status: 400 }
+        );
+      }
     }
 
     // ── 1. Write to pending-bounties.json via GitHub API ──────────────────────
