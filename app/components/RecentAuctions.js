@@ -39,17 +39,24 @@ export default function RecentAuctions() {
                 </div>
               </div>
             ))
-          : upcoming.map(({ dateStr, name }) => (
+          : upcoming.map(({ dateStr, name, image }) => (
               <div
                 key={dateStr}
                 className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden"
               >
-                {/* Placeholder — artwork revealed on auction day */}
-                <div className="w-full aspect-square bg-border/30 flex items-center justify-center">
-                  <span className="font-blackletter text-2xl text-muted/30">?</span>
-                </div>
+                {image ? (
+                  <img
+                    src={image}
+                    alt={name}
+                    className="w-full aspect-square object-cover"
+                  />
+                ) : (
+                  <div className="w-full aspect-square bg-border/30 flex items-center justify-center">
+                    <span className="font-blackletter text-2xl text-muted/30">?</span>
+                  </div>
+                )}
                 <div className="p-2">
-                  <p className="text-sm font-medium truncate text-muted">{name}</p>
+                  <p className="text-sm font-medium truncate">{name}</p>
                   <p className="text-xs text-muted">{dateStr}</p>
                 </div>
               </div>
