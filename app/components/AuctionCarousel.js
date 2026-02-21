@@ -225,6 +225,8 @@ export default function AuctionCarousel() {
     );
   }
 
+  const today = new Date().toISOString().split("T")[0];
+  const isToday = auctionData?.date === today;
   const auctionActive =
     chainAuction && !chainAuction.state.settled && countdown !== "Ended";
   const currentBidSol = chainAuction
@@ -362,26 +364,37 @@ export default function AuctionCarousel() {
                   <>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <p className="text-xs text-muted mb-1">Auction Date</p>
+                        <p className="text-xs text-muted mb-1">
+                          {isToday ? "Status" : "Auction Date"}
+                        </p>
                         <p className="text-2xl font-semibold">
-                          {new Date(
-                            auctionData.date + "T12:00:00Z"
-                          ).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            timeZone: "UTC",
-                          })}
+                          {isToday ? (
+                            <span className="text-gold">Live</span>
+                          ) : (
+                            new Date(
+                              auctionData.date + "T12:00:00Z"
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              timeZone: "UTC",
+                            })
+                          )}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted mb-1">Opens</p>
-                        <p className="text-2xl font-semibold">Midnight UTC</p>
+                        <p className="text-xs text-muted mb-1">
+                          {isToday ? "Current Bid" : "Opens"}
+                        </p>
+                        <p className="text-2xl font-semibold">
+                          {isToday ? "No bids yet" : "Midnight UTC"}
+                        </p>
                       </div>
                     </div>
                     <p className="text-xs text-muted">
-                      Auction opens at midnight UTC on auction day. Come back
-                      then to place your bid.
+                      {isToday
+                        ? "Auction is live. Connect your wallet to place a bid."
+                        : "Auction opens at midnight UTC on auction day. Come back then to place your bid."}
                     </p>
                   </>
                 )}
