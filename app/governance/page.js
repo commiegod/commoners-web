@@ -326,10 +326,41 @@ ${form.description}`;
   if (stage === "preview") {
     return (
       <div className="bg-card border border-border p-5">
-        <h3 className="font-semibold mb-3">Review Your Proposal</h3>
-        <pre className="text-xs bg-black/30 border border-border p-3 overflow-x-auto whitespace-pre-wrap font-mono text-muted mb-4">
-          {markdownPreview}
-        </pre>
+        <p className="text-xs text-muted uppercase tracking-widest mb-4">Review Your Proposal</p>
+
+        <div className="space-y-3 mb-5">
+          <div className="grid grid-cols-[120px_1fr] gap-3 text-sm items-start">
+            <span className="text-xs text-muted uppercase tracking-wider pt-0.5">Type</span>
+            <span>{typeInfo?.label}</span>
+          </div>
+          <div className="grid grid-cols-[120px_1fr] gap-3 text-sm items-start">
+            <span className="text-xs text-muted uppercase tracking-wider pt-0.5">Title</span>
+            <span className="font-semibold">{form.title}</span>
+          </div>
+          {solAmount > 0 && (
+            <div className="grid grid-cols-[120px_1fr] gap-3 text-sm items-start">
+              <span className="text-xs text-muted uppercase tracking-wider pt-0.5">Treasury Ask</span>
+              <span className="text-gold font-semibold">{solAmount} SOL</span>
+            </div>
+          )}
+          <div className="grid grid-cols-[120px_1fr] gap-3 text-sm items-start">
+            <span className="text-xs text-muted uppercase tracking-wider pt-0.5">Threshold</span>
+            <span className="text-muted">
+              {thresholds.majority}% majority · {thresholds.quorum}/{TOTAL_NFTS} quorum
+              {thresholds.needsFutarchy && " · + futarchy (Phase 4)"}
+            </span>
+          </div>
+          <div className="grid grid-cols-[120px_1fr] gap-3 text-sm items-start">
+            <span className="text-xs text-muted uppercase tracking-wider pt-0.5">Proposer</span>
+            <span className="font-mono text-muted text-xs">{short}</span>
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-4 mb-5">
+          <p className="text-xs text-muted uppercase tracking-wider mb-2">Description</p>
+          <p className="text-sm text-muted whitespace-pre-wrap leading-relaxed">{form.description}</p>
+        </div>
+
         {submitError && (
           <p className="text-xs text-red-600 mb-3">{submitError}</p>
         )}
@@ -342,16 +373,10 @@ ${form.description}`;
             {submitting ? "Submitting…" : "Submit to Discord"}
           </button>
           <button
-            onClick={() => navigator.clipboard?.writeText(markdownPreview)}
-            className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors"
-          >
-            Copy
-          </button>
-          <button
             onClick={() => setStage("form")}
             className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors"
           >
-            Edit
+            ← Edit
           </button>
         </div>
       </div>

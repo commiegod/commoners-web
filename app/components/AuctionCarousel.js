@@ -31,19 +31,24 @@ function lamportsToSol(lamports) {
 
 function Skeleton() {
   return (
-    <div className="grid md:grid-cols-2 gap-0 animate-pulse">
-      <div className="bg-card p-5 md:p-8 flex flex-col gap-4">
-        <div className="h-4 w-32 bg-border rounded" />
-        <div className="h-8 w-48 bg-border rounded" />
-        <div className="h-4 w-40 bg-border rounded" />
-        <div className="mt-auto space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-12 bg-border rounded" />
-            <div className="h-12 bg-border rounded" />
+    <div
+      className="border-y border-border animate-pulse"
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+    >
+      <div className="grid md:grid-cols-2 gap-0 md:min-h-[600px]">
+        <div className="bg-card p-5 md:p-8 flex flex-col gap-4">
+          <div className="h-4 w-32 bg-border rounded" />
+          <div className="h-8 w-48 bg-border rounded" />
+          <div className="h-4 w-40 bg-border rounded" />
+          <div className="mt-auto space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-12 bg-border rounded" />
+              <div className="h-12 bg-border rounded" />
+            </div>
           </div>
         </div>
+        <div className="bg-border min-h-[280px]" />
       </div>
-      <div className="bg-border aspect-square md:aspect-auto" />
     </div>
   );
 }
@@ -237,8 +242,10 @@ export default function AuctionCarousel() {
     <section
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      className="border-y border-border"
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
     >
-      <div className="grid md:grid-cols-2 gap-0 relative">
+      <div className="grid md:grid-cols-2 gap-0 relative md:min-h-[600px]">
         {/* ── Left panel (text + controls) ── */}
         <div className="bg-card md:border-r border-b md:border-b-0 border-border p-5 md:p-8 flex flex-col justify-between gap-6 order-2 md:order-1">
           {currentSlide?.type === "auction" ? (
@@ -449,12 +456,12 @@ export default function AuctionCarousel() {
         </div>
 
         {/* ── Right panel (image) ── */}
-        <div className="bg-card order-1 md:order-2">
+        <div className="bg-card order-1 md:order-2 relative min-h-[280px]">
           {currentSlide?.type === "auction" && auctionData.image ? (
             <img
               src={auctionData.image}
               alt={auctionData.name}
-              className="w-full aspect-square object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           ) : currentSlide?.type === "bounty" ? (
             <img
@@ -466,10 +473,10 @@ export default function AuctionCarousel() {
                 currentSlide.data.artist ||
                 "Bounty art"
               }
-              className="w-full aspect-square object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full aspect-square bg-border" />
+            <div className="absolute inset-0 bg-border" />
           )}
         </div>
 

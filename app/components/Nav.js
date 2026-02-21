@@ -83,25 +83,67 @@ export default function Nav() {
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {open && (
-        <div className="sm:hidden border-t border-border bg-background">
+      {/* Mobile full-screen overlay */}
+      <div
+        className={`sm:hidden fixed inset-0 z-50 bg-background flex flex-col transition-opacity duration-200 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Top bar */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="font-blackletter text-xl text-gold"
+          >
+            Commoner&apos;s SubDAO
+          </Link>
+          <button
+            onClick={() => setOpen(false)}
+            className="p-2 text-muted hover:text-foreground transition-colors"
+            aria-label="Close menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Links — large, centered */}
+        <div className="flex-1 flex flex-col justify-center px-8 overflow-y-auto">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className={`block px-4 py-3 text-sm border-b border-border transition-colors ${
+              className={`block py-4 font-blackletter text-3xl border-b border-border/40 transition-colors ${
                 pathname === link.href
                   ? "text-gold"
-                  : "text-muted hover:text-foreground"
+                  : "text-foreground hover:text-gold"
               }`}
             >
               {link.label}
             </Link>
           ))}
         </div>
-      )}
+
+        {/* Wallet at bottom */}
+        <div className="px-8 pb-10 pt-6 border-t border-border shrink-0">
+          <WalletMultiButton
+            style={{
+              backgroundColor: "#1a1a1a",
+              color: "#f5f5f5",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+              borderRadius: 0,
+              width: "100%",
+              justifyContent: "center",
+              padding: "0.75rem 1rem",
+              lineHeight: 1.5,
+            }}
+          />
+        </div>
+      </div>
     </nav>
   );
 }
