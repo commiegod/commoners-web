@@ -28,9 +28,14 @@ export default function Nav() {
 
   return (
     <nav>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between py-1">
         <Link href="/" className="hover:opacity-80 transition-opacity flex items-center">
-          <img src="/logo.png" alt="Commoner's DAO" className="h-14 w-auto" />
+          <img
+            src="/logo.png"
+            alt="Commoner's DAO"
+            className="h-24 w-auto"
+            style={{ mixBlendMode: "multiply" }}
+          />
         </Link>
 
         {/* Desktop links + wallet */}
@@ -89,7 +94,12 @@ export default function Nav() {
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
           <Link href="/" onClick={() => setOpen(false)} className="flex items-center">
-            <img src="/logo.png" alt="Commoner's DAO" className="h-12 w-auto" />
+            <img
+              src="/logo.png"
+              alt="Commoner's DAO"
+              className="h-20 w-auto"
+              style={{ mixBlendMode: "multiply" }}
+            />
           </Link>
           <button
             onClick={() => setOpen(false)}
