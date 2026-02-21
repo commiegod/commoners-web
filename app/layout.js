@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "The Commoner's SubDAO",
+  title: "Commoner's DAO",
   description: "Daily auctions for 3-trait MidEvils",
 };
 
@@ -32,8 +32,9 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <footer className="border-t border-border py-8 mt-16">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-muted text-sm">
-              The Commoner&apos;s SubDAO &middot; 3-Trait MidEvils
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-2">
+              <img src="/logo.png" alt="Commoner's DAO" className="h-16 w-auto opacity-60" />
+              <p className="text-muted text-xs">3-Trait MidEvils · Daily Auctions</p>
             </div>
           </footer>
           </ErrorBoundary>

@@ -29,11 +29,8 @@ export default function Nav() {
   return (
     <nav>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <Link
-          href="/"
-          className="font-blackletter text-xl sm:text-2xl text-gold hover:opacity-80 transition-opacity"
-        >
-          Commoner&apos;s SubDAO
+        <Link href="/" className="hover:opacity-80 transition-opacity flex items-center">
+          <img src="/logo.png" alt="Commoner's DAO" className="h-14 w-auto" />
         </Link>
 
         {/* Desktop links + wallet */}
@@ -91,12 +88,8 @@ export default function Nav() {
       >
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className="font-blackletter text-xl text-gold"
-          >
-            Commoner&apos;s SubDAO
+          <Link href="/" onClick={() => setOpen(false)} className="flex items-center">
+            <img src="/logo.png" alt="Commoner's DAO" className="h-12 w-auto" />
           </Link>
           <button
             onClick={() => setOpen(false)}
