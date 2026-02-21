@@ -49,8 +49,10 @@ export async function POST(request) {
       console.error("GitHub write failed:", ghErr.message);
     }
 
-    // Discord notification
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    // Discord notification — uses dedicated governance channel if configured
+    const webhookUrl =
+      process.env.DISCORD_GOVERNANCE_WEBHOOK_URL ||
+      process.env.DISCORD_WEBHOOK_URL;
     if (webhookUrl) {
       const embed = {
         title: `New Governance Proposal — ${title}`,

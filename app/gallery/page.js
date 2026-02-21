@@ -205,7 +205,7 @@ export default function GalleryPage() {
           No Commoners match your filters.
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-px bg-border">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
           {filtered.map((nft) => (
             <button
               key={nft.id}
