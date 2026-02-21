@@ -28,30 +28,6 @@ const STATUS_STYLES = {
   queued: "bg-blue-50 text-blue-700 border border-blue-300",
 };
 
-const VOTE_STORAGE_KEY = "governance_votes_v1";
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-function loadVotes() {
-  if (typeof window === "undefined") return {};
-  try {
-    return JSON.parse(localStorage.getItem(VOTE_STORAGE_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-
-function saveVote(proposalId, wallet, choice) {
-  const votes = loadVotes();
-  votes[`${wallet}:${proposalId}`] = choice;
-  localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(votes));
-}
-
-function getMyVote(proposalId, wallet) {
-  if (!wallet) return null;
-  return loadVotes()[`${wallet}:${proposalId}`] ?? null;
-}
-
 // ── sub-components ────────────────────────────────────────────────────────────
 
 function VoteBar({ votes, thresholds }) {
@@ -66,7 +42,6 @@ function VoteBar({ votes, thresholds }) {
 
   return (
     <div className="mt-4 space-y-3">
-      {/* Vote bar */}
       <div>
         <div className="flex h-2 overflow-hidden bg-border rounded-full relative">
           <div
@@ -77,7 +52,6 @@ function VoteBar({ votes, thresholds }) {
             className="bg-red-500 transition-all"
             style={{ width: `${noPct}%` }}
           />
-          {/* Threshold line */}
           <div
             className="absolute top-0 bottom-0 w-px bg-gold/60"
             style={{ left: `${thresholds.majority}%` }}
@@ -94,8 +68,6 @@ function VoteBar({ votes, thresholds }) {
           </span>
         </div>
       </div>
-
-      {/* Quorum + threshold status */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span className={quorumMet ? "text-green-700" : "text-muted"}>
           Quorum: {total}/{thresholds.quorum} NFTs ({quorumPct}%){" "}
@@ -137,12 +109,22 @@ function ThresholdBadge({ thresholds, type }) {
   );
 }
 
-function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }) {
+function ProposalCard({
+  proposal,
+  walletAddress,
+  commonerCount,
+  onVote,
+  myVote,
+  voteError,
+  voting,
+  realVotes,
+}) {
   const thresholds = getThresholds(proposal.type, proposal.treasurySol);
   const typeInfo = PROPOSAL_TYPES[proposal.type];
   const isActive = proposal.status === "active";
   const timeLeft = isActive ? formatTimeLeft(proposal.endsAt) : null;
   const expired = isActive && msRemaining(proposal.endsAt) === 0;
+  const displayVotes = realVotes || proposal.votes;
 
   const canVote =
     isActive &&
@@ -153,7 +135,6 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
 
   return (
     <div className="bg-card border border-border p-4 sm:p-5">
-      {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-1">
         <h3 className="font-semibold">{proposal.title}</h3>
         <div className="flex items-center gap-2 shrink-0">
@@ -168,7 +149,6 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
         </div>
       </div>
 
-      {/* Type + thresholds */}
       <div className="mb-2">
         <span className="text-xs text-muted">{typeInfo?.label ?? proposal.type}</span>
         <ThresholdBadge thresholds={thresholds} type={proposal.type} />
@@ -183,8 +163,13 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
       )}
 
       <p className="text-xs text-muted">
-        Proposed by {proposal.proposedBy} &middot;{" "}
-        {isActive ? "Ends" : "Ended"}{" "}
+        Proposed by{" "}
+        <span className="font-mono">
+          {proposal.proposedBy
+            ? `${proposal.proposedBy.slice(0, 4)}…${proposal.proposedBy.slice(-4)}`
+            : proposal.proposedBy}
+        </span>{" "}
+        &middot; {isActive ? "Ends" : "Ended"}{" "}
         {new Date(proposal.endsAt).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
@@ -192,9 +177,8 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
         })}
       </p>
 
-      <VoteBar votes={proposal.votes} thresholds={thresholds} />
+      <VoteBar votes={displayVotes} thresholds={thresholds} />
 
-      {/* Voting controls */}
       {isActive && (
         <div className="mt-4">
           {myVote ? (
@@ -224,25 +208,30 @@ function ProposalCard({ proposal, walletAddress, commonerCount, onVote, myVote }
           ) : expired ? (
             <p className="text-xs text-muted">Voting period has ended.</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => onVote(proposal.id, "yes")}
-                className="px-4 py-1.5 bg-green-50 border border-green-300 text-green-700 text-sm hover:bg-green-100 transition-colors"
-              >
-                Vote Yes
-              </button>
-              <button
-                onClick={() => onVote(proposal.id, "no")}
-                className="px-4 py-1.5 bg-red-50 border border-red-300 text-red-700 text-sm hover:bg-red-100 transition-colors"
-              >
-                Vote No
-              </button>
-              <button
-                onClick={() => onVote(proposal.id, "abstain")}
-                className="px-4 py-1.5 bg-card border border-border text-muted text-sm hover:text-foreground transition-colors"
-              >
-                Abstain
-              </button>
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {["yes", "no", "abstain"].map((choice) => (
+                  <button
+                    key={choice}
+                    onClick={() => onVote(proposal.id, choice)}
+                    disabled={voting === proposal.id}
+                    className={`px-4 py-1.5 text-sm disabled:opacity-50 transition-colors ${
+                      choice === "yes"
+                        ? "bg-green-50 border border-green-300 text-green-700 hover:bg-green-100"
+                        : choice === "no"
+                        ? "bg-red-50 border border-red-300 text-red-700 hover:bg-red-100"
+                        : "bg-card border border-border text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {voting === proposal.id
+                      ? "Voting…"
+                      : `Vote ${choice.charAt(0).toUpperCase() + choice.slice(1)}`}
+                  </button>
+                ))}
+              </div>
+              {voteError && (
+                <p className="text-xs text-red-600">{voteError}</p>
+              )}
             </div>
           )}
         </div>
@@ -260,9 +249,11 @@ const EMPTY_FORM = {
   treasurySol: "",
 };
 
-function SubmitForm({ onClose, walletAddress }) {
+function SubmitForm({ onClose, walletAddress, commonerCount }) {
   const [form, setForm] = useState(EMPTY_FORM);
-  const [submitted, setSubmitted] = useState(false);
+  const [stage, setStage] = useState("form"); // "form" | "preview" | "done"
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const typeInfo = PROPOSAL_TYPES[form.type];
   const solAmount = parseFloat(form.treasurySol) || 0;
@@ -270,11 +261,6 @@ function SubmitForm({ onClose, walletAddress }) {
 
   function set(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    setSubmitted(true);
   }
 
   const short = walletAddress
@@ -289,31 +275,83 @@ function SubmitForm({ onClose, walletAddress }) {
 
 ${form.description}`;
 
-  if (submitted) {
+  async function handleFinalSubmit() {
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/governance-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: form.type,
+          title: form.title,
+          description: form.description,
+          treasurySol: solAmount,
+          walletAddress,
+        }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setStage("done");
+      } else {
+        setSubmitError(json.error || "Submission failed.");
+      }
+    } catch {
+      setSubmitError("Network error.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (stage === "done") {
     return (
       <div className="bg-card border border-border p-5">
-        <h3 className="font-semibold mb-3">Proposal Ready to Submit</h3>
+        <h3 className="font-semibold mb-3">Proposal Submitted</h3>
         <p className="text-sm text-muted mb-4">
-          Copy the text below and post it in{" "}
-          <span className="text-gold">#governance</span> on Discord. An admin
-          will add it to the on-chain queue after community review. On-chain
-          autonomous submission arrives in Phase 4.
+          Your proposal has been sent to{" "}
+          <span className="text-gold">#governance</span> on Discord for community
+          review. Once an admin approves it, it will appear here open for a
+          72-hour vote.
         </p>
-        <pre className="text-xs bg-black/30 border border-border p-3 overflow-x-auto whitespace-pre-wrap font-mono text-muted">
+        <button
+          onClick={onClose}
+          className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
+  if (stage === "preview") {
+    return (
+      <div className="bg-card border border-border p-5">
+        <h3 className="font-semibold mb-3">Review Your Proposal</h3>
+        <pre className="text-xs bg-black/30 border border-border p-3 overflow-x-auto whitespace-pre-wrap font-mono text-muted mb-4">
           {markdownPreview}
         </pre>
-        <div className="flex gap-2 mt-4">
+        {submitError && (
+          <p className="text-xs text-red-600 mb-3">{submitError}</p>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleFinalSubmit}
+            disabled={submitting}
+            className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {submitting ? "Submitting…" : "Submit to Discord"}
+          </button>
           <button
             onClick={() => navigator.clipboard?.writeText(markdownPreview)}
-            className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors"
           >
             Copy
           </button>
           <button
-            onClick={onClose}
+            onClick={() => setStage("form")}
             className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors"
           >
-            Close
+            Edit
           </button>
         </div>
       </div>
@@ -322,12 +360,25 @@ ${form.description}`;
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={(e) => { e.preventDefault(); setStage("preview"); }}
       className="bg-card border border-border p-5 space-y-4"
     >
       <h3 className="font-semibold">Submit a Proposal</h3>
 
-      {/* Type */}
+      {commonerCount === 0 && (
+        <p className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-300 px-3 py-2">
+          You need at least one Commoner NFT to submit a proposal.{" "}
+          <a
+            href="https://magiceden.io/marketplace/midevilsnft"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            View on Magic Eden ↗
+          </a>
+        </p>
+      )}
+
       <div>
         <label className="block text-xs text-muted mb-1">Proposal type</label>
         <select
@@ -344,7 +395,6 @@ ${form.description}`;
         <p className="text-xs text-muted mt-1">{typeInfo?.description}</p>
       </div>
 
-      {/* Title */}
       <div>
         <label className="block text-xs text-muted mb-1">Title</label>
         <input
@@ -358,7 +408,6 @@ ${form.description}`;
         />
       </div>
 
-      {/* Treasury amount (treasury proposals only) */}
       {typeInfo?.treasury && (
         <div>
           <label className="block text-xs text-muted mb-1">
@@ -393,7 +442,6 @@ ${form.description}`;
         </div>
       )}
 
-      {/* Description */}
       <div>
         <label className="block text-xs text-muted mb-1">Description</label>
         <textarea
@@ -409,7 +457,7 @@ ${form.description}`;
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={!form.title.trim() || !form.description.trim()}
+          disabled={!form.title.trim() || !form.description.trim() || commonerCount === 0}
           className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Preview
@@ -434,13 +482,21 @@ export default function GovernancePage() {
 
   const [commonerCount, setCommonerCount] = useState(0);
   const [checkingHolder, setCheckingHolder] = useState(false);
-  const [votes, setVotes] = useState({});
+  const [govVotes, setGovVotes] = useState({}); // { [proposalId]: { tallies, voters } }
+  const [voting, setVoting] = useState(null); // proposalId currently being voted on
+  const [voteErrors, setVoteErrors] = useState({}); // { [proposalId]: string }
   const [showForm, setShowForm] = useState(false);
 
-  // Load persisted votes on mount
+  async function fetchGovVotes() {
+    try {
+      const res = await fetch("/api/governance-vote");
+      if (res.ok) setGovVotes(await res.json());
+    } catch {}
+  }
+
   useEffect(() => {
-    setVotes(loadVotes());
-  }, []);
+    fetchGovVotes();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Verify Commoner holder status whenever wallet changes
   useEffect(() => {
@@ -456,12 +512,35 @@ export default function GovernancePage() {
   }, [walletAddress]);
 
   const handleVote = useCallback(
-    (proposalId, choice) => {
+    async (proposalId, choice) => {
       if (!walletAddress) return;
-      saveVote(proposalId, walletAddress, choice);
-      setVotes(loadVotes());
+      setVoting(proposalId);
+      setVoteErrors((e) => ({ ...e, [proposalId]: "" }));
+      try {
+        const res = await fetch("/api/governance-vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ proposalId, choice, walletAddress }),
+        });
+        const json = await res.json();
+        if (json.ok) {
+          await fetchGovVotes();
+        } else {
+          setVoteErrors((e) => ({
+            ...e,
+            [proposalId]: json.error || "Vote failed.",
+          }));
+        }
+      } catch {
+        setVoteErrors((e) => ({
+          ...e,
+          [proposalId]: "Network error.",
+        }));
+      } finally {
+        setVoting(null);
+      }
     },
-    [walletAddress]
+    [walletAddress] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const shortAddress = walletAddress
@@ -509,7 +588,7 @@ export default function GovernancePage() {
               ? "Checking Commoner NFT holdings…"
               : commonerCount > 0
               ? `Commoner holder — ${commonerCount} NFT${commonerCount > 1 ? "s" : ""}, ${commonerCount} vote${commonerCount > 1 ? "s" : ""}`
-              : "No Commoner NFTs found — voting restricted"}
+              : "No Commoner NFTs found — voting restricted to Commoner holders"}
           </span>
           <span className="font-mono text-xs opacity-70">{shortAddress}</span>
         </div>
@@ -548,7 +627,7 @@ export default function GovernancePage() {
             <span className="text-foreground font-medium">1. Draft your proposal</span> — choose a type, write a title and description, and note any treasury ask.
           </li>
           <li>
-            <span className="text-foreground font-medium">2. Post to #governance on Discord</span> — share your proposal for community discussion before it goes to a vote.
+            <span className="text-foreground font-medium">2. Submit below</span> — your proposal is sent to <span className="text-foreground">#governance</span> on Discord for community discussion.
           </li>
           <li>
             <span className="text-foreground font-medium">3. Community votes for 72 hours</span> — if it meets the required threshold and quorum, it enters the execution queue.
@@ -565,6 +644,19 @@ export default function GovernancePage() {
           >
             + Submit a Proposal
           </button>
+          {!connected && (
+            <p className="text-xs text-muted mt-2">
+              Connect your wallet to submit a proposal.
+            </p>
+          )}
+        </div>
+      )}
+
+      {!connected && (
+        <div className="mb-6">
+          <p className="text-sm text-muted">
+            Connect your wallet to submit a proposal or vote.
+          </p>
         </div>
       )}
 
@@ -573,6 +665,7 @@ export default function GovernancePage() {
           <SubmitForm
             onClose={() => setShowForm(false)}
             walletAddress={walletAddress}
+            commonerCount={commonerCount}
           />
         </div>
       )}
@@ -584,7 +677,10 @@ export default function GovernancePage() {
         </h2>
         {activeProposals.length === 0 ? (
           <div className="bg-card border border-border p-6 text-center text-muted">
-            No active proposals yet. Connect your wallet and hold a Commoner NFT to be the first to submit.
+            <p>No active proposals yet.</p>
+            <p className="text-xs mt-2">
+              Connect your wallet and hold a Commoner NFT to be the first to submit.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -595,7 +691,10 @@ export default function GovernancePage() {
                 walletAddress={walletAddress}
                 commonerCount={commonerCount}
                 onVote={handleVote}
-                myVote={getMyVote(p.id, walletAddress)}
+                myVote={govVotes[p.id]?.voters[walletAddress]?.choice ?? null}
+                voteError={voteErrors[p.id]}
+                voting={voting}
+                realVotes={govVotes[p.id]?.tallies}
               />
             ))}
           </div>
@@ -603,32 +702,37 @@ export default function GovernancePage() {
       </section>
 
       {/* Past proposals */}
-      <section>
-        <h2 className="font-blackletter text-xl text-gold mb-4">
-          Past Proposals
-        </h2>
-        <div className="space-y-4">
-          {pastProposals.map((p) => (
-            <ProposalCard
-              key={p.id}
-              proposal={p}
-              walletAddress={walletAddress}
-              commonerCount={commonerCount}
-              onVote={handleVote}
-              myVote={getMyVote(p.id, walletAddress)}
-            />
-          ))}
-        </div>
-      </section>
+      {pastProposals.length > 0 && (
+        <section>
+          <h2 className="font-blackletter text-xl text-gold mb-4">
+            Past Proposals
+          </h2>
+          <div className="space-y-4">
+            {pastProposals.map((p) => (
+              <ProposalCard
+                key={p.id}
+                proposal={p}
+                walletAddress={walletAddress}
+                commonerCount={commonerCount}
+                onVote={handleVote}
+                myVote={govVotes[p.id]?.voters[walletAddress]?.choice ?? null}
+                voteError={voteErrors[p.id]}
+                voting={voting}
+                realVotes={govVotes[p.id]?.tallies}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Phase 4 notice */}
       <div className="mt-10 bg-blue-50 border border-blue-200 p-4 text-xs text-muted space-y-1">
         <p className="text-blue-700 font-medium">Phase 4 — On-chain Governance</p>
         <p>
-          Votes are currently stored locally and counted off-chain. Phase 4 deploys
-          the on-chain treasury program and integrates MetaDAO futarchy markets for
-          autonomous proposal execution. Treasury funds remain unreleased until
-          Phase 4 is live and audited.
+          Votes are currently recorded off-chain (shared and persistent, but not
+          on-chain). Phase 4 deploys the on-chain treasury program and integrates
+          MetaDAO futarchy markets for autonomous proposal execution. Treasury funds
+          remain unreleased until Phase 4 is live and audited.
         </p>
       </div>
     </div>
