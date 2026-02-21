@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Script from "next/script";
+import { useWallet } from "@solana/wallet-adapter-react";
 import bounties from "../../data/bounties.json";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
@@ -68,6 +69,46 @@ export default function BountyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null); // null | "ok" | string error
   const [lightbox, setLightbox] = useState(null); // { src, alt }
+  const { connected, publicKey } = useWallet();
+  const [votes, setVotes] = useState({}); // { [dateStr]: { tallies, voters } }
+  const [votingId, setVotingId] = useState(null);
+  const [voteError, setVoteError] = useState({}); // { [dateStr]: string }
+
+  async function fetchVotes() {
+    try {
+      const res = await fetch("/api/bounty-vote");
+      if (res.ok) setVotes(await res.json());
+    } catch {}
+  }
+
+  useEffect(() => { fetchVotes(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleVote(dateStr, submissionId) {
+    if (!publicKey) return;
+    setVotingId(submissionId);
+    setVoteError((e) => ({ ...e, [dateStr]: "" }));
+    try {
+      const res = await fetch("/api/bounty-vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: dateStr,
+          submissionId,
+          walletAddress: publicKey.toBase58(),
+        }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        await fetchVotes();
+      } else {
+        setVoteError((e) => ({ ...e, [dateStr]: json.error || "Vote failed." }));
+      }
+    } catch {
+      setVoteError((e) => ({ ...e, [dateStr]: "Network error." }));
+    } finally {
+      setVotingId(null);
+    }
+  }
 
   useEffect(() => {
     if (scheduleLoading) return;
@@ -338,67 +379,135 @@ export default function BountyPage() {
             Submissions
           </h2>
           <div className="space-y-12">
-            {groupedByDate.map(({ dateStr, slotForDate, allSubmissions }) => (
-              <div key={dateStr}>
-                <h3 className="text-xs text-muted tracking-widest uppercase mb-4">
-                  {dateStr}
-                  {slotForDate && (
-                    <span className="ml-2 text-foreground font-medium normal-case tracking-normal">
-                      — {slotForDate.name}
-                    </span>
+            {groupedByDate.map(({ dateStr, slotForDate, allSubmissions }) => {
+              const isToday = dateStr === today;
+              const dayVotes = votes[dateStr] || { tallies: {}, voters: {} };
+              const myVote = connected
+                ? dayVotes.voters[publicKey?.toBase58()]
+                : null;
+              // Winner = submission with most votes (only shown for closed auctions)
+              const winnerSubmissionId =
+                !isToday && Object.keys(dayVotes.tallies).length > 0
+                  ? Object.entries(dayVotes.tallies).sort(
+                      ([, va], [, vb]) => vb - va
+                    )[0]?.[0]
+                  : null;
+              return (
+                <div key={dateStr}>
+                  <h3 className="text-xs text-muted tracking-widest uppercase mb-4">
+                    {dateStr}
+                    {slotForDate && (
+                      <span className="ml-2 text-foreground font-medium normal-case tracking-normal">
+                        — {slotForDate.name}
+                      </span>
+                    )}
+                    {isToday && (
+                      <span className="ml-3 text-gold normal-case tracking-normal font-medium">
+                        · Voting open
+                      </span>
+                    )}
+                  </h3>
+                  {voteError[dateStr] && (
+                    <p className="text-xs text-red-600 mb-3">{voteError[dateStr]}</p>
                   )}
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {allSubmissions.map((b, i) => (
-                    <div
-                      key={i}
-                      className="bg-card border border-border overflow-hidden"
-                    >
-                      <button
-                        onClick={() =>
-                          setLightbox({
-                            src: b.imageUrl || b.image || "",
-                            alt: b.artistName || b.artist || "Bounty art",
-                          })
-                        }
-                        className="w-full block"
-                      >
-                        <img
-                          src={b.imageUrl || b.image || ""}
-                          alt={b.artistName || b.artist || "Bounty art"}
-                          className="w-full aspect-square object-cover hover:opacity-90 transition-opacity"
-                        />
-                      </button>
-                      <div className="p-3 space-y-1">
-                        <p className="text-sm font-medium truncate">
-                          {b.artistName || b.artist || b.model}
-                        </p>
-                        <span className="text-xs px-1.5 py-0.5 border border-border text-muted">
-                          {b.submissionType}
-                        </span>
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {b.twitter && (
-                            <SocialLink
-                              href={`https://twitter.com/${b.twitter.replace("@", "")}`}
-                              label="X"
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {allSubmissions.map((b, i) => {
+                      const voteCount = b.id ? (dayVotes.tallies[b.id] || 0) : 0;
+                      const isWinner = b.id && b.id === winnerSubmissionId && voteCount > 0;
+                      const myVotedForThis = myVote?.votedFor === b.id;
+                      const hasVotedToday = !!myVote;
+                      return (
+                        <div
+                          key={i}
+                          className="bg-card border border-border overflow-hidden"
+                        >
+                          <button
+                            onClick={() =>
+                              setLightbox({
+                                src: b.imageUrl || b.image || "",
+                                alt: b.artistName || b.artist || "Bounty art",
+                              })
+                            }
+                            className="w-full block"
+                          >
+                            <img
+                              src={b.imageUrl || b.image || ""}
+                              alt={b.artistName || b.artist || "Bounty art"}
+                              className="w-full aspect-square object-cover hover:opacity-90 transition-opacity"
                             />
-                          )}
-                          {b.instagram && (
-                            <SocialLink
-                              href={`https://instagram.com/${b.instagram.replace("@", "")}`}
-                              label="IG"
-                            />
-                          )}
-                          {b.website && (
-                            <SocialLink href={b.website} label="Web" />
-                          )}
+                          </button>
+                          <div className="p-3 space-y-1">
+                            <p className="text-sm font-medium truncate">
+                              {b.artistName || b.artist || b.model}
+                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs px-1.5 py-0.5 border border-border text-muted">
+                                {b.submissionType}
+                              </span>
+                              {isWinner && (
+                                <span className="text-xs font-semibold text-gold">
+                                  Winner
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {b.twitter && (
+                                <SocialLink
+                                  href={`https://twitter.com/${b.twitter.replace("@", "")}`}
+                                  label="X"
+                                />
+                              )}
+                              {b.instagram && (
+                                <SocialLink
+                                  href={`https://instagram.com/${b.instagram.replace("@", "")}`}
+                                  label="IG"
+                                />
+                              )}
+                              {b.website && (
+                                <SocialLink href={b.website} label="Web" />
+                              )}
+                            </div>
+                            {/* Vote row — only shown for submissions with an id */}
+                            {b.id && (
+                              <div className="pt-2 mt-1 border-t border-border flex items-center justify-between gap-2">
+                                <span className="text-xs text-muted">
+                                  {voteCount} vote{voteCount !== 1 ? "s" : ""}
+                                </span>
+                                {isToday && (
+                                  connected ? (
+                                    myVotedForThis ? (
+                                      <span className="text-xs text-green-700">
+                                        Voted ✓
+                                      </span>
+                                    ) : hasVotedToday ? (
+                                      <span className="text-xs text-muted">
+                                        Vote cast
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleVote(dateStr, b.id)}
+                                        disabled={votingId === b.id}
+                                        className="text-xs px-2 py-0.5 border border-border hover:border-foreground transition-colors disabled:opacity-50"
+                                      >
+                                        {votingId === b.id ? "Voting…" : "Vote"}
+                                      </button>
+                                    )
+                                  ) : (
+                                    <span className="text-xs text-muted italic">
+                                      Connect wallet
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
