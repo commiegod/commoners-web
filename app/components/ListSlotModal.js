@@ -83,18 +83,19 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
     setStep("loading");
     try {
       const { value: tokenAccounts } =
-        await connection.getTokenAccountsByOwner(wallet.publicKey, {
+        await connection.getParsedTokenAccountsByOwner(wallet.publicKey, {
           programId: TOKEN_PROGRAM_ID,
         });
 
       const ownedMints = [];
       for (const { account } of tokenAccounts) {
-        const mint = new PublicKey(account.data.slice(0, 32)).toBase58();
-        const amount = new BN(account.data.slice(64, 72), "le");
-        const decimals = account.data[44]; // byte 44 = decimals in token account layout
+        const info = account.data.parsed.info;
+        const mint = info.mint;
+        const amount = info.tokenAmount.uiAmount;
+        const decimals = info.tokenAmount.decimals;
         // Accept: amount=1, decimals=0 (NFT-like token)
         // On devnet: accept any such token. On mainnet: restrict to Commoner mints.
-        if (amount.eqn(1) && decimals === 0 && (IS_DEVNET || COMMONER_MINTS.has(mint))) {
+        if (amount === 1 && decimals === 0 && (IS_DEVNET || COMMONER_MINTS.has(mint))) {
           ownedMints.push(mint);
         }
       }
