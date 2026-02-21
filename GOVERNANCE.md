@@ -1,7 +1,7 @@
 # Commoner's SubDAO — Governance Framework v1.2
 
-> **Status:** Phase 1 · February 2026
-> **Voting:** Off-chain (localStorage), counting toward on-chain Phase 4
+> **Status:** Phase 1–2 · February 2026
+> **Voting:** Off-chain (shared, persistent), transitioning to Realms NFT Community DAO (Phase 3) and autonomous on-chain execution (Phase 4)
 
 ---
 
@@ -25,7 +25,7 @@ The Commoner's SubDAO converts individual self-interest into collective good. By
 |--------|-------|
 | Total Commoner NFTs | 120 |
 | Unique Holders | ~85 |
-| Largest Single Holding | 3 NFTs |
+| Largest Single Holding | 24 NFTs |
 | Average Holding | 1.4 NFTs |
 | Eligible Voters | All holders of ≥1 Commoner |
 
@@ -118,12 +118,14 @@ The treasury program executes proposals autonomously — no multi-sig, no admin 
 
 ### Allocation Table
 
+No team or founder allocation. All COMMON is distributed to the community. The founder participates in the airdrop like every other holder.
+
 | Allocation | Amount | % | Purpose |
 |---|---|---|---|
-| Holder Airdrop | 250,000 | 25% | Distributed pro-rata to Commoner holders at launch |
-| Auction Rewards | 400,000 | 40% | Earned by bidders and sellers via auction activity |
-| Treasury | 200,000 | 20% | Governed by SubDAO for bounties, ops, and grants |
-| Team | 150,000 | 15% | Founder allocation, vested linearly over 12 months |
+| Holder Airdrop | 700,000 | 70% | Distributed pro-rata to all 120 Commoner holders at snapshot; ~5,833 COMMON per NFT |
+| Bounty Rewards | 150,000 | 15% | Artist bounty pool; DAO can vote to replenish via open-market buys from treasury |
+| DAO Liquidity | 100,000 | 10% | SOL/COMMON liquidity pool; LP fees build the treasury over time |
+| Future Emissions | 50,000 | 5% | Locked at launch; released only by governance vote |
 
 ### Fee Tier Table
 
@@ -136,10 +138,10 @@ The treasury program executes proposals autonomously — no multi-sig, no admin 
 
 ### Reward Mechanics
 
-- **Seller reward:** COMMON airdrop proportional to final sale price at auction close.
-- **Bidder reward:** Losing bidders receive a small COMMON consolation for participating.
-- **Bounty reward:** Accepted artist submissions receive COMMON from the treasury allocation.
-- **Participation decay:** Rewards reduce as the auction rewards pool depletes over time.
+- **Bounty reward:** Accepted artist submissions receive COMMON from the bounty rewards pool, distributed vote-weighted (each approved submission's share is proportional to votes received from Commoner holders during the live auction window).
+- **Pool sustainability:** The 150,000 COMMON bounty pool funds daily auctions. The DAO may vote to replenish it by using treasury SOL to buy COMMON from the open market.
+- **LP rewards:** The DAO liquidity allocation earns trading fees from the SOL/COMMON pool, which flow back to the treasury.
+- **Airdrop distribution:** ~5,833 COMMON per Commoner NFT at Phase 3 launch snapshot. Wallets holding multiple Commoners receive proportionally more.
 
 ---
 
@@ -218,10 +220,10 @@ Each auction day features:
 
 | Phase | Status | Key Deliverables |
 |---|---|---|
-| Phase 1 | ✅ Complete | Site launch, gallery, holders, treasury, governance UI, rarity rankings |
-| Phase 2 | 🔄 In Progress | Live auction contracts on mainnet, first real auctions, Discord integration |
-| Phase 3 | Planned | COMMON token launch, airdrop to holders, social auto-posting |
-| Phase 4 | Future | On-chain treasury program, MetaDAO futarchy, autonomous execution |
+| Phase 1 | ✅ Complete | Site launch, gallery, holders, treasury, governance UI, bounty system, rarity rankings, off-chain voting |
+| Phase 2 | 🔄 In Progress | Anchor auction program mainnet deploy, first real auctions, Realms NFT Community DAO setup, multi-sig |
+| Phase 3 | Planned | COMMON token mint, holder airdrop, SOL/COMMON liquidity pool, bounty reward distribution, social auto-posting |
+| Phase 4 | Future | On-chain treasury program, MetaDAO futarchy integration, autonomous proposal execution |
 
 ---
 
