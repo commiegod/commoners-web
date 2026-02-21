@@ -3,18 +3,5 @@
     "nftId": "JDeykd4JBWPkzdBrfWqVfzsv6Ph6CWVYXYGC4HpAA2rF",
     "human": [],
     "ai": []
-  },
-  "2026-02-21": {
-    "human": [
-      {
-        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png",
-        "artistName": "Test Submission",
-        "solanaAddress": "TopozN6tRbeghtDFZALdy5THQpWG8GysPtBUqs8YaxV",
-        "twitter": "@testartist",
-        "instagram": "@testartist_ig",
-        "website": "https://example.com"
-      }
-    ],
-    "ai": []
   }
 }
