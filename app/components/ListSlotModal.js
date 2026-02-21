@@ -8,7 +8,7 @@ import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import commoners from "../../data/commoners.json";
 import schedule from "../../data/auction-schedule.json";
 import idl from "../../lib/idl.json";
-import { PROGRAM_ID, configPDA, slotPDA } from "../../lib/programClient";
+import { PROGRAM_ID, RPC_URL, configPDA, slotPDA } from "../../lib/programClient";
 
 const TOKEN_PROGRAM_ID = new PublicKey(
   "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
@@ -22,11 +22,10 @@ const COMMONER_BY_MINT = Object.fromEntries(
   commoners.nfts.map((n) => [n.id, n])
 );
 
-// On devnet: any NFT in the wallet is listable (not just Commoners).
-// We use auction-schedule.json to show names/images for the minted test NFTs.
-const IS_DEVNET =
-  (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "").includes("devnet") ||
-  (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "") === "";
+// On devnet (RPC URL does not reference mainnet-beta), any NFT with
+// decimals=0, amount=1 can be listed. On mainnet this will be restricted
+// to MidEvil holders and eventually any collection.
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 const SCHEDULE_BY_MINT = Object.fromEntries(
   Object.values(schedule).map((entry) => [
@@ -210,13 +209,13 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
             {/* NFT selection */}
             <div>
               <label className="text-xs text-muted tracking-widest block mb-2">
-                SELECT YOUR COMMONER
+                SELECT YOUR NFT
               </label>
               {myNfts.length === 0 ? (
                 <p className="text-sm text-muted">
                   {IS_DEVNET
-                    ? "No devnet NFTs found. Run scripts/mint-devnet-nfts.ts to mint test tokens to this wallet."
-                    : "No MidEvil Commoners found in this wallet."}
+                    ? "No NFTs found in this wallet. Transfer devnet test tokens here first (see commoners-auction/scripts/transfer-devnet-nfts.ts)."
+                    : "No MidEvil NFTs found in this wallet."}
                 </p>
               ) : (
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
@@ -230,11 +229,17 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
                           : "border-border"
                       }`}
                     >
-                      <img
-                        src={nft.image}
-                        alt={nft.name}
-                        className="w-full aspect-square object-cover"
-                      />
+                      {nft.image ? (
+                        <img
+                          src={nft.image}
+                          alt={nft.name}
+                          className="w-full aspect-square object-cover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square bg-border flex items-center justify-center text-muted text-xs">
+                          NFT
+                        </div>
+                      )}
                       <p className="text-xs p-1 truncate">{nft.name}</p>
                     </button>
                   ))}
