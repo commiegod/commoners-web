@@ -36,7 +36,7 @@ export default function Nav() {
             className="h-9 w-auto"
             style={{ mixBlendMode: "multiply" }}
           />
-          <span className="font-blackletter text-2xl text-gold">Commoner&apos;s DAO</span>
+          <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
         </Link>
 
         {/* Desktop links + wallet */}
@@ -101,7 +101,7 @@ export default function Nav() {
               className="h-9 w-auto"
               style={{ mixBlendMode: "multiply" }}
             />
-            <span className="font-blackletter text-2xl text-gold">Commoner&apos;s DAO</span>
+            <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
           </Link>
           <button
             onClick={() => setOpen(false)}

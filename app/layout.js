@@ -40,7 +40,7 @@ export default function RootLayout({ children }) {
                   className="h-10 w-auto"
                   style={{ mixBlendMode: "multiply" }}
                 />
-                <span className="font-blackletter text-2xl text-gold">Commoner&apos;s DAO</span>
+                <img src="/wordmark.png" alt="Commoner's DAO" className="h-7 w-auto" style={{ mixBlendMode: "multiply" }} />
               </div>
               <p className="text-muted text-xs">3-Trait MidEvils · Daily Auctions</p>
             </div>
