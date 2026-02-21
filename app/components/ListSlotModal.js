@@ -6,7 +6,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import commoners from "../../data/commoners.json";
-import schedule from "../../data/auction-schedule.json";
+import devnetMeta from "../../data/devnet-nft-metadata.json";
 import idl from "../../lib/idl.json";
 import { PROGRAM_ID, RPC_URL, configPDA, slotPDA } from "../../lib/programClient";
 
@@ -27,11 +27,9 @@ const COMMONER_BY_MINT = Object.fromEntries(
 // to MidEvil holders and eventually any collection.
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
-const SCHEDULE_BY_MINT = Object.fromEntries(
-  Object.values(schedule).map((entry) => [
-    entry.nftId,
-    { id: entry.nftId, name: entry.name, image: entry.image, traits: entry.traits },
-  ])
+// Devnet test NFT metadata (name/image/traits lookup by mint address)
+const DEVNET_META_BY_MINT = Object.fromEntries(
+  devnetMeta.map((n) => [n.mint, { id: n.mint, name: n.name, image: n.image, traits: n.traits }])
 );
 
 function getAta(owner, mint) {
@@ -102,8 +100,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
 
       const nfts = ownedMints.map((m) => {
         if (COMMONER_BY_MINT[m]) return COMMONER_BY_MINT[m];
-        if (SCHEDULE_BY_MINT[m]) return SCHEDULE_BY_MINT[m];
-        // Fallback for unknown devnet tokens
+        if (DEVNET_META_BY_MINT[m]) return DEVNET_META_BY_MINT[m];
         return { id: m, name: `NFT ${m.slice(0, 4)}…${m.slice(-4)}`, image: null, traits: [] };
       });
       setMyNfts(nfts);
