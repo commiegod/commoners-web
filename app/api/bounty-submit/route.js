@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { date, imageUrl, artistName, type } = body;
+    const { date, imageUrl, artistName, type, solanaAddress } = body;
 
-    if (!date || !imageUrl || !artistName || !type) {
+    if (!date || !imageUrl || !artistName || !type || !solanaAddress) {
       return NextResponse.json(
-        { error: "Missing required fields: date, imageUrl, artistName, type" },
+        { error: "Missing required fields: date, imageUrl, artistName, type, solanaAddress" },
         { status: 400 }
       );
     }
@@ -35,6 +35,7 @@ export async function POST(request) {
         { name: "Artist / Model", value: artistName, inline: true },
         { name: "Type", value: type, inline: true },
         { name: "Date", value: date, inline: true },
+        { name: "Solana Address", value: `\`${solanaAddress}\``, inline: false },
         ...(socialLines.length
           ? [{ name: "Links", value: socialLines.join("\n"), inline: false }]
           : []),

@@ -178,7 +178,7 @@ export default function AboutPage() {
           <h2 className="font-blackletter text-xl text-gold mb-3">Links</h2>
           <div className="flex flex-wrap gap-4">
             <a
-              href="/GOVERNANCE.md"
+              href="https://github.com/commiegod/commoners-web/blob/main/web/GOVERNANCE.md"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
@@ -186,12 +186,12 @@ export default function AboutPage() {
               Governance Doc ↗
             </a>
             <a
-              href="https://github.com/commonersdao"
+              href="https://github.com/commiegod/commoners-web"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
             >
-              GitHub README ↗
+              GitHub ↗
             </a>
           </div>
         </section>

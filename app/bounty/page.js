@@ -59,6 +59,7 @@ export default function BountyPage() {
     imageUrl: "",
     artistName: "",
     type: "Human",
+    solanaAddress: "",
     twitter: "",
     instagram: "",
     website: "",
@@ -103,6 +104,7 @@ export default function BountyPage() {
           imageUrl: "",
           artistName: "",
           type: "Human",
+          solanaAddress: "",
           twitter: "",
           instagram: "",
           website: "",
@@ -235,6 +237,21 @@ export default function BountyPage() {
                 </label>
               ))}
             </div>
+          </div>
+
+          {/* Solana address */}
+          <div>
+            <label className="block text-xs text-muted tracking-widest mb-2">
+              SOLANA WALLET ADDRESS <span className="text-muted normal-case tracking-normal">(for payment)</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={form.solanaAddress}
+              onChange={(e) => setField("solanaAddress", e.target.value)}
+              placeholder="Your Solana wallet address"
+              className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold placeholder:text-muted/50 font-mono"
+            />
           </div>
 
           {/* Social links */}

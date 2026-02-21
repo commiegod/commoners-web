@@ -520,7 +520,7 @@ export default function GovernancePage() {
         <div className="flex items-baseline justify-between mb-3">
           <h2 className="font-blackletter text-gold">Voting Rules</h2>
           <a
-            href="/docs/governance-v1.2.md"
+            href="https://github.com/commiegod/commoners-web/blob/main/web/GOVERNANCE.md"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-muted hover:text-gold transition-colors"
@@ -557,7 +557,7 @@ export default function GovernancePage() {
       </div>
 
       {/* Submit proposal */}
-      {connected && commonerCount > 0 && !showForm && (
+      {connected && !showForm && (
         <div className="mb-6">
           <button
             onClick={() => setShowForm(true)}
