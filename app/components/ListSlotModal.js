@@ -152,10 +152,18 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
       setStep("done");
       setTimeout(onSuccess, 1500);
     } catch (e) {
-      const msg =
-        e?.message?.match(/custom program error: (0x\w+)/)?.[0] ||
-        e?.message ||
-        "Transaction failed";
+      if (e?.message?.includes("was not confirmed")) {
+        // Timed out — tx may have landed. Refresh the schedule to check.
+        setTxError("Transaction timed out. Refreshing schedule to check if your slot was registered…");
+        setStep("pick");
+        setTimeout(onSuccess, 3000);
+        return;
+      }
+      const msg = e?.message?.includes("custom program error: 0x0")
+        ? "This slot is already registered for that date. Select a different date."
+        : e?.message?.match(/custom program error: (0x\w+)/)?.[0] ||
+          e?.message ||
+          "Transaction failed";
       setTxError(msg);
       setStep("pick");
     }

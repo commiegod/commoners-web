@@ -49,7 +49,7 @@ export default function RecentAuctions() {
                   <span className="font-blackletter text-2xl text-muted/30">?</span>
                 </div>
                 <div className="p-2">
-                  <p className="text-sm font-medium truncate text-muted">Commoner</p>
+                  <p className="text-sm font-medium truncate text-muted">{name}</p>
                   <p className="text-xs text-muted">{dateStr}</p>
                 </div>
               </div>
