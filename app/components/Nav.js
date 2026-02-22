@@ -34,8 +34,7 @@ export default function Nav() {
             src="/icon.png"
             alt=""
             className="h-9 w-auto"
-            style={{ mixBlendMode: "multiply" }}
-          />
+                      />
           <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
         </Link>
 
@@ -99,8 +98,7 @@ export default function Nav() {
               src="/icon.png"
               alt=""
               className="h-9 w-auto"
-              style={{ mixBlendMode: "multiply" }}
-            />
+                          />
             <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
           </Link>
           <button

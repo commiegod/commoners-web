@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Commoner's DAO",
   description: "Daily NFT auctions run by 3-trait MidEvil holders.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
   openGraph: {
     title: "Commoner's DAO",
     description: "Daily NFT auctions run by 3-trait MidEvil holders.",
@@ -52,8 +57,7 @@ export default function RootLayout({ children }) {
                   src="/icon.png"
                   alt=""
                   className="h-10 w-auto"
-                  style={{ mixBlendMode: "multiply" }}
-                />
+                                  />
                 <img src="/wordmark.png" alt="Commoner's DAO" className="h-7 w-auto" style={{ mixBlendMode: "multiply" }} />
               </div>
               <p className="text-muted text-xs">3-Trait MidEvils · Daily Auctions</p>
