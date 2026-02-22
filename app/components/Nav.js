@@ -27,7 +27,7 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="bg-background" style={{ isolation: "isolate" }}>
+    <nav className="bg-background relative z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2">
           <img
