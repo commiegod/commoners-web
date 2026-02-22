@@ -111,7 +111,7 @@ The treasury program executes proposals autonomously — no multi-sig, no admin 
 | Property | Value |
 |---|---|
 | Name | COMMON |
-| Supply | 1,000,000 (fixed, no mint authority post-launch) |
+| Supply | 1,000,000,000 (fixed, no mint authority post-launch) |
 | Blockchain | Solana (SPL token) |
 | Decimals | 6 |
 | Launch | Phase 3 |
@@ -122,10 +122,10 @@ No team or founder allocation. All COMMON is distributed to the community. The f
 
 | Allocation | Amount | % | Purpose |
 |---|---|---|---|
-| Holder Airdrop | 700,000 | 70% | Distributed pro-rata to all 120 Commoner holders at snapshot; ~5,833 COMMON per NFT |
-| Bounty Rewards | 150,000 | 15% | Artist bounty pool; DAO can vote to replenish via open-market buys from treasury |
-| DAO Liquidity | 100,000 | 10% | SOL/COMMON liquidity pool; LP fees build the treasury over time |
-| Future Emissions | 50,000 | 5% | Locked at launch; released only by governance vote |
+| Holder Airdrop | 700,000,000 | 70% | Distributed pro-rata to all 120 Commoner holders at snapshot; ~5,833,333 COMMON per NFT |
+| Bounty Rewards | 150,000,000 | 15% | Artist bounty pool; DAO can vote to replenish via open-market buys from treasury |
+| DAO Liquidity | 100,000,000 | 10% | SOL/COMMON liquidity pool; LP fees build the treasury over time |
+| Future Emissions | 50,000,000 | 5% | Locked at launch; released only by governance vote |
 
 ### Fee Tier Table
 
@@ -139,9 +139,9 @@ No team or founder allocation. All COMMON is distributed to the community. The f
 ### Reward Mechanics
 
 - **Bounty reward:** Accepted artist submissions receive COMMON from the bounty rewards pool, distributed vote-weighted (each approved submission's share is proportional to votes received from Commoner holders during the live auction window).
-- **Pool sustainability:** The 150,000 COMMON bounty pool funds daily auctions. The DAO may vote to replenish it by using treasury SOL to buy COMMON from the open market.
+- **Pool sustainability:** The 150,000,000 COMMON bounty pool funds daily auctions. The DAO may vote to replenish it by using treasury SOL to buy COMMON from the open market.
 - **LP rewards:** The DAO liquidity allocation earns trading fees from the SOL/COMMON pool, which flow back to the treasury.
-- **Airdrop distribution:** ~5,833 COMMON per Commoner NFT at Phase 3 launch snapshot. Wallets holding multiple Commoners receive proportionally more.
+- **Airdrop distribution:** ~5,833,333 COMMON per Commoner NFT at Phase 3 launch snapshot. Wallets holding multiple Commoners receive proportionally more.
 
 ---
 

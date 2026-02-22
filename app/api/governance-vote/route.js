@@ -13,27 +13,36 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { proposalId, choice, walletAddress } = await request.json();
+    // allocations: { yes: N, no: M, abstain: P } — votes split across choices
+    const { proposalId, allocations, walletAddress } = await request.json();
 
-    if (!proposalId || !choice || !walletAddress) {
-      return NextResponse.json(
-        { error: "Missing required fields." },
-        { status: 400 }
-      );
+    if (!proposalId || !allocations || !walletAddress || typeof allocations !== "object") {
+      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    if (!["yes", "no", "abstain"].includes(choice)) {
-      return NextResponse.json(
-        { error: "Invalid vote choice." },
-        { status: 400 }
-      );
+    const { yes = 0, no = 0, abstain = 0 } = allocations;
+    if (
+      !Number.isInteger(yes) || yes < 0 ||
+      !Number.isInteger(no) || no < 0 ||
+      !Number.isInteger(abstain) || abstain < 0
+    ) {
+      return NextResponse.json({ error: "Vote amounts must be non-negative integers." }, { status: 400 });
+    }
+
+    const totalAllocated = yes + no + abstain;
+    if (totalAllocated === 0) {
+      return NextResponse.json({ error: "Allocate at least 1 vote." }, { status: 400 });
     }
 
     const weight = await getCommonerCount(walletAddress);
     if (weight === 0) {
+      return NextResponse.json({ error: "You must hold a Commoner NFT to vote." }, { status: 403 });
+    }
+
+    if (totalAllocated > weight) {
       return NextResponse.json(
-        { error: "You must hold a Commoner NFT to vote." },
-        { status: 403 }
+        { error: `Cannot allocate more than your ${weight} votes.` },
+        { status: 400 }
       );
     }
 
@@ -52,22 +61,21 @@ export async function POST(request) {
       );
     }
 
-    prop.tallies[choice] = (prop.tallies[choice] || 0) + weight;
-    prop.voters[walletAddress] = { weight, choice };
+    prop.tallies.yes = (prop.tallies.yes || 0) + yes;
+    prop.tallies.no = (prop.tallies.no || 0) + no;
+    prop.tallies.abstain = (prop.tallies.abstain || 0) + abstain;
+    prop.voters[walletAddress] = { weight, allocations: { yes, no, abstain } };
 
     await putFile(
       "data/governance-votes.json",
       all,
       sha,
-      `vote: ${walletAddress.slice(0, 8)}… → ${choice} on ${proposalId} (×${weight})`
+      `vote: ${walletAddress.slice(0, 8)}… split ${totalAllocated}/${weight} on ${proposalId}`
     );
 
     return NextResponse.json({ ok: true, weight, tallies: prop.tallies });
   } catch (err) {
     console.error("governance-vote error:", err);
-    return NextResponse.json(
-      { error: "Internal server error." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
   }
 }

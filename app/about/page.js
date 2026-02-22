@@ -121,7 +121,7 @@ export default function AboutPage() {
             COMMON Token
           </h2>
           <p className="text-muted leading-relaxed mb-4">
-            Fixed supply of 1,000,000 COMMON. No team or founder allocation —
+            Fixed supply of 1,000,000,000 COMMON. No team or founder allocation —
             all distribution is community-driven. Purpose: auction fee waiver,
             artist bounty rewards, DAO liquidity, and futarchy market
             participation (Phase 4).
@@ -144,28 +144,28 @@ export default function AboutPage() {
               <tbody>
                 <tr className="border-b border-border">
                   <td className="px-3 py-2">Holder Airdrop</td>
-                  <td className="px-3 py-2 text-muted">700,000 (70%)</td>
+                  <td className="px-3 py-2 text-muted">700,000,000 (70%)</td>
                   <td className="px-3 py-2 text-muted">
                     Distributed to all 120 Commoner holders, proportional to NFTs held
                   </td>
                 </tr>
                 <tr className="border-b border-border">
                   <td className="px-3 py-2">Bounty Rewards</td>
-                  <td className="px-3 py-2 text-muted">150,000 (15%)</td>
+                  <td className="px-3 py-2 text-muted">150,000,000 (15%)</td>
                   <td className="px-3 py-2 text-muted">
                     Artist bounty pool; DAO can vote to replenish via open-market buys
                   </td>
                 </tr>
                 <tr className="border-b border-border">
                   <td className="px-3 py-2">DAO Liquidity</td>
-                  <td className="px-3 py-2 text-muted">100,000 (10%)</td>
+                  <td className="px-3 py-2 text-muted">100,000,000 (10%)</td>
                   <td className="px-3 py-2 text-muted">
                     SOL/COMMON liquidity pool managed by treasury; LP fees build the treasury
                   </td>
                 </tr>
                 <tr>
                   <td className="px-3 py-2">Future Emissions</td>
-                  <td className="px-3 py-2 text-muted">50,000 (5%)</td>
+                  <td className="px-3 py-2 text-muted">50,000,000 (5%)</td>
                   <td className="px-3 py-2 text-muted">
                     Locked; released only by governance vote
                   </td>

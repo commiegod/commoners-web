@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useWallet } from "@solana/wallet-adapter-react";
 import bounties from "../../data/bounties.json";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
+import { getCommonerCount } from "../../lib/commoners";
 
 const TYPES = ["Human", "AI-assisted"];
 
@@ -70,8 +71,11 @@ export default function BountyPage() {
   const [submitResult, setSubmitResult] = useState(null); // null | "ok" | string error
   const [lightbox, setLightbox] = useState(null); // { src, alt }
   const { connected, publicKey } = useWallet();
+  const [commonerCount, setCommonerCount] = useState(0);
   const [votes, setVotes] = useState({}); // { [dateStr]: { tallies, voters } }
-  const [votingId, setVotingId] = useState(null);
+  // localAlloc: { [dateStr]: { [submissionId]: number } } — pending split allocation
+  const [localAlloc, setLocalAlloc] = useState({});
+  const [submittingDay, setSubmittingDay] = useState(null); // dateStr being submitted
   const [voteError, setVoteError] = useState({}); // { [dateStr]: string }
 
   async function fetchVotes() {
@@ -83,9 +87,19 @@ export default function BountyPage() {
 
   useEffect(() => { fetchVotes(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleVote(dateStr, submissionId) {
+  // Fetch Commoner NFT count when wallet connects
+  useEffect(() => {
+    if (!publicKey) { setCommonerCount(0); return; }
+    getCommonerCount(publicKey.toBase58()).then(setCommonerCount).catch(() => {});
+  }, [publicKey?.toBase58()]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSplitVote(dateStr) {
     if (!publicKey) return;
-    setVotingId(submissionId);
+    const allocations = localAlloc[dateStr] || {};
+    const totalAllocated = Object.values(allocations).reduce((a, v) => a + v, 0);
+    if (totalAllocated === 0) return;
+
+    setSubmittingDay(dateStr);
     setVoteError((e) => ({ ...e, [dateStr]: "" }));
     try {
       const res = await fetch("/api/bounty-vote", {
@@ -93,21 +107,35 @@ export default function BountyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: dateStr,
-          submissionId,
+          allocations,
           walletAddress: publicKey.toBase58(),
         }),
       });
       const json = await res.json();
       if (json.ok) {
         await fetchVotes();
+        setLocalAlloc((a) => ({ ...a, [dateStr]: {} }));
       } else {
         setVoteError((e) => ({ ...e, [dateStr]: json.error || "Vote failed." }));
       }
     } catch {
       setVoteError((e) => ({ ...e, [dateStr]: "Network error." }));
     } finally {
-      setVotingId(null);
+      setSubmittingDay(null);
     }
+  }
+
+  function setAlloc(dateStr, subId, value) {
+    setLocalAlloc((prev) => {
+      const day = { ...(prev[dateStr] || {}) };
+      const clamped = Math.max(0, Math.min(commonerCount, value));
+      // Ensure total doesn't exceed commonerCount
+      const others = Object.entries(day)
+        .filter(([k]) => k !== subId)
+        .reduce((s, [, v]) => s + v, 0);
+      day[subId] = Math.min(clamped, commonerCount - others);
+      return { ...prev, [dateStr]: day };
+    });
   }
 
   useEffect(() => {
@@ -423,8 +451,6 @@ export default function BountyPage() {
                     {allSubmissions.map((b, i) => {
                       const voteCount = b.id ? (dayVotes.tallies[b.id] || 0) : 0;
                       const isWinner = b.id && b.id === winnerSubmissionId && voteCount > 0;
-                      const myVotedForThis = myVote?.votedFor === b.id;
-                      const hasVotedToday = !!myVote;
                       return (
                         <div
                           key={i}
@@ -497,31 +523,20 @@ export default function BountyPage() {
                                       </span>
                                     )}
                                   </span>
-                                  {isToday && (
-                                    connected ? (
-                                      myVotedForThis ? (
-                                        <span className="text-xs text-green-700">
-                                          Voted ✓
-                                        </span>
-                                      ) : hasVotedToday ? (
-                                        <span className="text-xs text-muted">
-                                          Vote cast
-                                        </span>
-                                      ) : (
-                                        <button
-                                          onClick={() => handleVote(dateStr, b.id)}
-                                          disabled={votingId === b.id}
-                                          className="text-xs px-2 py-0.5 border border-border hover:border-foreground transition-colors disabled:opacity-50"
-                                        >
-                                          {votingId === b.id ? "Voting…" : "Vote"}
-                                        </button>
-                                      )
-                                    ) : (
-                                      <span className="text-xs text-muted italic">
-                                        Connect wallet
-                                      </span>
-                                    )
-                                  )}
+                                  {isToday && myVote?.allocations?.[b.id] > 0 ? (
+                                    <span className="text-xs text-green-700">+{myVote.allocations[b.id]} ✓</span>
+                                  ) : isToday && !myVote && connected && commonerCount > 0 ? (
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      max={commonerCount}
+                                      value={(localAlloc[dateStr]?.[b.id]) || 0}
+                                      onChange={(e) => setAlloc(dateStr, b.id, parseInt(e.target.value) || 0)}
+                                      className="w-14 bg-background border border-border px-2 py-0.5 text-xs text-center focus:outline-none focus:border-foreground"
+                                    />
+                                  ) : isToday && !connected ? (
+                                    <span className="text-xs text-muted italic">Connect wallet</span>
+                                  ) : null}
                                 </div>
                               </div>
                             )}
@@ -530,6 +545,27 @@ export default function BountyPage() {
                       );
                     })}
                   </div>
+
+                  {/* Split vote submit row */}
+                  {isToday && connected && !myVote && commonerCount > 0 && (() => {
+                    const dayAlloc = localAlloc[dateStr] || {};
+                    const totalAllocated = Object.values(dayAlloc).reduce((a, v) => a + v, 0);
+                    const remaining = commonerCount - totalAllocated;
+                    return (
+                      <div className="mt-4 flex items-center gap-4 flex-wrap">
+                        <span className="text-xs text-muted">
+                          {remaining} of {commonerCount} vote{commonerCount !== 1 ? "s" : ""} remaining
+                        </span>
+                        <button
+                          onClick={() => handleSplitVote(dateStr)}
+                          disabled={submittingDay === dateStr || totalAllocated === 0}
+                          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                        >
+                          {submittingDay === dateStr ? "Submitting…" : "Submit Votes"}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}

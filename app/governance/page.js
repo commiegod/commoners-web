@@ -119,6 +119,7 @@ function ProposalCard({
   voting,
   realVotes,
 }) {
+  const [alloc, setAlloc] = useState({ yes: 0, no: 0, abstain: 0 });
   const thresholds = getThresholds(proposal.type, proposal.treasurySol);
   const typeInfo = PROPOSAL_TYPES[proposal.type];
   const isActive = proposal.status === "active";
@@ -182,15 +183,14 @@ function ProposalCard({
       {isActive && (
         <div className="mt-4">
           {myVote ? (
-            <p className="text-sm text-gold">
-              You voted:{" "}
-              <span className="font-semibold">{myVote.toUpperCase()}</span>
-              {commonerCount > 1 && (
-                <span className="text-muted font-normal">
-                  {" "}({commonerCount} NFTs)
+            <div className="text-sm text-gold">
+              <span>Votes submitted</span>
+              {myVote.allocations && (
+                <span className="text-muted font-normal ml-2">
+                  (Yes: {myVote.allocations.yes || 0} · No: {myVote.allocations.no || 0} · Abstain: {myVote.allocations.abstain || 0})
                 </span>
               )}
-            </p>
+            </div>
           ) : !walletAddress ? (
             <p className="text-xs text-muted">Connect your wallet to vote.</p>
           ) : commonerCount === 0 ? (
@@ -208,26 +208,45 @@ function ProposalCard({
           ) : expired ? (
             <p className="text-xs text-muted">Voting period has ended.</p>
           ) : (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                {["yes", "no", "abstain"].map((choice) => (
-                  <button
-                    key={choice}
-                    onClick={() => onVote(proposal.id, choice)}
-                    disabled={voting === proposal.id}
-                    className={`px-4 py-1.5 text-sm disabled:opacity-50 transition-colors ${
-                      choice === "yes"
-                        ? "bg-green-50 border border-green-300 text-green-700 hover:bg-green-100"
-                        : choice === "no"
-                        ? "bg-red-50 border border-red-300 text-red-700 hover:bg-red-100"
-                        : "bg-card border border-border text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {voting === proposal.id
-                      ? "Voting…"
-                      : `Vote ${choice.charAt(0).toUpperCase() + choice.slice(1)}`}
-                  </button>
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-5 items-end">
+                {[
+                  { key: "yes", label: "Yes", inputClass: "border-green-300", labelClass: "text-green-700" },
+                  { key: "no", label: "No", inputClass: "border-red-300", labelClass: "text-red-600" },
+                  { key: "abstain", label: "Abstain", inputClass: "border-border", labelClass: "text-muted" },
+                ].map(({ key, label, inputClass, labelClass }) => (
+                  <label key={key} className={`flex flex-col gap-1 text-xs font-medium ${labelClass}`}>
+                    {label}
+                    <input
+                      type="number"
+                      min={0}
+                      max={commonerCount}
+                      value={alloc[key]}
+                      onChange={(e) => {
+                        const val = Math.max(0, parseInt(e.target.value) || 0);
+                        setAlloc((prev) => {
+                          const others = Object.entries(prev)
+                            .filter(([k]) => k !== key)
+                            .reduce((s, [, v]) => s + v, 0);
+                          return { ...prev, [key]: Math.min(val, commonerCount - others) };
+                        });
+                      }}
+                      className={`w-16 bg-background border px-2 py-1 text-sm text-center text-foreground focus:outline-none focus:border-foreground ${inputClass}`}
+                    />
+                  </label>
                 ))}
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-xs text-muted">
+                  {commonerCount - (alloc.yes + alloc.no + alloc.abstain)} of {commonerCount} vote{commonerCount !== 1 ? "s" : ""} remaining
+                </span>
+                <button
+                  onClick={() => onVote(proposal.id, alloc)}
+                  disabled={voting === proposal.id || (alloc.yes + alloc.no + alloc.abstain) === 0}
+                  className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                >
+                  {voting === proposal.id ? "Voting…" : "Submit Votes"}
+                </button>
               </div>
               {voteError && (
                 <p className="text-xs text-red-600">{voteError}</p>
@@ -537,7 +556,7 @@ export default function GovernancePage() {
   }, [walletAddress]);
 
   const handleVote = useCallback(
-    async (proposalId, choice) => {
+    async (proposalId, allocations) => {
       if (!walletAddress) return;
       setVoting(proposalId);
       setVoteErrors((e) => ({ ...e, [proposalId]: "" }));
@@ -545,7 +564,7 @@ export default function GovernancePage() {
         const res = await fetch("/api/governance-vote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ proposalId, choice, walletAddress }),
+          body: JSON.stringify({ proposalId, allocations, walletAddress }),
         });
         const json = await res.json();
         if (json.ok) {
@@ -716,7 +735,7 @@ export default function GovernancePage() {
                 walletAddress={walletAddress}
                 commonerCount={commonerCount}
                 onVote={handleVote}
-                myVote={govVotes[p.id]?.voters[walletAddress]?.choice ?? null}
+                myVote={govVotes[p.id]?.voters[walletAddress] ?? null}
                 voteError={voteErrors[p.id]}
                 voting={voting}
                 realVotes={govVotes[p.id]?.tallies}
@@ -740,7 +759,7 @@ export default function GovernancePage() {
                 walletAddress={walletAddress}
                 commonerCount={commonerCount}
                 onVote={handleVote}
-                myVote={govVotes[p.id]?.voters[walletAddress]?.choice ?? null}
+                myVote={govVotes[p.id]?.voters[walletAddress] ?? null}
                 voteError={voteErrors[p.id]}
                 voting={voting}
                 realVotes={govVotes[p.id]?.tallies}
