@@ -16,7 +16,21 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Commoner's DAO",
-  description: "Daily auctions for 3-trait MidEvils",
+  description: "Daily NFT auctions run by 3-trait MidEvil holders.",
+  openGraph: {
+    title: "Commoner's DAO",
+    description: "Daily NFT auctions run by 3-trait MidEvil holders.",
+    url: "https://commonersdao.com",
+    siteName: "Commoner's DAO",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Commoner's DAO",
+    description: "Daily NFT auctions run by 3-trait MidEvil holders.",
+    images: ["/opengraph-image.png"],
+  },
 };
 
 export default function RootLayout({ children }) {
