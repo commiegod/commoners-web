@@ -69,9 +69,26 @@ export default function AuctionCarousel() {
   const [mounted, setMounted] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [voteData, setVoteData] = useState(null); // { tallies, voters }
 
   const countdownRef = useRef(null);
   const autoAdvanceRef = useRef(null);
+
+  // Fetch vote data for today's bounty submissions
+  useEffect(() => {
+    if (!auctionData?.date) return;
+    fetch(`/api/bounty-vote?date=${auctionData.date}`)
+      .then((r) => r.json())
+      .then((d) => setVoteData(d))
+      .catch(() => {});
+    const interval = setInterval(() => {
+      fetch(`/api/bounty-vote?date=${auctionData.date}`)
+        .then((r) => r.json())
+        .then((d) => setVoteData(d))
+        .catch(() => {});
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [auctionData?.date]);
 
   // Derive today's or next upcoming auction from live slot data
   useEffect(() => {
@@ -446,6 +463,34 @@ export default function AuctionCarousel() {
                     </a>
                   )}
                 </div>
+
+                {/* Live vote tally for this submission */}
+                {currentSlide.data.id && voteData && (() => {
+                  const sid = currentSlide.data.id;
+                  const votes = voteData.tallies?.[sid] || 0;
+                  const total = Object.values(voteData.tallies || {}).reduce((a, b) => a + b, 0);
+                  const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+                  return (
+                    <div className="mt-6 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-muted">
+                        <span>{votes} vote{votes !== 1 ? "s" : ""}</span>
+                        {total > 0 && <span className="font-medium text-foreground">{pct}%</span>}
+                      </div>
+                      <div className="h-1 bg-border w-full">
+                        <div
+                          className="h-1 bg-gold transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      {total > 0 && (
+                        <p className="text-xs text-muted">{total} total votes · <a href="/bounty" className="hover:text-foreground transition-colors">Vote on Bounty page ↗</a></p>
+                      )}
+                      {total === 0 && (
+                        <p className="text-xs text-muted"><a href="/bounty" className="hover:text-foreground transition-colors">Be the first to vote ↗</a></p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
               <div />
             </>

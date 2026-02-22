@@ -385,6 +385,8 @@ export default function BountyPage() {
               const myVote = connected
                 ? dayVotes.voters[publicKey?.toBase58()]
                 : null;
+              // Total votes for this day (for percentage calculation)
+              const totalVotes = Object.values(dayVotes.tallies).reduce((a, b) => a + b, 0);
               // Winner = submission with most votes (only shown for closed auctions)
               const winnerSubmissionId =
                 !isToday && Object.keys(dayVotes.tallies).length > 0
@@ -394,19 +396,26 @@ export default function BountyPage() {
                   : null;
               return (
                 <div key={dateStr}>
-                  <h3 className="text-xs text-muted tracking-widest uppercase mb-4">
-                    {dateStr}
-                    {slotForDate && (
-                      <span className="ml-2 text-foreground font-medium normal-case tracking-normal">
-                        — {slotForDate.name}
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs text-muted tracking-widest uppercase">
+                      {dateStr}
+                      {slotForDate && (
+                        <span className="ml-2 text-foreground font-medium normal-case tracking-normal">
+                          — {slotForDate.name}
+                        </span>
+                      )}
+                      {isToday && (
+                        <span className="ml-3 text-gold normal-case tracking-normal font-medium">
+                          · Voting open
+                        </span>
+                      )}
+                    </h3>
+                    {totalVotes > 0 && (
+                      <span className="text-xs text-muted">
+                        {totalVotes} total vote{totalVotes !== 1 ? "s" : ""}
                       </span>
                     )}
-                    {isToday && (
-                      <span className="ml-3 text-gold normal-case tracking-normal font-medium">
-                        · Voting open
-                      </span>
-                    )}
-                  </h3>
+                  </div>
                   {voteError[dateStr] && (
                     <p className="text-xs text-red-600 mb-3">{voteError[dateStr]}</p>
                   )}
@@ -469,35 +478,51 @@ export default function BountyPage() {
                             </div>
                             {/* Vote row — only shown for submissions with an id */}
                             {b.id && (
-                              <div className="pt-2 mt-1 border-t border-border flex items-center justify-between gap-2">
-                                <span className="text-xs text-muted">
-                                  {voteCount} vote{voteCount !== 1 ? "s" : ""}
-                                </span>
-                                {isToday && (
-                                  connected ? (
-                                    myVotedForThis ? (
-                                      <span className="text-xs text-green-700">
-                                        Voted ✓
-                                      </span>
-                                    ) : hasVotedToday ? (
-                                      <span className="text-xs text-muted">
-                                        Vote cast
-                                      </span>
-                                    ) : (
-                                      <button
-                                        onClick={() => handleVote(dateStr, b.id)}
-                                        disabled={votingId === b.id}
-                                        className="text-xs px-2 py-0.5 border border-border hover:border-foreground transition-colors disabled:opacity-50"
-                                      >
-                                        {votingId === b.id ? "Voting…" : "Vote"}
-                                      </button>
-                                    )
-                                  ) : (
-                                    <span className="text-xs text-muted italic">
-                                      Connect wallet
-                                    </span>
-                                  )
+                              <div className="pt-2 mt-1 border-t border-border space-y-1.5">
+                                {/* Progress bar */}
+                                {totalVotes > 0 && (
+                                  <div className="h-1 bg-border w-full">
+                                    <div
+                                      className="h-1 bg-gold transition-all duration-500"
+                                      style={{ width: `${Math.round((voteCount / totalVotes) * 100)}%` }}
+                                    />
+                                  </div>
                                 )}
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs text-muted">
+                                    {voteCount} vote{voteCount !== 1 ? "s" : ""}
+                                    {totalVotes > 0 && (
+                                      <span className="ml-1 font-medium text-foreground">
+                                        ({Math.round((voteCount / totalVotes) * 100)}%)
+                                      </span>
+                                    )}
+                                  </span>
+                                  {isToday && (
+                                    connected ? (
+                                      myVotedForThis ? (
+                                        <span className="text-xs text-green-700">
+                                          Voted ✓
+                                        </span>
+                                      ) : hasVotedToday ? (
+                                        <span className="text-xs text-muted">
+                                          Vote cast
+                                        </span>
+                                      ) : (
+                                        <button
+                                          onClick={() => handleVote(dateStr, b.id)}
+                                          disabled={votingId === b.id}
+                                          className="text-xs px-2 py-0.5 border border-border hover:border-foreground transition-colors disabled:opacity-50"
+                                        >
+                                          {votingId === b.id ? "Voting…" : "Vote"}
+                                        </button>
+                                      )
+                                    ) : (
+                                      <span className="text-xs text-muted italic">
+                                        Connect wallet
+                                      </span>
+                                    )
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
