@@ -13,5 +13,20 @@
       "no": 0,
       "abstain": 0
     }
+  },
+  {
+    "id": "prop-1771701561849-uult",
+    "type": "builder-bounty",
+    "title": "hi",
+    "description": "dhft",
+    "treasurySol": 4,
+    "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+    "status": "active",
+    "endsAt": "2026-02-25T01:16:35.305Z",
+    "votes": {
+      "yes": 0,
+      "no": 0,
+      "abstain": 0
+    }
   }
 ]
