@@ -1,1 +1,13 @@
-{}
+{
+  "2026-02-22": {
+    "tallies": {
+      "1771700000003-grok2": 24
+    },
+    "voters": {
+      "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41": {
+        "weight": 24,
+        "votedFor": "1771700000003-grok2"
+      }
+    }
+  }
+}
