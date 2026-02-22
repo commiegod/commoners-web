@@ -35,6 +35,7 @@ export async function POST(request) {
   }
   const bucket = submission.type === "Human" ? "human" : "ai";
   bounties[submission.date][bucket].push({
+    id: submission.id,
     imageUrl: submission.imageUrl,
     artistName: submission.artistName,
     solanaAddress: submission.solanaAddress,

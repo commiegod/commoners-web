@@ -410,7 +410,9 @@ export default function AuctionCarousel() {
                     </div>
                     <p className="text-xs text-muted">
                       {isToday
-                        ? "Auction is live. Connect your wallet to place a bid."
+                        ? wallet.publicKey
+                          ? "Bidding opens once the auction is initialized. Check back shortly."
+                          : "Connect your wallet to place a bid when the auction opens."
                         : "Auction opens at midnight UTC on auction day. Come back then to place your bid."}
                     </p>
                   </>
