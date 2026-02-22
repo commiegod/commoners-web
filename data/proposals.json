@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "prop-1771699526340-xscw",
+    "type": "treasury-grant",
+    "title": "funny money",
+    "description": "money straight to my wallet",
+    "treasurySol": 0.5,
+    "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+    "status": "active",
+    "endsAt": "2026-02-25T01:16:31.916Z",
+    "votes": {
+      "yes": 0,
+      "no": 0,
+      "abstain": 0
+    }
+  }
+]
