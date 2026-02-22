@@ -122,31 +122,37 @@ export default function AboutPage() {
           </h2>
           <p className="text-muted leading-relaxed mb-4">
             Fixed supply of 1,000,000,000 COMMON. No team or founder allocation —
-            all distribution is community-driven. Purpose: auction fee waiver,
-            artist bounty rewards, DAO liquidity, and futarchy market
-            participation (Phase 4).
+            all distribution is community-driven. Commoner holders receive the
+            primary airdrop and hold governance rights. The broader MidEvils
+            community receives a smaller allocation to enable futarchy market
+            participation (Phase 4) and platform alignment without diluting
+            Commoner governance power. Purpose: auction fee reduction, artist
+            bounty rewards, DAO liquidity, staking yield, and futarchy.
           </p>
-          <div className="overflow-x-auto">
+
+          {/* Allocation table */}
+          <div className="overflow-x-auto mb-6">
             <table className="w-full text-sm border border-border">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Allocation
-                  </th>
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Amount
-                  </th>
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Purpose
-                  </th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">Allocation</th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">Amount</th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">Purpose</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-border">
-                  <td className="px-3 py-2">Holder Airdrop</td>
-                  <td className="px-3 py-2 text-muted">700,000,000 (70%)</td>
+                  <td className="px-3 py-2">Commoner Airdrop</td>
+                  <td className="px-3 py-2 text-muted">600,000,000 (60%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Distributed to all 120 Commoner holders, proportional to NFTs held
+                    ~5,000,000 per Commoner NFT — pro-rata to all 120 holders at Phase 3 snapshot
+                  </td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2">MidEvil Airdrop</td>
+                  <td className="px-3 py-2 text-muted">100,000,000 (10%)</td>
+                  <td className="px-3 py-2 text-muted">
+                    ~20,490 per non-Commoner MidEvil — enables futarchy participation for the broader community
                   </td>
                 </tr>
                 <tr className="border-b border-border">
@@ -164,15 +170,46 @@ export default function AboutPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2">Future Emissions</td>
+                  <td className="px-3 py-2">Staking Emissions</td>
                   <td className="px-3 py-2 text-muted">50,000,000 (5%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Locked; released only by governance vote
+                    Earned by locking COMMON for 30 / 90 / 180 days (Phase 4); released only by governance vote
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
+
+          {/* Auction fee tiers */}
+          <h3 className="text-sm font-medium mb-2">Auction Fee Tiers</h3>
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full text-sm border border-border">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">COMMON Held</th>
+                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">Auction Fee</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2 text-muted">&lt; 50,000</td>
+                  <td className="px-3 py-2">5% (standard)</td>
+                </tr>
+                <tr className="border-b border-border">
+                  <td className="px-3 py-2 text-muted">50,000 – 499,999</td>
+                  <td className="px-3 py-2">3% (reduced)</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 text-muted">≥ 500,000</td>
+                  <td className="px-3 py-2">0% (fee-free)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-muted">
+            The 500,000 COMMON zero-fee threshold is the first governance proposal — the community votes on the exact amount.
+            Active bounty artists can accumulate COMMON through rewards. Regular MidEvil holders would need to buy COMMON or earn it through the platform to access reduced fees.
+          </p>
         </section>
 
         {/* 6. Links */}

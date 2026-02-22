@@ -122,26 +122,47 @@ No team or founder allocation. All COMMON is distributed to the community. The f
 
 | Allocation | Amount | % | Purpose |
 |---|---|---|---|
-| Holder Airdrop | 700,000,000 | 70% | Distributed pro-rata to all 120 Commoner holders at snapshot; ~5,833,333 COMMON per NFT |
+| Commoner Airdrop | 600,000,000 | 60% | ~5,000,000 per Commoner NFT — pro-rata to all 120 holders at Phase 3 snapshot |
+| MidEvil Airdrop | 100,000,000 | 10% | ~20,490 per non-Commoner MidEvil (~4,880 NFTs) — futarchy participation for the broader community |
 | Bounty Rewards | 150,000,000 | 15% | Artist bounty pool; DAO can vote to replenish via open-market buys from treasury |
 | DAO Liquidity | 100,000,000 | 10% | SOL/COMMON liquidity pool; LP fees build the treasury over time |
-| Future Emissions | 50,000,000 | 5% | Locked at launch; released only by governance vote |
+| Staking Emissions | 50,000,000 | 5% | Earned by locking COMMON (Phase 4); locked at launch, released only by governance vote |
+
+**Airdrop design rationale:** Commoner holders control ~85% of the community-distributed supply (600M out of 700M), maintaining clear governance dominance. The broader MidEvils airdrop (~14% of community float) gives regular holders enough COMMON to participate meaningfully in futarchy prediction markets without granting them voting rights or enough aggregate supply to harm token value. Individual non-Commoner holders receive ~20,490 COMMON — enough to take a position in futarchy markets but small relative to a Commoner's ~5,000,000 allocation.
 
 ### Fee Tier Table
 
-| COMMON Balance | Auction Fee |
-|---|---|
-| < Threshold (TBD by vote) | Standard fee (5% of sale) |
-| ≥ Threshold | Zero fee |
+| COMMON Held | Auction Fee | Notes |
+|---|---|---|
+| < 50,000 | 5% (standard) | Default for all sellers |
+| 50,000 – 499,999 | 3% (reduced) | Reachable via bounty rewards or market purchase |
+| ≥ 500,000 | 0% (fee-free) | ~10% of a Commoner's airdrop; first governance proposal sets this |
 
-*The COMMON zero-fee threshold is the first governance proposal — the community votes on the exact amount.*
+*The exact 500,000 COMMON zero-fee threshold is the first governance proposal — Commoner holders vote on the final amount. The 3% reduced-fee tier is set alongside it.*
+
+### Staking Mechanics (Phase 4)
+
+COMMON holders can lock tokens to earn from the 50,000,000 staking emissions pool. Longer locks earn higher multipliers.
+
+| Lock Period | Multiplier | Notes |
+|---|---|---|
+| 30 days | 1× | Base rate |
+| 90 days | 1.5× | 50% bonus |
+| 180 days | 2× | Double rate |
+
+- **Emission rate:** ~10,000,000 COMMON/year (pool depletes in ~5 years at constant rate)
+- **Eligible stakers:** Any COMMON holder — Commoners, MidEvil airdrop recipients, bounty earners, open-market buyers
+- **Distribution:** Pro-rata to (stake amount × multiplier) each epoch
+- **Governance:** The DAO can vote to adjust emission rate, lock periods, or pause staking at any time
+- **Rationale:** Staking rewards create a rational reason for both Commoner holders and MidEvil airdrop recipients to lock rather than sell immediately, reducing sell pressure at launch and aligning long-term incentives
 
 ### Reward Mechanics
 
 - **Bounty reward:** Accepted artist submissions receive COMMON from the bounty rewards pool, distributed vote-weighted (each approved submission's share is proportional to votes received from Commoner holders during the live auction window).
 - **Pool sustainability:** The 150,000,000 COMMON bounty pool funds daily auctions. The DAO may vote to replenish it by using treasury SOL to buy COMMON from the open market.
 - **LP rewards:** The DAO liquidity allocation earns trading fees from the SOL/COMMON pool, which flow back to the treasury.
-- **Airdrop distribution:** ~5,833,333 COMMON per Commoner NFT at Phase 3 launch snapshot. Wallets holding multiple Commoners receive proportionally more.
+- **Commoner airdrop:** ~5,000,000 COMMON per Commoner NFT at Phase 3 launch snapshot. Wallets holding multiple Commoners receive proportionally more.
+- **MidEvil airdrop:** ~20,490 COMMON per non-Commoner MidEvil at Phase 3 snapshot. This allocation enables futarchy market participation but does not grant governance voting rights.
 
 ---
 
@@ -160,9 +181,10 @@ No team or founder allocation. All COMMON is distributed to the community. The f
 
 | Scenario | Seller Receives | Treasury Receives |
 |---|---|---|
-| Auction with bids | Sale price − 5% | 5% of sale |
+| Auction with bids (< 50K COMMON) | Sale price − 5% | 5% of sale |
+| Auction with bids (50K–499K COMMON) | Sale price − 3% | 3% of sale |
+| Auction with bids (≥ 500K COMMON) | Full sale price | 0% |
 | Auction with no bids | NFT returned | Nothing |
-| COMMON holder (≥ threshold) | Full sale price | 0% |
 
 ### Daily Highlight
 
@@ -231,14 +253,18 @@ Each auction day features:
 
 These are unresolved decisions the community should vote on:
 
-1. **COMMON zero-fee threshold** — How many COMMON tokens should unlock zero auction fees? The first governance proposal.
-2. **Auction fee rate** — Should the standard fee be 5%? Could go lower to attract sellers.
-3. **Anti-snipe window** — Should the 10-minute extension be shorter or longer?
-4. **Spending cap** — Is 20 SOL per 30 days the right cap for launch?
-5. **Bounty reward size** — How much COMMON should a submitted (accepted) artwork earn?
-6. **Listing requirement** — Should COMMON be required to list an NFT for auction, and if so, how much?
-7. **Phase 4 audit** — Which firm should audit the treasury program before Phase 4 launch?
+1. **COMMON zero-fee threshold** — Proposed starting point: 500,000 COMMON (~10% of a Commoner's airdrop) unlocks zero fees. Vote to confirm or adjust.
+2. **Reduced-fee tier** — Proposed: 50,000–499,999 COMMON → 3% fee. Vote to confirm or adjust the bracket and rate.
+3. **Staking emission rate** — Is ~10M COMMON/year the right pace? Too fast inflates supply; too slow reduces staking appeal.
+4. **Staking lock multipliers** — Are 1× / 1.5× / 2× the right multipliers for 30 / 90 / 180 days?
+5. **MidEvil airdrop snapshot date** — When does the snapshot happen? Announcing it early gives holders time to prepare.
+6. **Auction fee rate** — Should the standard fee be 5%? Could go lower to attract sellers.
+7. **Anti-snipe window** — Should the 10-minute extension be shorter or longer?
+8. **Spending cap** — Is 20 SOL per 30 days the right cap for launch?
+9. **Bounty reward size** — How much COMMON should a submitted (accepted) artwork earn per vote received?
+10. **Listing requirement** — Should COMMON be required to list an NFT for auction, and if so, how much?
+11. **Phase 4 audit** — Which firm should audit the treasury program before Phase 4 launch?
 
 ---
 
-*Document version: 1.2 · Last updated: February 2026 · Maintained by the Commoner's SubDAO*
+*Document version: 1.3 · Last updated: February 2026 · Maintained by the Commoner's SubDAO*
