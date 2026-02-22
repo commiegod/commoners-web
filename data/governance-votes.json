@@ -11,5 +11,18 @@
         "choice": "no"
       }
     }
+  },
+  "prop-1771699526340-xscw": {
+    "tallies": {
+      "yes": 0,
+      "no": 24,
+      "abstain": 0
+    },
+    "voters": {
+      "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41": {
+        "weight": 24,
+        "choice": "no"
+      }
+    }
   }
 }
