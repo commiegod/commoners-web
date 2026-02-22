@@ -134,11 +134,14 @@ No team or founder allocation. All COMMON is distributed to the community. The f
 
 | COMMON Held | Auction Fee | Notes |
 |---|---|---|
-| < 50,000 | 5% (standard) | Default for all sellers |
-| 50,000 – 499,999 | 3% (reduced) | Reachable via bounty rewards or market purchase |
-| ≥ 500,000 | 0% (fee-free) | ~10% of a Commoner's airdrop; first governance proposal sets this |
+| < 1,666,667 | 9% (standard) | Default for all sellers |
+| 1,666,667 – 3,333,332 | 6% (reduced) | Reachable via bounty accumulation or market purchase |
+| 3,333,333 – 4,999,999 | 3% (reduced) | Serious COMMON holders; ~67% of a Commoner's airdrop |
+| ≥ 5,000,000 | 0% (fee-free) | Full Commoner airdrop; first governance proposal confirms threshold |
 
-*The exact 500,000 COMMON zero-fee threshold is the first governance proposal — Commoner holders vote on the final amount. The 3% reduced-fee tier is set alongside it.*
+**Listing minimum:** 20,000 COMMON required to list an NFT for auction (covers the MidEvil airdrop threshold, ensuring listed NFTs come from engaged community members).
+
+*Thresholds are equidistant: 5,000,000 ÷ 3 = 1,666,667. The exact amounts are confirmed by the first governance proposal and stored in `data/fee-config.json`.*
 
 ### Staking Mechanics (Phase 4)
 
@@ -181,9 +184,10 @@ COMMON holders can lock tokens to earn from the 50,000,000 staking emissions poo
 
 | Scenario | Seller Receives | Treasury Receives |
 |---|---|---|
-| Auction with bids (< 50K COMMON) | Sale price − 5% | 5% of sale |
-| Auction with bids (50K–499K COMMON) | Sale price − 3% | 3% of sale |
-| Auction with bids (≥ 500K COMMON) | Full sale price | 0% |
+| Auction with bids (< 1,666,667 COMMON) | Sale price − 9% | 9% of sale |
+| Auction with bids (1,666,667–3,333,332 COMMON) | Sale price − 6% | 6% of sale |
+| Auction with bids (3,333,333–4,999,999 COMMON) | Sale price − 3% | 3% of sale |
+| Auction with bids (≥ 5,000,000 COMMON) | Full sale price | 0% |
 | Auction with no bids | NFT returned | Nothing |
 
 ### Daily Highlight
@@ -253,8 +257,8 @@ Each auction day features:
 
 These are unresolved decisions the community should vote on:
 
-1. **COMMON zero-fee threshold** — Proposed starting point: 500,000 COMMON (~10% of a Commoner's airdrop) unlocks zero fees. Vote to confirm or adjust.
-2. **Reduced-fee tier** — Proposed: 50,000–499,999 COMMON → 3% fee. Vote to confirm or adjust the bracket and rate.
+1. **COMMON fee tiers** — Proposed: 9% standard / 6% at 1,666,667 / 3% at 3,333,333 / 0% at 5,000,000 COMMON. Vote to confirm or adjust thresholds and rates.
+2. **Listing minimum** — Proposed: 20,000 COMMON to list an NFT for auction. Vote to confirm or adjust.
 3. **Staking emission rate** — Is ~10M COMMON/year the right pace? Too fast inflates supply; too slow reduces staking appeal.
 4. **Staking lock multipliers** — Are 1× / 1.5× / 2× the right multipliers for 30 / 90 / 180 days?
 5. **MidEvil airdrop snapshot date** — When does the snapshot happen? Announcing it early gives holders time to prepare.

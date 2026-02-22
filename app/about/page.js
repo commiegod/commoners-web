@@ -1,3 +1,5 @@
+import feeConfig from "../../data/fee-config.json";
+
 export default function AboutPage() {
   return (
     <div className="max-w-2xl">
@@ -180,7 +182,7 @@ export default function AboutPage() {
             </table>
           </div>
 
-          {/* Auction fee tiers */}
+          {/* Auction fee tiers — sourced from data/fee-config.json */}
           <h3 className="text-sm font-medium mb-2">Auction Fee Tiers</h3>
           <div className="overflow-x-auto mb-4">
             <table className="w-full text-sm border border-border">
@@ -191,24 +193,28 @@ export default function AboutPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2 text-muted">&lt; 50,000</td>
-                  <td className="px-3 py-2">5% (standard)</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2 text-muted">50,000 – 499,999</td>
-                  <td className="px-3 py-2">3% (reduced)</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-2 text-muted">≥ 500,000</td>
-                  <td className="px-3 py-2">0% (fee-free)</td>
-                </tr>
+                {feeConfig.tiers.map((tier, i) => (
+                  <tr key={i} className={i < feeConfig.tiers.length - 1 ? "border-b border-border" : ""}>
+                    <td className="px-3 py-2 text-muted">
+                      {tier.maxCommon === null
+                        ? `≥ ${tier.minCommon.toLocaleString()}`
+                        : tier.minCommon === 0
+                        ? `< ${(tier.maxCommon + 1).toLocaleString()}`
+                        : `${tier.minCommon.toLocaleString()} – ${tier.maxCommon.toLocaleString()}`}
+                    </td>
+                    <td className="px-3 py-2">
+                      {tier.feePercent === 0 ? "0% (fee-free)" : `${tier.feePercent}% (${tier.label.toLowerCase()})`}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
           <p className="text-xs text-muted">
-            The 500,000 COMMON zero-fee threshold is the first governance proposal — the community votes on the exact amount.
-            Active bounty artists can accumulate COMMON through rewards. Regular MidEvil holders would need to buy COMMON or earn it through the platform to access reduced fees.
+            Listing an NFT for auction requires a minimum of{" "}
+            {feeConfig.listingMinimum.toLocaleString()} COMMON.
+            The zero-fee threshold is the first governance proposal — the community votes to confirm or adjust the exact amounts.
+            Active bounty artists can accumulate COMMON through rewards; regular MidEvil airdrop recipients would need to accumulate or purchase COMMON to access reduced fees.
           </p>
         </section>
 

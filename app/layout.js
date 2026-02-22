@@ -53,11 +53,7 @@ export default function RootLayout({ children }) {
           <footer className="border-t border-border py-8 mt-16">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-3">
               <div className="flex items-center gap-2">
-                <img
-                  src="/icon.png"
-                  alt=""
-                  className="h-10 w-auto"
-                                  />
+                <img src="/icon.png" alt="" className="h-10 w-auto" style={{ mixBlendMode: "multiply" }} />
                 <img src="/wordmark.png" alt="Commoner's DAO" className="h-7 w-auto" style={{ mixBlendMode: "multiply" }} />
               </div>
               <p className="text-muted text-xs">3-Trait MidEvils · Daily Auctions</p>

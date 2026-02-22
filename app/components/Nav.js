@@ -30,11 +30,7 @@ export default function Nav() {
     <nav className="bg-background relative z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2">
-          <img
-            src="/icon.png"
-            alt=""
-            className="h-9 w-auto"
-                      />
+          <img src="/icon.png" alt="" className="h-9 w-auto" style={{ mixBlendMode: "multiply" }} />
           <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
         </Link>
 
@@ -94,11 +90,7 @@ export default function Nav() {
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
           <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
-            <img
-              src="/icon.png"
-              alt=""
-              className="h-9 w-auto"
-                          />
+            <img src="/icon.png" alt="" className="h-9 w-auto" style={{ mixBlendMode: "multiply" }} />
             <img src="/wordmark.png" alt="Commoner's DAO" className="h-6 w-auto" style={{ mixBlendMode: "multiply" }} />
           </Link>
           <button

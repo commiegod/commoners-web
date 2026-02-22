@@ -1,0 +1,10 @@
+{
+  "listingMinimum": 20000,
+  "standardFeePercent": 9,
+  "tiers": [
+    { "minCommon": 0,       "maxCommon": 1666666, "feePercent": 9, "label": "Standard" },
+    { "minCommon": 1666667, "maxCommon": 3333332, "feePercent": 6, "label": "Reduced"  },
+    { "minCommon": 3333333, "maxCommon": 4999999, "feePercent": 3, "label": "Reduced"  },
+    { "minCommon": 5000000, "maxCommon": null,    "feePercent": 0, "label": "Fee-free" }
+  ]
+}
