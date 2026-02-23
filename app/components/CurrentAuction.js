@@ -132,12 +132,12 @@ export default function CurrentAuction() {
     return () => clearInterval(countdownRef.current);
   }, [chainAuction]);
 
-  // Pre-fill min bid
+  // Pre-fill min bid — ceiling to nearest 0.001 so the pre-filled value always clears validation
   useEffect(() => {
     if (!chainAuction) return;
-    setBidInput(
-      (computeMinNextBid(chainAuction.state).toNumber() / LAMPORTS_PER_SOL).toFixed(3)
-    );
+    const minLamports = computeMinNextBid(chainAuction.state).toNumber();
+    const minSol = Math.ceil(minLamports / (LAMPORTS_PER_SOL / 1000)) / 1000;
+    setBidInput(minSol.toFixed(3));
   }, [chainAuction]);
 
   // Fetch bid history whenever auction account changes
@@ -215,7 +215,7 @@ export default function CurrentAuction() {
       : (chainAuction.state.current_bid.toNumber() / LAMPORTS_PER_SOL).toFixed(3)
     : null;
   const minBidSol = chainAuction
-    ? (computeMinNextBid(chainAuction.state).toNumber() / LAMPORTS_PER_SOL).toFixed(3)
+    ? (Math.ceil(computeMinNextBid(chainAuction.state).toNumber() / (LAMPORTS_PER_SOL / 1000)) / 1000).toFixed(3)
     : null;
 
   return (

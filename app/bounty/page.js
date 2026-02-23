@@ -8,6 +8,7 @@ import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 import { getCommonerCount } from "../../lib/commoners";
 
 const TYPES = ["Human", "AI-assisted"];
+const IMAGE_MODES = ["url", "upload"];
 
 function SocialLink({ href, label }) {
   if (!href) return null;
@@ -67,6 +68,10 @@ export default function BountyPage() {
     instagram: "",
     website: "",
   });
+  const [imageMode, setImageMode] = useState("url"); // "url" | "upload"
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null); // null | "ok" | string error
   const [lightbox, setLightbox] = useState(null); // { src, alt }
@@ -156,21 +161,48 @@ export default function BountyPage() {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadFile(file);
+    setUploadPreview(URL.createObjectURL(file));
+    setField("imageUrl", ""); // clear URL field when file chosen
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     setSubmitResult(null);
     try {
-      const turnstileToken =
-        e.target["cf-turnstile-response"]?.value || "";
+      let imageUrl = form.imageUrl;
+
+      // If upload mode, upload the file first and get a URL
+      if (imageMode === "upload" && uploadFile) {
+        setUploading(true);
+        const fd = new FormData();
+        fd.append("file", uploadFile);
+        const upRes = await fetch("/api/bounty-upload", { method: "POST", body: fd });
+        const upJson = await upRes.json();
+        setUploading(false);
+        if (!upJson.url) {
+          setSubmitResult(upJson.error || "Upload failed. Please try again.");
+          setSubmitting(false);
+          return;
+        }
+        imageUrl = upJson.url;
+      }
+
+      const turnstileToken = e.target["cf-turnstile-response"]?.value || "";
       const res = await fetch("/api/bounty-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, turnstileToken }),
+        body: JSON.stringify({ ...form, imageUrl, turnstileToken }),
       });
       const json = await res.json();
       if (json.ok) {
         setSubmitResult("ok");
+        setUploadFile(null);
+        setUploadPreview(null);
         setForm({
           date: todaySlot?.dateStr || "",
           imageUrl: "",
@@ -187,6 +219,7 @@ export default function BountyPage() {
     } catch {
       setSubmitResult("Network error. Please try again.");
     } finally {
+      setUploading(false);
       setSubmitting(false);
     }
   }
@@ -259,19 +292,55 @@ export default function BountyPage() {
             </select>
           </div>
 
-          {/* Image URL */}
+          {/* Image — URL or upload */}
           <div>
-            <label className="block text-xs text-muted tracking-widest mb-2">
-              IMAGE URL
-            </label>
-            <input
-              type="url"
-              required
-              value={form.imageUrl}
-              onChange={(e) => setField("imageUrl", e.target.value)}
-              placeholder="https://..."
-              className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold placeholder:text-muted/50"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs text-muted tracking-widest">IMAGE</label>
+              <div className="flex gap-0 border border-border text-xs">
+                {IMAGE_MODES.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setImageMode(m)}
+                    className={`px-3 py-0.5 capitalize transition-colors ${
+                      imageMode === m
+                        ? "bg-gold text-card"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {m === "url" ? "Link URL" : "Upload"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {imageMode === "url" ? (
+              <input
+                type="url"
+                required
+                value={form.imageUrl}
+                onChange={(e) => setField("imageUrl", e.target.value)}
+                placeholder="https://..."
+                className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold placeholder:text-muted/50"
+              />
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
+                  required={!uploadFile}
+                  onChange={handleFileChange}
+                  className="w-full text-sm text-muted file:mr-3 file:py-1.5 file:px-3 file:border file:border-border file:bg-background file:text-sm file:text-foreground file:cursor-pointer hover:file:text-gold"
+                />
+                {uploadPreview && (
+                  <img
+                    src={uploadPreview}
+                    alt="Preview"
+                    className="mt-2 h-24 object-contain border border-border"
+                  />
+                )}
+                <p className="mt-1 text-xs text-muted">Max 10 MB · JPG, PNG, GIF, WebP</p>
+              </div>
+            )}
           </div>
 
           {/* Artist name */}
@@ -384,10 +453,10 @@ export default function BountyPage() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || uploading}
             className="px-5 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {submitting ? "Submitting…" : "Submit"}
+            {uploading ? "Uploading…" : submitting ? "Submitting…" : "Submit"}
           </button>
         </form>
 
