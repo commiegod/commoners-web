@@ -1,7 +1,6 @@
 import AuctionCarousel from "./components/AuctionCarousel";
 import CurrentAuction from "./components/CurrentAuction";
 import RecentAuctions from "./components/RecentAuctions";
-import DaoSuccesses from "./components/DaoSuccesses";
 
 export default function Home() {
   return (
@@ -9,7 +8,6 @@ export default function Home() {
       <AuctionCarousel />
       <CurrentAuction />
       <RecentAuctions />
-      <DaoSuccesses />
     </div>
   );
 }
