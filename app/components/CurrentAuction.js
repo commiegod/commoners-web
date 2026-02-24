@@ -350,17 +350,26 @@ export default function CurrentAuction() {
   // If no on-chain auctions exist yet, show today's scheduled slot as a placeholder
   const today = new Date().toISOString().split("T")[0];
   const todaySlot = slots.find((s) => s.dateStr === today);
-  const hasActiveOnChain = activeAuctions.length > 0;
 
   if (scheduleLoading || loadingChain) return null;
 
+  // Only show auctions active now OR ended within the last 4 hours.
+  // This prevents old unsettled auctions from cluttering the homepage.
+  const STALE_CUTOFF_SECS = 4 * 60 * 60;
+  const nowSecs = Math.floor(Date.now() / 1000);
+  const recentAuctions = activeAuctions.filter((a) => {
+    const endTime = a.state.end_time.toNumber();
+    return endTime > nowSecs - STALE_CUTOFF_SECS;
+  });
+
   // Sort: most recently started first (highest auctionId = most recent midnight)
-  const sorted = [...activeAuctions].sort(
+  const sorted = [...recentAuctions].sort(
     (a, b) => b.state.auction_id.toString() - a.state.auction_id.toString()
   );
+  const hasActiveOnChain = sorted.length > 0;
 
   return (
-    <section>
+    <section id="current-auction">
       <h2 className="font-blackletter text-2xl text-gold mb-6">
         Today&apos;s Auction
       </h2>
