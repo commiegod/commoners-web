@@ -11,6 +11,50 @@
         "seller": null
     },
     "2026-02-22": {
+        "nftId": "6keqACfbioinpTFEv3Ftem3rbuihmMYSB1475vGBCesn",
+        "name": "MidEvil #780 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/779.png",
+        "traits": [
+            "Brick",
+            "Eagle",
+            "Angler Saxon"
+        ],
+        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
+    },
+    "2026-02-23": {
+        "nftId": "J5XEUAzJYCJs5tMVbVXtCwHpMvUrjAhxjBjnyNyNTJpV",
+        "name": "MidEvil #927 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/926.png",
+        "traits": [
+            "Tan",
+            "Gorilla",
+            "Cloak of Fire"
+        ],
+        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
+    },
+    "2026-02-24": {
+        "nftId": "8tUXAMRctZnCJhHwfvezcyhnUp5DYrxgCZA1dvWbBJ1",
+        "name": "MidEvil #891 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/890.png",
+        "traits": [
+            "Mud",
+            "X-Ray",
+            "Midtallica Tee"
+        ],
+        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
+    },
+    "2026-02-25": {
+        "nftId": "3y8mvvU1W92Y3FCDkTNk8ML8CjjzrTJg7MWTW1Ja8C7o",
+        "name": "MidEvil #972 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/971.png",
+        "traits": [
+            "Olive",
+            "Creature",
+            "Letterman"
+        ],
+        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
+    },
+    "2026-02-26": {
         "nftId": "4Fgmmc6j13bopvJ5RAWUhQQBsadudt8RjvpH249togRm",
         "name": "MidEvil #44 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/43.png",
@@ -21,58 +65,14 @@
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
-    "2026-02-23": {
-        "nftId": "FxDD1Vg4Qdi1XqF7fLXp4qQUGeb8rQKmuDnbCkbV346f",
-        "name": "MidEvil #76 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/75.png",
-        "traits": [
-            "Brick",
-            "Creature",
-            "Goat Fleece"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-02-24": {
-        "nftId": "2c4gEtVWUcqfTMUgKwCCRCMxpbdMRCEeA5ka8JoC4dZF",
-        "name": "MidEvil #79 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/78.png",
-        "traits": [
-            "Brick",
-            "Wolf",
-            "Knights Helm"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-02-25": {
-        "nftId": "C8KzwBMwUWV2bDea4TjjTvuF6qJvem38uP1emLsBsyJP",
-        "name": "MidEvil #130 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/129.png",
+    "2026-02-27": {
+        "nftId": "CzwJjYU12TiYiXZi8xhq9onhHWyoBDB3DQA9kjoYU5yS",
+        "name": "MidEvil #741 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/740.png",
         "traits": [
             "Brown",
-            "Gravel",
-            "Dreads"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-02-26": {
-        "nftId": "C8BDhZgU8ydv3Zq74EgnKr7Jx9hebFg1V1SV47c6PBTJ",
-        "name": "MidEvil #204 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/203.png",
-        "traits": [
-            "Mud",
-            "Alien",
-            "Revelry Shirt"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-02-27": {
-        "nftId": "Hp4SWrzdjXMoGvm6UQaUiNpd9VgRAwDqE2ndpXYDiL4Y",
-        "name": "MidEvil #325 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/324.png",
-        "traits": [
-            "Olive",
-            "Sand",
-            "Prince Hair"
+            "Tiger",
+            "Midtallica Tee"
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
@@ -88,7 +88,7 @@
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
     "2026-03-01": {
-        "nftId": "E7ooUcv6SEf6FPHBPLkWSmkoAuGQqz1aKE9Qw2gS2WkZ",
+        "nftId": "2BuVWzYVGwfvZtScywK69uRExB7aeLQWcuazDmQvDzcY",
         "name": "MidEvil #371 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/370.png",
         "traits": [
@@ -154,13 +154,13 @@
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
     "2026-03-07": {
-        "nftId": "CzwJjYU12TiYiXZi8xhq9onhHWyoBDB3DQA9kjoYU5yS",
-        "name": "MidEvil #741 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/740.png",
+        "nftId": "HwioPEFnw7kwyfDpNhDUpZc1KsbdJY1QcXYhDEoueh4b",
+        "name": "MidEvil #921 (Devnet)",
+        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/920.png",
         "traits": [
-            "Brown",
-            "Tiger",
-            "Midtallica Tee"
+            "Brick",
+            "Wolf",
+            "Revelry Shirt"
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
@@ -176,17 +176,6 @@
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
     "2026-03-09": {
-        "nftId": "6keqACfbioinpTFEv3Ftem3rbuihmMYSB1475vGBCesn",
-        "name": "MidEvil #780 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/779.png",
-        "traits": [
-            "Brick",
-            "Eagle",
-            "Angler Saxon"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-03-10": {
         "nftId": "DfacFF85UkHUkPw6a6onkoQUqvjHZbcrrdigQRzNKhpG",
         "name": "MidEvil #827 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/826.png",
@@ -197,7 +186,7 @@
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
-    "2026-03-11": {
+    "2026-03-10": {
         "nftId": "K44JaPiHpLJa2oDpCZLHNpGvrk18nvS8M2FHGzMSGq9",
         "name": "MidEvil #857 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/856.png",
@@ -208,51 +197,7 @@
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
-    "2026-03-12": {
-        "nftId": "8tUXAMRctZnCJhHwfvezcyhnUp5DYrxgCZA1dvWbBJ1",
-        "name": "MidEvil #891 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/890.png",
-        "traits": [
-            "Mud",
-            "X-Ray",
-            "Midtallica Tee"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-03-13": {
-        "nftId": "HwioPEFnw7kwyfDpNhDUpZc1KsbdJY1QcXYhDEoueh4b",
-        "name": "MidEvil #921 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/920.png",
-        "traits": [
-            "Brick",
-            "Wolf",
-            "Revelry Shirt"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-03-14": {
-        "nftId": "J5XEUAzJYCJs5tMVbVXtCwHpMvUrjAhxjBjnyNyNTJpV",
-        "name": "MidEvil #927 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/926.png",
-        "traits": [
-            "Tan",
-            "Gorilla",
-            "Cloak of Fire"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-03-15": {
-        "nftId": "3y8mvvU1W92Y3FCDkTNk8ML8CjjzrTJg7MWTW1Ja8C7o",
-        "name": "MidEvil #972 (Devnet)",
-        "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/971.png",
-        "traits": [
-            "Olive",
-            "Creature",
-            "Letterman"
-        ],
-        "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
-    },
-    "2026-03-16": {
+    "2026-03-11": {
         "nftId": "EY53wxbVJCdiruiCKqE558mGiy8jwc7c8DMq6ZYWmppm",
         "name": "MidEvil #982 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/981.png",
@@ -263,7 +208,7 @@
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
-    "2026-03-17": {
+    "2026-03-12": {
         "nftId": "J4oEYqbxD1NrpHDGP8YB84QVN26aajktum5csNJypqvZ",
         "name": "MidEvil #993 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/992.png",
@@ -274,7 +219,7 @@
         ],
         "seller": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41"
     },
-    "2026-03-18": {
+    "2026-03-13": {
         "nftId": "Ch2NRpmboGnq9qHUnd3c5kk6E3gARF7MZspugsUc3L8X",
         "name": "MidEvil #1000 (Devnet)",
         "image": "https://magiceden-launchpad.mypinata.cloud/ipfs/bafybeifckj3kctgo6oztxbcrkg2vumodyvcbfkga3pnoeazrcv5wrc26je/999.png",
