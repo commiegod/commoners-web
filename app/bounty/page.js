@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Script from "next/script";
+import { upload } from "@vercel/blob/client";
 import { useWallet } from "@solana/wallet-adapter-react";
 import bounties from "../../data/bounties.json";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
@@ -176,20 +177,23 @@ export default function BountyPage() {
     try {
       let imageUrl = form.imageUrl;
 
-      // If upload mode, upload the file first and get a URL
+      // If upload mode, upload directly to Vercel Blob (bypasses function body limit)
       if (imageMode === "upload" && uploadFile) {
         setUploading(true);
-        const fd = new FormData();
-        fd.append("file", uploadFile);
-        const upRes = await fetch("/api/bounty-upload", { method: "POST", body: fd });
-        const upJson = await upRes.json();
-        setUploading(false);
-        if (!upJson.url) {
-          setSubmitResult(upJson.error || "Upload failed. Please try again.");
+        try {
+          const ext = uploadFile.name.split(".").pop()?.toLowerCase() || "jpg";
+          const blob = await upload(`bounty/${Date.now()}.${ext}`, uploadFile, {
+            access: "public",
+            handleUploadUrl: "/api/bounty-upload",
+          });
+          imageUrl = blob.url;
+        } catch (upErr) {
+          setSubmitResult(upErr.message || "Upload failed. Please try again.");
+          setUploading(false);
           setSubmitting(false);
           return;
         }
-        imageUrl = upJson.url;
+        setUploading(false);
       }
 
       const turnstileToken = e.target["cf-turnstile-response"]?.value || "";
