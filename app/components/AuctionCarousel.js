@@ -42,12 +42,27 @@ export default function AuctionCarousel() {
   useEffect(() => {
     if (scheduleLoading) return;
     const today = new Date().toISOString().split("T")[0];
-    const todaySlot = slots.find((s) => s.dateStr === today);
+    // There can be multiple slots registered for the same date (e.g. if a
+    // different seller also registered a slot).  Prefer the consumed slot —
+    // consumed=true means createAuction was already called on it, so it is the
+    // one actually running today.  Fall back to the first escrowed slot, then
+    // any slot.
+    const todaySlots = slots.filter((s) => s.dateStr === today);
+    const todaySlot =
+      todaySlots.find((s) => s.consumed) ??
+      todaySlots.find((s) => s.escrowed) ??
+      todaySlots[0] ??
+      null;
     if (todaySlot) {
       setAuctionData({ ...todaySlot, date: todaySlot.dateStr });
       setLabel("TODAY'S AUCTION");
     } else {
-      const next = slots.find((s) => s.dateStr >= today);
+      // No slot for today — find the next upcoming one
+      const upcomingSlots = slots.filter((s) => s.dateStr > today);
+      const next =
+        upcomingSlots.find((s) => s.escrowed && !s.consumed) ??
+        upcomingSlots[0] ??
+        null;
       if (next) {
         setAuctionData({ ...next, date: next.dateStr });
         setLabel(`UPCOMING · ${next.dateStr}`);
