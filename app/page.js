@@ -23,9 +23,10 @@ export default function Home() {
             Every MidEvil Deserves Its Day.
           </h2>
           <p className="text-muted leading-relaxed mb-10 max-w-lg mx-auto">
-            A community-owned institution on Solana. 120 NFT holders govern a
-            shared treasury, run daily auctions, and commission artwork —
-            turning individual self-interest into collective good.
+            A community-owned institution on Solana. Holders of the 120
+            identified Commoner NFTs govern a shared treasury, run daily
+            auctions, and commission artwork — turning individual self-interest
+            into collective good.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a

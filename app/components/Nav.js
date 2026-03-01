@@ -14,11 +14,10 @@ const WalletMultiButton = dynamic(
 );
 
 const links = [
-  { href: "/gallery", label: "Gallery" },
   { href: "/bounty", label: "Bounty" },
-  { href: "/holders", label: "Holders" },
   { href: "/governance", label: "Governance" },
-  { href: "/about", label: "About" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/holders", label: "Holders" },
 ];
 
 export default function Nav() {

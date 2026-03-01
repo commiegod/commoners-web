@@ -157,7 +157,7 @@ export default function LandingAccordion() {
                   <td className="px-3 py-2">Commoner Airdrop</td>
                   <td className="px-3 py-2 text-muted">600M (60%)</td>
                   <td className="px-3 py-2 text-muted">
-                    ~5M per Commoner NFT — pro-rata to all 120 holders at Phase 3 snapshot
+                    ~5M per Commoner NFT — pro-rata to all holders of the 120 Commoner NFTs at Phase 3 snapshot
                   </td>
                 </tr>
                 <tr className="border-b border-border">
