@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getThresholds } from "../../lib/commoners";
 
 // ── Bounty submission card ────────────────────────────────────────────────────
 
@@ -208,12 +209,40 @@ function ProposalCard({ prop, token, onDone }) {
 // ── Finalize proposal card ────────────────────────────────────────────────────
 
 function FinalizeCard({ prop, token, onDone }) {
-  const [busy, setBusy] = useState(null);
+  const [confirming, setConfirming] = useState(null); // null | 1 | 2 | 3
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  const yes = prop.votes?.yes ?? 0;
+  const no = prop.votes?.no ?? 0;
+  const abstain = prop.votes?.abstain ?? 0;
+  const total = yes + no + abstain;
+
+  const thresholds = getThresholds(prop.type, prop.treasurySol);
+  const quorumMet = total >= thresholds.quorum;
+  const majorityPassed = yes > no && (yes / Math.max(total, 1)) * 100 >= thresholds.majority;
+  const hasTreasuryAsk = (prop.treasurySol ?? 0) > 0;
+
+  // Auto-determine outcome from votes
+  const autoStatus = quorumMet && majorityPassed ? 1 : 2; // 1=passed, 2=failed
+  const noVotesCast = total === 0;
+
+  const now = new Date();
+  const endsAt = new Date(prop.endsAt);
+  const votingOpen = endsAt > now;
+  const endLabel = endsAt.toLocaleString("en-US", {
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+  });
+
+  const STATUS_LABELS = { 1: "Passed", 2: "Failed", 3: "Queued" };
+  const STATUS_DESCRIPTIONS = {
+    1: "The proposal passed. The outcome will be recorded on-chain and the status updated.",
+    2: "The proposal failed — quorum was not met or the majority voted against. No changes will be made.",
+    3: "The proposal passed but the treasury disbursement is held in a time-lock queue pending admin execution. Use this only for treasury proposals where you want a delay before funds move.",
+  };
+
   async function finalize(status) {
-    const labels = { 1: "passing", 2: "failing", 3: "queuing" };
-    setBusy(status);
+    setBusy(true);
     setError(null);
     try {
       const res = await fetch("/api/admin/finalize-proposal", {
@@ -229,80 +258,112 @@ function FinalizeCard({ prop, token, onDone }) {
         onDone(prop.id, data.status);
       } else {
         setError(data.error || "Error");
-        setBusy(null);
+        setBusy(false);
+        setConfirming(null);
       }
     } catch {
       setError("Network error");
-      setBusy(null);
+      setBusy(false);
+      setConfirming(null);
     }
   }
 
-  const now = new Date();
-  const endsAt = new Date(prop.endsAt);
-  const votingOpen = endsAt > now;
-  const endLabel = endsAt.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
   return (
-    <div className="bg-card border border-border p-4 space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold">{prop.title}</p>
-          <div className="flex flex-wrap gap-2 mt-1">
-            <span className="text-xs border border-border px-1.5 py-0.5 text-muted">
-              {prop.type}
+    <div className="bg-card border border-border p-4 space-y-4">
+      {/* Header */}
+      <div>
+        <p className="font-semibold">{prop.title}</p>
+        <div className="flex flex-wrap gap-2 mt-1">
+          <span className="text-xs border border-border px-1.5 py-0.5 text-muted">{prop.type}</span>
+          {hasTreasuryAsk && (
+            <span className="text-xs text-gold px-1.5 py-0.5 border border-gold/30">
+              {prop.treasurySol} SOL
             </span>
-            {prop.treasurySol > 0 && (
-              <span className="text-xs text-gold px-1.5 py-0.5 border border-gold/30">
-                {prop.treasurySol} SOL
-              </span>
+          )}
+          {votingOpen ? (
+            <span className="text-xs text-amber-600 border border-amber-300 px-1.5 py-0.5">
+              Voting open until {endLabel}
+            </span>
+          ) : (
+            <span className="text-xs text-muted">Ended {endLabel}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Vote results */}
+      <div className="border border-border p-3 space-y-1 text-sm">
+        <div className="flex gap-4">
+          <span className="text-green-700 font-medium">{yes} For</span>
+          <span className="text-red-600 font-medium">{no} Against</span>
+          <span className="text-muted">{abstain} Abstain</span>
+        </div>
+        {noVotesCast ? (
+          <p className="text-xs text-muted">No votes recorded — this proposal has not been voted on.</p>
+        ) : (
+          <p className="text-xs text-muted">
+            {quorumMet ? `Quorum met (${total}/${thresholds.quorum})` : `Quorum not met (${total}/${thresholds.quorum})`}
+            {" · "}
+            {majorityPassed ? `Majority for (${thresholds.majority}% threshold)` : `Majority against or threshold not reached`}
+          </p>
+        )}
+      </div>
+
+      {/* Determined outcome */}
+      {!confirming && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted">Determined outcome:</span>
+            <span className={`text-xs font-semibold px-2 py-0.5 border ${autoStatus === 1 ? "text-green-700 border-green-300 bg-green-50" : "text-red-700 border-red-300 bg-red-50"}`}>
+              {STATUS_LABELS[autoStatus]}
+            </span>
+            {noVotesCast && (
+              <span className="text-xs text-amber-600">⚠ No votes cast</span>
             )}
-            {votingOpen ? (
-              <span className="text-xs text-amber-600 border border-amber-300 px-1.5 py-0.5">
-                Voting open until {endLabel}
-              </span>
-            ) : (
-              <span className="text-xs text-muted">Ended {endLabel}</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConfirming(autoStatus)}
+              className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Finalize as {STATUS_LABELS[autoStatus]} →
+            </button>
+            {hasTreasuryAsk && autoStatus === 1 && (
+              <button
+                onClick={() => setConfirming(3)}
+                className="px-4 py-2 border border-border text-muted text-sm hover:text-foreground transition-colors"
+                title="Hold disbursement in time-lock queue before funds move"
+              >
+                Queue instead
+              </button>
             )}
           </div>
         </div>
-        {/* On-chain vote tallies from proposals.json (populated by cast_vote) */}
-        <div className="text-xs text-right text-muted flex-shrink-0 space-y-0.5">
-          <div>Yes: <span className="text-foreground font-medium">{prop.votes?.yes ?? 0}</span></div>
-          <div>No: <span className="text-foreground font-medium">{prop.votes?.no ?? 0}</span></div>
-          <div>Abstain: <span className="text-foreground font-medium">{prop.votes?.abstain ?? 0}</span></div>
+      )}
+
+      {/* Confirmation step */}
+      {confirming && (
+        <div className="border border-border p-3 space-y-3 bg-background">
+          <p className="text-sm font-medium">Confirm: Finalize as {STATUS_LABELS[confirming]}</p>
+          <p className="text-xs text-muted">{STATUS_DESCRIPTIONS[confirming]}</p>
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          <div className="flex gap-2">
+            <button
+              onClick={() => finalize(confirming)}
+              disabled={busy}
+              className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+            >
+              {busy ? "Recording on-chain…" : "Confirm"}
+            </button>
+            <button
+              onClick={() => { setConfirming(null); setError(null); }}
+              disabled={busy}
+              className="px-4 py-2 border border-border text-muted text-sm hover:text-foreground disabled:opacity-40 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-
-      {error && <p className="text-xs text-red-600">{error}</p>}
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => finalize(1)}
-          disabled={!!busy}
-          className="px-3 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
-        >
-          {busy === 1 ? "…" : "Passed"}
-        </button>
-        <button
-          onClick={() => finalize(3)}
-          disabled={!!busy}
-          className="px-3 py-1.5 border border-border text-muted text-sm hover:text-foreground disabled:opacity-40 transition-colors"
-        >
-          {busy === 3 ? "…" : "Queued"}
-        </button>
-        <button
-          onClick={() => finalize(2)}
-          disabled={!!busy}
-          className="px-3 py-1.5 border border-border text-muted text-sm hover:text-foreground disabled:opacity-40 transition-colors"
-        >
-          {busy === 2 ? "…" : "Failed"}
-        </button>
-      </div>
+      )}
     </div>
   );
 }
