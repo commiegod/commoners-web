@@ -83,7 +83,7 @@ export default function ProposalPage({ params }) {
   }, [id]);
 
   // ── Wallet ─────────────────────────────────────────────────────────────────
-  const { connected, publicKey, sendTransaction } = useWallet();
+  const { connected, publicKey, sendTransaction, signTransaction } = useWallet();
   const { connection: walletConnection } = useConnection();
   const walletAddress = publicKey?.toBase58() ?? null;
 
@@ -165,7 +165,7 @@ export default function ProposalPage({ params }) {
   // ── Vote handlers ──────────────────────────────────────────────────────────
 
   const handleChainVote = useCallback(async () => {
-    if (!walletAddress || !publicKey) return;
+    if (!walletAddress || !publicKey || !signTransaction) return;
     setVoting(true);
     setVoteError("");
     setTxSig("");
@@ -184,8 +184,40 @@ export default function ProposalPage({ params }) {
       });
       const json = await res.json();
       if (!json.ok) { setVoteError(json.error || "Vote preparation failed."); return; }
+
       const tx = Transaction.from(Buffer.from(json.transaction, "base64"));
-      const sig = await sendTransaction(tx, walletConnection);
+
+      // Sign with the wallet, then submit via our own connection (walletConnection
+      // is set from our ConnectionProvider → RPC_URL). This avoids the case where
+      // some wallet adapters use their own RPC endpoint for sendTransaction.
+      let signed;
+      try {
+        signed = await signTransaction(tx);
+      } catch (walletErr) {
+        setVoteError("Wallet rejected: " + (walletErr.message || "User denied signature"));
+        return;
+      }
+
+      let sig;
+      try {
+        sig = await walletConnection.sendRawTransaction(signed.serialize(), {
+          skipPreflight: false,
+          preflightCommitment: "confirmed",
+        });
+      } catch (sendErr) {
+        // Capture Anchor/program simulation logs if available
+        const logs = sendErr.logs ?? [];
+        const programLog = logs.find(
+          (l) => l.includes("Error") || l.includes("error") || l.includes("custom program error")
+        );
+        setVoteError(
+          programLog
+            ? `Program error: ${programLog}`
+            : sendErr.message || "Transaction rejected by network"
+        );
+        return;
+      }
+
       submittedSig = sig;
       setTxSig(sig);
       try {
@@ -213,7 +245,7 @@ export default function ProposalPage({ params }) {
     } finally {
       setVoting(false);
     }
-  }, [walletAddress, publicKey, alloc, proposal?.chainId, sendTransaction, walletConnection, fetchChainTallies, fetchChainVoteRecord]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [walletAddress, publicKey, alloc, proposal?.chainId, signTransaction, walletConnection, fetchChainTallies, fetchChainVoteRecord]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOffChainVote = useCallback(async () => {
     if (!walletAddress) return;
