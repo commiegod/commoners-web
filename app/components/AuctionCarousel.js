@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import bounties from "../../data/bounties.json";
-import { RPC_URL, findAuctionByMint, getConnection } from "../../lib/programClient";
+import { RPC_URL, fetchActiveAuctions, getConnection } from "../../lib/programClient";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
@@ -38,48 +38,63 @@ export default function AuctionCarousel() {
 
   const autoAdvanceRef = useRef(null);
 
-  // Derive today's or next upcoming auction
+  // Derive today's or next upcoming auction.
+  // Mirrors CurrentAuction: scan all unsettled AuctionState accounts on-chain,
+  // sort by auction_id desc (most recent), and pick the most recent active one.
+  // This avoids the ambiguity when multiple sellers register slots for the
+  // same date — the carousel always shows the auction that is actually running.
   useEffect(() => {
     if (scheduleLoading) return;
 
+    // Build mint → slot lookup from the schedule
+    const mintToSlot = {};
+    for (const s of slots) {
+      mintToSlot[s.nftMint] = s;
+    }
+
     async function pickSlot() {
       const today = new Date().toISOString().split("T")[0];
-      const todaySlots = slots.filter((s) => s.dateStr === today);
+      const STALE_CUTOFF_SECS = 4 * 60 * 60;
+      const nowSecs = Math.floor(Date.now() / 1000);
 
-      let chosenSlot = null;
-
-      if (todaySlots.length === 1) {
-        chosenSlot = todaySlots[0];
-      } else if (todaySlots.length > 1) {
-        // Multiple slots share this date (e.g. a second seller registered the
-        // same day).  Ask the chain which mint actually has a live auction.
+      try {
         const conn = getConnection();
-        for (const slot of todaySlots) {
-          try {
-            const result = await findAuctionByMint(
-              conn,
-              new PublicKey(slot.nftMint)
-            );
-            if (result && !result.state.settled) {
-              chosenSlot = slot;
-              break;
-            }
-          } catch (_) {}
-        }
-        // Fallback: prefer the consumed slot (createAuction was called on it)
-        if (!chosenSlot) {
-          chosenSlot =
-            todaySlots.find((s) => s.consumed) ??
-            todaySlots.find((s) => s.escrowed) ??
-            todaySlots[0];
-        }
-      }
+        const allActive = await fetchActiveAuctions(conn);
 
-      if (chosenSlot) {
-        setAuctionData({ ...chosenSlot, date: chosenSlot.dateStr });
+        // Keep auctions still running or ended within the last 4 hours
+        const recent = allActive.filter((a) => {
+          const endTime = a.state.end_time.toNumber();
+          return endTime > nowSecs - STALE_CUTOFF_SECS;
+        });
+
+        if (recent.length > 0) {
+          // Most recent auction first (highest auction_id = most recent midnight)
+          recent.sort(
+            (a, b) =>
+              Number(b.state.auction_id.toString()) -
+              Number(a.state.auction_id.toString())
+          );
+          const best = recent[0];
+          const mintStr = best.state.nft_mint?.toBase58?.() ?? "";
+          const slot = mintToSlot[mintStr];
+          if (slot) {
+            setAuctionData({ ...slot, date: slot.dateStr });
+            setLabel("TODAY'S AUCTION");
+            setMounted(true);
+            return;
+          }
+        }
+      } catch (_) {}
+
+      // Fallback: no live auction found — show today's scheduled slot or next upcoming
+      const todaySlot =
+        slots.find((s) => s.dateStr === today && s.consumed) ??
+        slots.find((s) => s.dateStr === today) ??
+        null;
+      if (todaySlot) {
+        setAuctionData({ ...todaySlot, date: todaySlot.dateStr });
         setLabel("TODAY'S AUCTION");
       } else {
-        // No slot for today — find the next upcoming one
         const next =
           slots.find((s) => s.dateStr > today && s.escrowed && !s.consumed) ??
           slots.find((s) => s.dateStr > today) ??
