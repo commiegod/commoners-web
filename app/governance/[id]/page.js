@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { Transaction } from "@solana/web3.js";
 import dynamic from "next/dynamic";
+import { Buffer } from "buffer";
 import proposalsData from "../../../data/proposals.json";
 import {
   getCommonerCount,
@@ -13,6 +15,11 @@ import {
   PROPOSAL_TYPES,
   TOTAL_NFTS,
 } from "../../../lib/commoners";
+import {
+  getConnection,
+  fetchProposalAccount,
+  fetchVoteRecord,
+} from "../../../lib/programClient";
 
 const WalletMultiButton = dynamic(
   () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
@@ -56,17 +63,57 @@ export default function ProposalPage({ params }) {
   const { id } = params;
   const proposal = proposalsData.find((p) => p.id === id);
 
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, sendTransaction } = useWallet();
+  const { connection: walletConnection } = useConnection();
   const walletAddress = publicKey?.toBase58() ?? null;
+
+  const hasChain = !!proposal?.chainId;
 
   const [commonerCount, setCommonerCount] = useState(0);
   const [checkingHolder, setCheckingHolder] = useState(false);
-  const [govVotes, setGovVotes] = useState(null); // { tallies, voters }
+
+  // On-chain state
+  const [chainTallies, setChainTallies] = useState(null); // { yes, no, abstain }
+  const [chainVoted, setChainVoted] = useState(false);
+  const [chainVoteRecord, setChainVoteRecord] = useState(null);
+
+  // Off-chain state (legacy / fallback)
+  const [govVotes, setGovVotes] = useState(null);
+
   const [alloc, setAlloc] = useState({ yes: 0, no: 0, abstain: 0 });
   const [voting, setVoting] = useState(false);
   const [voteError, setVoteError] = useState("");
+  const [txSig, setTxSig] = useState("");
 
-  async function fetchVotes() {
+  // ── Fetch tallies ──────────────────────────────────────────────────────────
+
+  const fetchChainTallies = useCallback(async () => {
+    if (!hasChain) return;
+    try {
+      const conn = getConnection();
+      const result = await fetchProposalAccount(conn, BigInt(proposal.chainId));
+      if (result) {
+        const { state } = result;
+        setChainTallies({
+          yes: state.yes.toNumber(),
+          no: state.no.toNumber(),
+          abstain: state.abstain.toNumber(),
+        });
+      }
+    } catch {}
+  }, [hasChain, proposal?.chainId]);
+
+  const fetchChainVoteRecord = useCallback(async () => {
+    if (!hasChain || !publicKey) return;
+    try {
+      const conn = getConnection();
+      const record = await fetchVoteRecord(conn, BigInt(proposal.chainId), publicKey);
+      setChainVoted(!!record);
+      setChainVoteRecord(record?.state ?? null);
+    } catch {}
+  }, [hasChain, proposal?.chainId, publicKey]);
+
+  async function fetchOffChainVotes() {
     try {
       const res = await fetch("/api/governance-vote");
       if (res.ok) {
@@ -76,7 +123,17 @@ export default function ProposalPage({ params }) {
     } catch {}
   }
 
-  useEffect(() => { fetchVotes(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (hasChain) {
+      fetchChainTallies();
+    } else {
+      fetchOffChainVotes();
+    }
+  }, [hasChain]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (hasChain) fetchChainVoteRecord();
+  }, [fetchChainVoteRecord]);
 
   useEffect(() => {
     if (!walletAddress) { setCommonerCount(0); return; }
@@ -87,7 +144,51 @@ export default function ProposalPage({ params }) {
     });
   }, [walletAddress]);
 
-  const handleVote = useCallback(async () => {
+  // ── On-chain vote submission ───────────────────────────────────────────────
+
+  const handleChainVote = useCallback(async () => {
+    if (!walletAddress || !publicKey) return;
+    setVoting(true);
+    setVoteError("");
+    setTxSig("");
+    try {
+      // Step 1: backend verifies NFTs, admin co-signs, returns serialized tx
+      const res = await fetch("/api/governance-vote-prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proposalId: proposal.chainId,
+          walletAddress,
+          yes: alloc.yes,
+          no: alloc.no,
+          abstain: alloc.abstain,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        setVoteError(json.error || "Vote preparation failed.");
+        return;
+      }
+
+      // Step 2: deserialize admin-signed tx, user adds their signature & broadcasts
+      const tx = Transaction.from(Buffer.from(json.transaction, "base64"));
+      const sig = await sendTransaction(tx, walletConnection);
+      await walletConnection.confirmTransaction(sig, "confirmed");
+
+      setTxSig(sig);
+      setAlloc({ yes: 0, no: 0, abstain: 0 });
+      await fetchChainTallies();
+      await fetchChainVoteRecord();
+    } catch (err) {
+      setVoteError(err.message || "Transaction failed.");
+    } finally {
+      setVoting(false);
+    }
+  }, [walletAddress, publicKey, alloc, proposal?.chainId, sendTransaction, walletConnection, fetchChainTallies, fetchChainVoteRecord]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Off-chain vote submission (legacy) ────────────────────────────────────
+
+  const handleOffChainVote = useCallback(async () => {
     if (!walletAddress) return;
     setVoting(true);
     setVoteError("");
@@ -99,7 +200,7 @@ export default function ProposalPage({ params }) {
       });
       const json = await res.json();
       if (json.ok) {
-        await fetchVotes();
+        await fetchOffChainVotes();
         setAlloc({ yes: 0, no: 0, abstain: 0 });
       } else {
         setVoteError(json.error || "Vote failed.");
@@ -107,6 +208,8 @@ export default function ProposalPage({ params }) {
     } catch { setVoteError("Network error."); }
     finally { setVoting(false); }
   }, [walletAddress, alloc, id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Derived values ─────────────────────────────────────────────────────────
 
   if (!proposal) {
     return (
@@ -125,14 +228,22 @@ export default function ProposalPage({ params }) {
   const expired = isActive && msRemaining(proposal.endsAt) === 0;
   const timeLeft = isActive ? formatTimeLeft(proposal.endsAt) : null;
 
-  const tallies = govVotes?.tallies ?? proposal.votes ?? { yes: 0, no: 0, abstain: 0 };
+  // Prefer on-chain tallies, fall back to off-chain, then proposal.votes
+  const tallies = hasChain
+    ? (chainTallies ?? proposal.votes ?? { yes: 0, no: 0, abstain: 0 })
+    : (govVotes?.tallies ?? proposal.votes ?? { yes: 0, no: 0, abstain: 0 });
+
   const forVotes = tallies.yes ?? 0;
   const againstVotes = tallies.no ?? 0;
   const abstainVotes = tallies.abstain ?? 0;
 
-  const myVote = govVotes?.voters?.[walletAddress] ?? null;
-  const canVote = isActive && !expired && !!walletAddress && commonerCount > 0 && !myVote;
+  const myVote = hasChain
+    ? (chainVoted ? chainVoteRecord : null)
+    : (govVotes?.voters?.[walletAddress] ?? null);
+  const hasVoted = hasChain ? chainVoted : !!myVote;
+
   const allocTotal = alloc.yes + alloc.no + alloc.abstain;
+  const handleVote = hasChain ? handleChainVote : handleOffChainVote;
 
   return (
     <div className="max-w-4xl">
@@ -151,6 +262,11 @@ export default function ProposalPage({ params }) {
         >
           {proposal.status}
         </span>
+        {hasChain && (
+          <span className="text-xs text-muted border border-border px-2 py-0.5">
+            On-chain ✓
+          </span>
+        )}
       </div>
 
       {/* ── Title + meta ── */}
@@ -169,7 +285,9 @@ export default function ProposalPage({ params }) {
         )}
         <span>·</span>
         <span>
-          {isActive && timeLeft ? timeLeft : `Ended ${new Date(proposal.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
+          {isActive && timeLeft
+            ? timeLeft
+            : `Ended ${new Date(proposal.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`}
         </span>
       </div>
 
@@ -202,6 +320,19 @@ export default function ProposalPage({ params }) {
           <div className="text-sm text-muted leading-relaxed whitespace-pre-wrap">
             {proposal.description}
           </div>
+          {proposal.txSig && (
+            <p className="mt-6 text-xs text-muted">
+              Proposal created on-chain:{" "}
+              <a
+                href={`https://solscan.io/tx/${proposal.txSig}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold hover:underline font-mono"
+              >
+                {proposal.txSig.slice(0, 8)}…
+              </a>
+            </p>
+          )}
         </div>
 
         {/* Vote sidebar */}
@@ -225,10 +356,25 @@ export default function ProposalPage({ params }) {
             {/* Voting UI */}
             {isActive && !expired && (
               <div className="pt-2">
-                {myVote ? (
+                {hasVoted ? (
                   <div className="text-sm text-gold">
-                    Voted ✓
-                    {myVote.allocations && (
+                    Voted ✓{" "}
+                    {hasChain && txSig && (
+                      <a
+                        href={`https://solscan.io/tx/${txSig}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-muted hover:text-gold font-mono"
+                      >
+                        view tx ↗
+                      </a>
+                    )}
+                    {chainVoteRecord && (
+                      <p className="text-xs text-muted font-normal mt-1">
+                        Yes: {chainVoteRecord.yes?.toNumber?.() ?? 0} · No: {chainVoteRecord.no?.toNumber?.() ?? 0} · Abstain: {chainVoteRecord.abstain?.toNumber?.() ?? 0}
+                      </p>
+                    )}
+                    {!hasChain && myVote?.allocations && (
                       <p className="text-xs text-muted font-normal mt-1">
                         Yes: {myVote.allocations.yes ?? 0} · No: {myVote.allocations.no ?? 0} · Abstain: {myVote.allocations.abstain ?? 0}
                       </p>
@@ -297,8 +443,13 @@ export default function ProposalPage({ params }) {
                       disabled={voting || allocTotal === 0}
                       className="w-full px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
                     >
-                      {voting ? "Submitting…" : "Submit Vote"}
+                      {voting ? "Submitting…" : `Submit Vote${hasChain ? " (on-chain)" : ""}`}
                     </button>
+                    {hasChain && (
+                      <p className="text-xs text-muted text-center">
+                        Requires wallet signature · ~0.001 SOL rent
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
