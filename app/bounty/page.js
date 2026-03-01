@@ -198,7 +198,13 @@ export default function BountyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, imageUrl, turnstileToken }),
       });
-      const json = await res.json();
+      let json;
+      try {
+        json = await res.json();
+      } catch {
+        setSubmitResult(`Server error (${res.status}). Please try again.`);
+        return;
+      }
       if (json.ok) {
         setSubmitResult("ok");
         setUploadFile(null);
@@ -217,7 +223,7 @@ export default function BountyPage() {
         setSubmitResult(json.error || "Submission failed. Please try again.");
       }
     } catch {
-      setSubmitResult("Network error. Please try again.");
+      setSubmitResult("Connection failed. Please check your network and try again.");
     } finally {
       setUploading(false);
       setSubmitting(false);
