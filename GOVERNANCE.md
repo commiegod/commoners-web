@@ -1,4 +1,4 @@
-# Commoner's SubDAO — Governance Framework v1.2
+# Commoner's DAO — Governance Framework v1.2
 
 > **Status:** Phase 1–2 · February 2026
 > **Voting:** Off-chain (shared, persistent), transitioning to Realms NFT Community DAO (Phase 3) and autonomous on-chain execution (Phase 4)
@@ -7,7 +7,7 @@
 
 ## 1. Mission & Philosophy
 
-The Commoner's SubDAO converts individual self-interest into collective good. By aligning the incentives of 120 Commoner NFT holders around a shared treasury, daily auctions, and artist bounties, the DAO creates a self-sustaining institution on Solana that grows in value with every auction and every participating member.
+The Commoner's DAO converts individual self-interest into collective good. By aligning the incentives of 120 Commoner NFT holders around a shared treasury, daily auctions, and artist bounties, the DAO creates a self-sustaining institution on Solana that grows in value with every auction and every participating member.
 
 **Core principles:**
 - One NFT, one vote — no whale capture
@@ -223,7 +223,7 @@ Each auction day features:
 
 ## 8. Talent Coordination
 
-### Roles Within the SubDAO
+### Roles Within the DAO
 
 | Role | Who | Contribution |
 |---|---|---|
@@ -271,4 +271,4 @@ These are unresolved decisions the community should vote on:
 
 ---
 
-*Document version: 1.3 · Last updated: February 2026 · Maintained by the Commoner's SubDAO*
+*Document version: 1.3 · Last updated: February 2026 · Maintained by the Commoner's DAO*
