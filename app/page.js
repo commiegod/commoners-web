@@ -20,7 +20,7 @@ export default function Home() {
             Commoner&apos;s SubDAO
           </p>
           <h2 className="font-blackletter text-3xl md:text-5xl text-gold mb-6 leading-tight">
-            One Commoner,<br />Every Day, Forever.
+            Every MidEvil Deserves Its Day.
           </h2>
           <p className="text-muted leading-relaxed mb-10 max-w-lg mx-auto">
             A community-owned institution on Solana. 120 NFT holders govern a
@@ -42,11 +42,6 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Media placeholder — replace with video embed when ready */}
-          <div className="mt-12 bg-card border border-border aspect-video max-w-xl mx-auto flex flex-col items-center justify-center gap-2">
-            <p className="text-muted text-sm">Video introduction coming soon.</p>
-            <p className="text-xs text-muted">Community highlights · Founder story</p>
-          </div>
         </div>
       </section>
 

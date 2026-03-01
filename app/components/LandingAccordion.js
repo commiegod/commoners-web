@@ -28,7 +28,7 @@ export default function LandingAccordion() {
   return (
     <section className="max-w-2xl">
       <h2 className="font-blackletter text-2xl md:text-3xl text-gold mb-4">
-        WTF is Commoner&apos;s SubDAO?
+        Common Folk. Uncommon Purpose.
       </h2>
       <p className="text-muted leading-relaxed mb-8">
         The Commoner&apos;s SubDAO turns individual self-interest into collective
