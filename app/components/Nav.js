@@ -38,7 +38,7 @@ export default function Nav() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm transition-colors ${
+              className={`font-blackletter text-sm tracking-wide transition-colors ${
                 pathname === link.href
                   ? "text-gold"
                   : "text-muted hover:text-foreground"
