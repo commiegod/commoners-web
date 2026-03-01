@@ -169,6 +169,7 @@ export default function ProposalPage({ params }) {
     setVoting(true);
     setVoteError("");
     setTxSig("");
+    let submittedSig = null;
     try {
       const res = await fetch("/api/governance-vote-prepare", {
         method: "POST",
@@ -185,13 +186,30 @@ export default function ProposalPage({ params }) {
       if (!json.ok) { setVoteError(json.error || "Vote preparation failed."); return; }
       const tx = Transaction.from(Buffer.from(json.transaction, "base64"));
       const sig = await sendTransaction(tx, walletConnection);
-      await walletConnection.confirmTransaction(sig, "confirmed");
+      submittedSig = sig;
       setTxSig(sig);
-      setAlloc({ yes: 0, no: 0, abstain: 0 });
-      await fetchChainTallies();
-      await fetchChainVoteRecord();
+      try {
+        await walletConnection.confirmTransaction(
+          { signature: sig, blockhash: json.blockhash, lastValidBlockHeight: json.lastValidBlockHeight },
+          "confirmed"
+        );
+        setAlloc({ yes: 0, no: 0, abstain: 0 });
+        await fetchChainTallies();
+        await fetchChainVoteRecord();
+      } catch (confirmErr) {
+        const isTimeout =
+          confirmErr.name === "TransactionExpiredBlockheightExceededError" ||
+          confirmErr.message?.includes("block height exceeded") ||
+          confirmErr.message?.includes("was not confirmed");
+        if (isTimeout) {
+          setVoteError("Confirmation timed out — your vote likely landed. Check Solscan to verify.");
+        } else {
+          throw confirmErr;
+        }
+      }
     } catch (err) {
-      setVoteError(err.message || "Transaction failed.");
+      if (!submittedSig) setVoteError(err.message || "Transaction failed.");
+      else setVoteError(err.message || "Unexpected error after submission.");
     } finally {
       setVoting(false);
     }
@@ -507,7 +525,21 @@ export default function ProposalPage({ params }) {
                     <div className="text-xs text-muted text-right">
                       {commonerCount - allocTotal} remaining
                     </div>
-                    {voteError && <p className="text-xs text-red-600">{voteError}</p>}
+                    {voteError && (
+                      <div className="text-xs text-red-600 space-y-1">
+                        <p>{voteError}</p>
+                        {txSig && (
+                          <a
+                            href={`https://solscan.io/tx/${txSig}${cluster}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gold hover:underline font-mono block"
+                          >
+                            View transaction on Solscan ↗
+                          </a>
+                        )}
+                      </div>
+                    )}
                     <button
                       onClick={handleVote}
                       disabled={voting || allocTotal === 0}

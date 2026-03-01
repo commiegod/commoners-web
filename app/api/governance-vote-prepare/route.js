@@ -114,6 +114,8 @@ export async function POST(request) {
       ok: true,
       transaction: serialized.toString("base64"),
       weight,
+      blockhash,
+      lastValidBlockHeight,
     });
   } catch (err) {
     console.error("governance-vote-prepare error:", err);
