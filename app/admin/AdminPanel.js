@@ -205,25 +205,123 @@ function ProposalCard({ prop, token, onDone }) {
   );
 }
 
+// ── Finalize proposal card ────────────────────────────────────────────────────
+
+function FinalizeCard({ prop, token, onDone }) {
+  const [busy, setBusy] = useState(null);
+  const [error, setError] = useState(null);
+
+  async function finalize(status) {
+    const labels = { 1: "passing", 2: "failing", 3: "queuing" };
+    setBusy(status);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/finalize-proposal", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: prop.id, status }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        onDone(prop.id, data.status);
+      } else {
+        setError(data.error || "Error");
+        setBusy(null);
+      }
+    } catch {
+      setError("Network error");
+      setBusy(null);
+    }
+  }
+
+  const endedAt = new Date(prop.endsAt).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return (
+    <div className="bg-card border border-border p-4 space-y-3">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">{prop.title}</p>
+          <div className="flex flex-wrap gap-2 mt-1">
+            <span className="text-xs border border-border px-1.5 py-0.5 text-muted">
+              {prop.type}
+            </span>
+            {prop.treasurySol > 0 && (
+              <span className="text-xs text-gold px-1.5 py-0.5 border border-gold/30">
+                {prop.treasurySol} SOL
+              </span>
+            )}
+            <span className="text-xs text-muted">Ended {endedAt}</span>
+          </div>
+        </div>
+        {/* On-chain vote tallies from proposals.json (populated by cast_vote) */}
+        <div className="text-xs text-right text-muted flex-shrink-0 space-y-0.5">
+          <div>Yes: <span className="text-foreground font-medium">{prop.votes?.yes ?? 0}</span></div>
+          <div>No: <span className="text-foreground font-medium">{prop.votes?.no ?? 0}</span></div>
+          <div>Abstain: <span className="text-foreground font-medium">{prop.votes?.abstain ?? 0}</span></div>
+        </div>
+      </div>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+
+      <div className="flex gap-2">
+        <button
+          onClick={() => finalize(1)}
+          disabled={!!busy}
+          className="px-3 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+        >
+          {busy === 1 ? "…" : "Passed"}
+        </button>
+        <button
+          onClick={() => finalize(3)}
+          disabled={!!busy}
+          className="px-3 py-1.5 border border-border text-muted text-sm hover:text-foreground disabled:opacity-40 transition-colors"
+        >
+          {busy === 3 ? "…" : "Queued"}
+        </button>
+        <button
+          onClick={() => finalize(2)}
+          disabled={!!busy}
+          className="px-3 py-1.5 border border-border text-muted text-sm hover:text-foreground disabled:opacity-40 transition-colors"
+        >
+          {busy === 2 ? "…" : "Failed"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Admin panel ───────────────────────────────────────────────────────────────
 
 export default function AdminPanel({ token }) {
   const [pending, setPending] = useState([]);
   const [pendingProps, setPendingProps] = useState([]);
+  const [activeProps, setActiveProps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastApproved, setLastApproved] = useState(null);
   const [lastApprovedProp, setLastApprovedProp] = useState(null);
+  const [finalizedProps, setFinalizedProps] = useState([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [bountyRes, propRes] = await Promise.all([
+      const [bountyRes, propRes, activeRes] = await Promise.all([
         fetch("/api/admin/pending", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch("/api/admin/pending-proposals", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/admin/active-proposals", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -233,6 +331,10 @@ export default function AdminPanel({ token }) {
       if (propRes.ok) {
         const propData = await propRes.json();
         setPendingProps(Array.isArray(propData) ? propData.slice().reverse() : []);
+      }
+      if (activeRes.ok) {
+        const activeData = await activeRes.json();
+        setActiveProps(Array.isArray(activeData) ? activeData : []);
       }
     } catch (e) {
       setError(`Failed to load: ${e.message}`);
@@ -255,6 +357,11 @@ export default function AdminPanel({ token }) {
     const prop = pendingProps.find((p) => p.id === id);
     if (prop) setLastApprovedProp(prop);
     setPendingProps((p) => p.filter((s) => s.id !== id));
+  }
+
+  function onFinalized(id, statusLabel) {
+    setFinalizedProps((prev) => [...prev, { id, statusLabel }]);
+    setActiveProps((p) => p.filter((s) => s.id !== id));
   }
 
   return (
@@ -337,6 +444,43 @@ export default function AdminPanel({ token }) {
                 prop={prop}
                 token={token}
                 onDone={onPropDone}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Finalize proposals ── */}
+      <div>
+        <h2 className="font-blackletter text-2xl text-gold mb-6">
+          Finalize Proposals
+          {!loading && (
+            <span className="ml-3 text-lg font-sans text-muted font-normal">
+              ({activeProps.length} ready)
+            </span>
+          )}
+        </h2>
+
+        {finalizedProps.length > 0 && (
+          <div className="mb-6 bg-green-50 border border-green-300 text-green-700 text-sm px-4 py-3 space-y-1">
+            {finalizedProps.map(({ id, statusLabel }) => (
+              <div key={id}>✓ Proposal finalized → <strong>{statusLabel}</strong></div>
+            ))}
+          </div>
+        )}
+
+        {!loading && activeProps.length === 0 ? (
+          <div className="bg-card border border-border p-8 text-center text-muted text-sm">
+            No proposals awaiting finalization.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activeProps.map((prop) => (
+              <FinalizeCard
+                key={prop.id}
+                prop={prop}
+                token={token}
+                onDone={onFinalized}
               />
             ))}
           </div>
