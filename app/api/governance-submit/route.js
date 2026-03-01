@@ -4,7 +4,7 @@ import { getCommonerCount } from "../../../lib/commoners";
 
 export async function POST(request) {
   try {
-    const { type, title, description, treasurySol, walletAddress } =
+    const { type, title, description, treasurySol, walletAddress, imageUrl } =
       await request.json();
 
     if (!type || !title || !description || !walletAddress) {
@@ -32,6 +32,7 @@ export async function POST(request) {
       description,
       treasurySol: solAmount,
       proposedBy: walletAddress,
+      imageUrl: imageUrl || "",
       submittedAt: new Date().toISOString(),
     };
 

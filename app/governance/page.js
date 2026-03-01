@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { upload } from "@vercel/blob/client";
 import idl from "../../lib/idl.json";
 import { getConnection, configPDA, RPC_URL } from "../../lib/programClient";
 import {
@@ -43,7 +44,7 @@ function StatusBadge({ status }) {
 
 // ── Proposal submission form ──────────────────────────────────────────────────
 
-const EMPTY_FORM = { type: "community-initiative", title: "", description: "", treasurySol: "" };
+const EMPTY_FORM = { type: "community-initiative", title: "", description: "", treasurySol: "", imageUrl: "" };
 
 function SubmitForm({ onClose, walletAddress, commonerCount }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -62,15 +63,31 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
     setSubmitting(true);
     setSubmitError("");
     try {
+      // If a file was selected, upload it first
+      let imageUrl = form.imageUrl;
+      if (form._imageFile) {
+        const blob = await upload(form._imageFile.name, form._imageFile, {
+          access: "public",
+          handleUploadUrl: "/api/bounty-upload",
+        });
+        imageUrl = blob.url;
+      }
       const res = await fetch("/api/governance-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: form.type, title: form.title, description: form.description, treasurySol: solAmount, walletAddress }),
+        body: JSON.stringify({
+          type: form.type,
+          title: form.title,
+          description: form.description,
+          treasurySol: solAmount,
+          walletAddress,
+          imageUrl,
+        }),
       });
       const json = await res.json();
       if (json.ok) setStage("done");
       else setSubmitError(json.error || "Submission failed.");
-    } catch { setSubmitError("Network error."); }
+    } catch (e) { setSubmitError(e.message || "Network error."); }
     finally { setSubmitting(false); }
   }
 
@@ -102,6 +119,9 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         <div className="border-t border-border pt-4 mb-5">
           <p className="text-xs text-muted uppercase tracking-wider mb-2">Description</p>
           <p className="text-sm text-muted whitespace-pre-wrap leading-relaxed">{form.description}</p>
+          {form.imageUrl && (
+            <img src={form.imageUrl} alt="preview" className="mt-3 max-h-48 object-cover border border-border" />
+          )}
         </div>
         {submitError && <p className="text-xs text-red-600 mb-3">{submitError}</p>}
         <div className="flex gap-2">
@@ -157,6 +177,25 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
       <div>
         <label className="block text-xs text-muted mb-1">Description</label>
         <textarea required rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the proposal, why it matters, and what success looks like." className="w-full bg-background border border-border text-sm px-3 py-2 placeholder:text-muted/50 resize-y" />
+      </div>
+
+      <div>
+        <label className="block text-xs text-muted mb-1">Supporting image <span className="text-muted/60">(optional)</span></label>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              set("_imageFile", file);
+              set("imageUrl", URL.createObjectURL(file));
+            }
+          }}
+          className="w-full text-sm text-muted file:mr-3 file:px-3 file:py-1.5 file:bg-background file:border file:border-border file:text-sm file:text-foreground hover:file:border-foreground file:cursor-pointer"
+        />
+        {form.imageUrl && (
+          <img src={form.imageUrl} alt="preview" className="mt-2 max-h-40 object-cover border border-border" />
+        )}
       </div>
 
       <div className="flex gap-2">

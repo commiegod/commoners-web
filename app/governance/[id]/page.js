@@ -6,7 +6,6 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import dynamic from "next/dynamic";
 import { Buffer } from "buffer";
-import proposalsData from "../../../data/proposals.json";
 import {
   getCommonerCount,
   getThresholds,
@@ -19,7 +18,10 @@ import {
   getConnection,
   fetchProposalAccount,
   fetchVoteRecord,
+  RPC_URL,
 } from "../../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 const WalletMultiButton = dynamic(
   () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
@@ -36,10 +38,10 @@ const STATUS_STYLES = {
 
 function shortAddr(addr) {
   if (!addr) return "—";
-  return addr.slice(0, 4) + "…" + addr.slice(-4);
+  return addr.slice(0, 6) + "…" + addr.slice(-4);
 }
 
-function VoteBar({ for: forV, against, abstain, thresholds }) {
+function VoteBar({ forV, against, abstain, thresholds }) {
   const total = forV + against + abstain;
   if (total === 0) return null;
   const forPct = Math.round((forV / total) * 100);
@@ -47,7 +49,7 @@ function VoteBar({ for: forV, against, abstain, thresholds }) {
   const quorumMet = total >= thresholds.quorum;
   return (
     <div className="mt-3">
-      <div className="flex h-1.5 overflow-hidden bg-border rounded-full">
+      <div className="flex h-1.5 overflow-hidden bg-border">
         <div className="bg-green-500 transition-all" style={{ width: `${forPct}%` }} />
         <div className="bg-red-500 transition-all" style={{ width: `${againstPct}%` }} />
       </div>
@@ -61,8 +63,26 @@ function VoteBar({ for: forV, against, abstain, thresholds }) {
 
 export default function ProposalPage({ params }) {
   const { id } = params;
-  const proposal = proposalsData.find((p) => p.id === id);
 
+  // ── Proposal data (fetched at runtime from GitHub via API) ─────────────────
+  const [proposal, setProposal] = useState(null);
+  const [propLoading, setPropLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/proposals/${id}`)
+      .then((r) => {
+        if (r.status === 404) { setNotFound(true); setPropLoading(false); return null; }
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (data) { setProposal(data); setPropLoading(false); }
+      })
+      .catch(() => { setNotFound(true); setPropLoading(false); });
+  }, [id]);
+
+  // ── Wallet ─────────────────────────────────────────────────────────────────
   const { connected, publicKey, sendTransaction } = useWallet();
   const { connection: walletConnection } = useConnection();
   const walletAddress = publicKey?.toBase58() ?? null;
@@ -73,7 +93,7 @@ export default function ProposalPage({ params }) {
   const [checkingHolder, setCheckingHolder] = useState(false);
 
   // On-chain state
-  const [chainTallies, setChainTallies] = useState(null); // { yes, no, abstain }
+  const [chainTallies, setChainTallies] = useState(null);
   const [chainVoted, setChainVoted] = useState(false);
   const [chainVoteRecord, setChainVoteRecord] = useState(null);
 
@@ -88,7 +108,7 @@ export default function ProposalPage({ params }) {
   // ── Fetch tallies ──────────────────────────────────────────────────────────
 
   const fetchChainTallies = useCallback(async () => {
-    if (!hasChain) return;
+    if (!hasChain || !proposal?.chainId) return;
     try {
       const conn = getConnection();
       const result = await fetchProposalAccount(conn, BigInt(proposal.chainId));
@@ -104,7 +124,7 @@ export default function ProposalPage({ params }) {
   }, [hasChain, proposal?.chainId]);
 
   const fetchChainVoteRecord = useCallback(async () => {
-    if (!hasChain || !publicKey) return;
+    if (!hasChain || !publicKey || !proposal?.chainId) return;
     try {
       const conn = getConnection();
       const record = await fetchVoteRecord(conn, BigInt(proposal.chainId), publicKey);
@@ -124,12 +144,10 @@ export default function ProposalPage({ params }) {
   }
 
   useEffect(() => {
-    if (hasChain) {
-      fetchChainTallies();
-    } else {
-      fetchOffChainVotes();
-    }
-  }, [hasChain]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!proposal) return;
+    if (hasChain) fetchChainTallies();
+    else fetchOffChainVotes();
+  }, [hasChain, proposal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (hasChain) fetchChainVoteRecord();
@@ -144,7 +162,7 @@ export default function ProposalPage({ params }) {
     });
   }, [walletAddress]);
 
-  // ── On-chain vote submission ───────────────────────────────────────────────
+  // ── Vote handlers ──────────────────────────────────────────────────────────
 
   const handleChainVote = useCallback(async () => {
     if (!walletAddress || !publicKey) return;
@@ -152,7 +170,6 @@ export default function ProposalPage({ params }) {
     setVoteError("");
     setTxSig("");
     try {
-      // Step 1: backend verifies NFTs, admin co-signs, returns serialized tx
       const res = await fetch("/api/governance-vote-prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,16 +182,10 @@ export default function ProposalPage({ params }) {
         }),
       });
       const json = await res.json();
-      if (!json.ok) {
-        setVoteError(json.error || "Vote preparation failed.");
-        return;
-      }
-
-      // Step 2: deserialize admin-signed tx, user adds their signature & broadcasts
+      if (!json.ok) { setVoteError(json.error || "Vote preparation failed."); return; }
       const tx = Transaction.from(Buffer.from(json.transaction, "base64"));
       const sig = await sendTransaction(tx, walletConnection);
       await walletConnection.confirmTransaction(sig, "confirmed");
-
       setTxSig(sig);
       setAlloc({ yes: 0, no: 0, abstain: 0 });
       await fetchChainTallies();
@@ -185,8 +196,6 @@ export default function ProposalPage({ params }) {
       setVoting(false);
     }
   }, [walletAddress, publicKey, alloc, proposal?.chainId, sendTransaction, walletConnection, fetchChainTallies, fetchChainVoteRecord]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Off-chain vote submission (legacy) ────────────────────────────────────
 
   const handleOffChainVote = useCallback(async () => {
     if (!walletAddress) return;
@@ -209,18 +218,31 @@ export default function ProposalPage({ params }) {
     finally { setVoting(false); }
   }, [walletAddress, alloc, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Derived values ─────────────────────────────────────────────────────────
+  // ── Loading / not found ────────────────────────────────────────────────────
 
-  if (!proposal) {
+  if (propLoading) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-4xl">
         <Link href="/governance" className="text-sm text-muted hover:text-foreground transition-colors">
           ← Governance
         </Link>
-        <p className="mt-6 text-muted">Proposal not found.</p>
+        <p className="mt-8 text-muted text-sm">Loading…</p>
       </div>
     );
   }
+
+  if (notFound || !proposal) {
+    return (
+      <div className="max-w-4xl">
+        <Link href="/governance" className="text-sm text-muted hover:text-foreground transition-colors">
+          ← Governance
+        </Link>
+        <p className="mt-8 text-muted">Proposal not found.</p>
+      </div>
+    );
+  }
+
+  // ── Derived values ─────────────────────────────────────────────────────────
 
   const typeInfo = PROPOSAL_TYPES[proposal.type];
   const thresholds = getThresholds(proposal.type, proposal.treasurySol);
@@ -228,7 +250,6 @@ export default function ProposalPage({ params }) {
   const expired = isActive && msRemaining(proposal.endsAt) === 0;
   const timeLeft = isActive ? formatTimeLeft(proposal.endsAt) : null;
 
-  // Prefer on-chain tallies, fall back to off-chain, then proposal.votes
   const tallies = hasChain
     ? (chainTallies ?? proposal.votes ?? { yes: 0, no: 0, abstain: 0 })
     : (govVotes?.tallies ?? proposal.votes ?? { yes: 0, no: 0, abstain: 0 });
@@ -241,40 +262,42 @@ export default function ProposalPage({ params }) {
     ? (chainVoted ? chainVoteRecord : null)
     : (govVotes?.voters?.[walletAddress] ?? null);
   const hasVoted = hasChain ? chainVoted : !!myVote;
-
   const allocTotal = alloc.yes + alloc.no + alloc.abstain;
   const handleVote = hasChain ? handleChainVote : handleOffChainVote;
+  const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 
   return (
     <div className="max-w-4xl">
       {/* ── Back + status ── */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          href="/governance"
-          className="text-sm text-muted hover:text-foreground transition-colors flex items-center gap-1"
-        >
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <Link href="/governance" className="text-sm text-muted hover:text-foreground transition-colors">
           ← Governance
         </Link>
         <span className="text-border">·</span>
-        <span className="text-sm text-muted">Proposal #{proposal.id}</span>
+        <span className="text-sm text-muted font-mono">
+          Proposal #{proposal.proposalNumber ?? "—"}
+        </span>
         <span
           className={`text-xs px-2 py-0.5 font-medium capitalize ${STATUS_STYLES[proposal.status] ?? STATUS_STYLES.pending}`}
         >
           {proposal.status}
         </span>
         {hasChain && (
-          <span className="text-xs text-muted border border-border px-2 py-0.5">
-            On-chain ✓
-          </span>
+          <span className="text-xs text-muted border border-border px-2 py-0.5">On-chain ✓</span>
         )}
       </div>
 
       {/* ── Title + meta ── */}
-      <h1 className="font-blackletter text-3xl text-foreground leading-tight mb-2">
+      <h1 className="font-blackletter text-3xl text-foreground leading-tight mb-3">
         {proposal.title}
       </h1>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted mb-6">
-        <span>Proposed by <span className="font-mono">{shortAddr(proposal.proposedBy)}</span></span>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted mb-8">
+        <span>
+          Proposed by{" "}
+          <span className="font-mono text-xs" title={proposal.proposedBy}>
+            {shortAddr(proposal.proposedBy)}
+          </span>
+        </span>
         <span>·</span>
         <span>{typeInfo?.label ?? proposal.type}</span>
         {proposal.treasurySol > 0 && (
@@ -292,50 +315,102 @@ export default function ProposalPage({ params }) {
       </div>
 
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-3 border border-border mb-8">
+      <div className="grid grid-cols-3 border border-border mb-8 text-sm">
         <div className="p-4 border-r border-border">
           <p className="text-xs text-muted uppercase tracking-widest mb-1">Threshold</p>
-          <p className="text-sm font-medium">{thresholds.majority}% majority</p>
-          <p className="text-xs text-muted">{thresholds.quorum}/{TOTAL_NFTS} quorum</p>
+          <p className="font-medium">{thresholds.majority}% majority</p>
+          <p className="text-xs text-muted">{thresholds.quorum} / {TOTAL_NFTS} quorum</p>
         </div>
         <div className="p-4 border-r border-border">
           <p className="text-xs text-muted uppercase tracking-widest mb-1">{isActive ? "Ends" : "Ended"}</p>
-          <p className="text-sm font-medium">
+          <p className="font-medium">
             {new Date(proposal.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </p>
           {timeLeft && <p className="text-xs text-muted">{timeLeft}</p>}
         </div>
         <div className="p-4">
           <p className="text-xs text-muted uppercase tracking-widest mb-1">Total Votes</p>
-          <p className="text-sm font-medium">{forVotes + againstVotes + abstainVotes}</p>
+          <p className="font-medium">{forVotes + againstVotes + abstainVotes}</p>
+          <p className="text-xs text-muted">{thresholds.quorum} needed for quorum</p>
         </div>
       </div>
 
-      {/* ── Two-column: description + vote sidebar ── */}
+      {/* ── Main content + sidebar ── */}
       <div className="grid md:grid-cols-[1fr_260px] gap-8">
 
-        {/* Description */}
-        <div>
-          <h2 className="font-blackletter text-xl text-gold mb-4">Description</h2>
-          <div className="text-sm text-muted leading-relaxed whitespace-pre-wrap">
-            {proposal.description}
+        {/* ── Description + image ── */}
+        <div className="space-y-6">
+          {proposal.imageUrl && (
+            <img
+              src={proposal.imageUrl}
+              alt={proposal.title}
+              className="w-full max-h-96 object-cover border border-border"
+            />
+          )}
+
+          <div>
+            <h2 className="font-blackletter text-xl text-gold mb-3">Description</h2>
+            <div className="text-sm text-muted leading-relaxed whitespace-pre-wrap">
+              {proposal.description}
+            </div>
           </div>
-          {proposal.txSig && (
-            <p className="mt-6 text-xs text-muted">
-              Proposal created on-chain:{" "}
-              <a
-                href={`https://solscan.io/tx/${proposal.txSig}?cluster=devnet`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gold hover:underline font-mono"
-              >
-                {proposal.txSig.slice(0, 8)}…
-              </a>
-            </p>
+
+          {/* Proposed transaction (treasury proposals) */}
+          {proposal.treasurySol > 0 && (
+            <div>
+              <h2 className="font-blackletter text-xl text-gold mb-3">Proposed Transaction</h2>
+              <div className="border border-border p-4 text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted">Amount</span>
+                  <span className="font-medium">{proposal.treasurySol} SOL</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted">Recipient</span>
+                  <span className="font-mono text-xs" title={proposal.proposedBy}>
+                    {shortAddr(proposal.proposedBy)}
+                  </span>
+                </div>
+                <p className="text-xs text-muted pt-1">
+                  Treasury disbursement — executed autonomously after vote passes (Phase 4) or by admin after confirmation (current phase).
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* On-chain links */}
+          {(proposal.txSig || proposal.finalizeTxSig) && (
+            <div className="text-xs text-muted space-y-1">
+              {proposal.txSig && (
+                <p>
+                  Proposal created:{" "}
+                  <a
+                    href={`https://solscan.io/tx/${proposal.txSig}${cluster}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-gold hover:underline"
+                  >
+                    {proposal.txSig.slice(0, 8)}…
+                  </a>
+                </p>
+              )}
+              {proposal.finalizeTxSig && (
+                <p>
+                  Finalized:{" "}
+                  <a
+                    href={`https://solscan.io/tx/${proposal.finalizeTxSig}${cluster}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-gold hover:underline"
+                  >
+                    {proposal.finalizeTxSig.slice(0, 8)}…
+                  </a>
+                </p>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Vote sidebar */}
+        {/* ── Vote sidebar ── */}
         <div>
           <div className="border border-border p-4 space-y-3 sticky top-6">
             {/* Tallies */}
@@ -351,7 +426,7 @@ export default function ProposalPage({ params }) {
               </div>
             </div>
 
-            <VoteBar for={forVotes} against={againstVotes} abstain={abstainVotes} thresholds={thresholds} />
+            <VoteBar forV={forVotes} against={againstVotes} abstain={abstainVotes} thresholds={thresholds} />
 
             {/* Voting UI */}
             {isActive && !expired && (
@@ -361,7 +436,7 @@ export default function ProposalPage({ params }) {
                     Voted ✓{" "}
                     {hasChain && txSig && (
                       <a
-                        href={`https://solscan.io/tx/${txSig}?cluster=devnet`}
+                        href={`https://solscan.io/tx/${txSig}${cluster}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-muted hover:text-gold font-mono"
@@ -385,15 +460,10 @@ export default function ProposalPage({ params }) {
                     <p className="text-xs text-muted mb-2">Connect wallet to vote.</p>
                     <WalletMultiButton
                       style={{
-                        backgroundColor: "#1a1a1a",
-                        color: "#f5f5f5",
-                        fontSize: "0.75rem",
-                        borderRadius: 0,
-                        height: "auto",
-                        padding: "0.375rem 0.75rem",
-                        lineHeight: 1.5,
-                        width: "100%",
-                        justifyContent: "center",
+                        backgroundColor: "#1a1a1a", color: "#f5f5f5",
+                        fontSize: "0.75rem", borderRadius: 0, height: "auto",
+                        padding: "0.375rem 0.75rem", lineHeight: 1.5,
+                        width: "100%", justifyContent: "center",
                       }}
                     />
                   </div>
@@ -446,22 +516,15 @@ export default function ProposalPage({ params }) {
                       {voting ? "Submitting…" : `Submit Vote${hasChain ? " (on-chain)" : ""}`}
                     </button>
                     {hasChain && (
-                      <p className="text-xs text-muted text-center">
-                        Requires wallet signature · ~0.001 SOL rent
-                      </p>
+                      <p className="text-xs text-muted text-center">Requires wallet signature · ~0.001 SOL</p>
                     )}
                   </div>
                 )}
               </div>
             )}
 
-            {expired && (
-              <p className="text-xs text-muted pt-2">Voting period has ended.</p>
-            )}
-
-            {!isActive && (
-              <p className="text-xs text-muted pt-2">This proposal is {proposal.status}.</p>
-            )}
+            {expired && <p className="text-xs text-muted pt-2">Voting period has ended.</p>}
+            {!isActive && <p className="text-xs text-muted pt-2 capitalize">This proposal {proposal.status}.</p>}
           </div>
         </div>
       </div>
