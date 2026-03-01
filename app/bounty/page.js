@@ -248,9 +248,6 @@ export default function BountyPage() {
           <p className="text-muted leading-relaxed max-w-2xl">
             Today&apos;s auction features{" "}
             <span className="text-foreground font-medium">{todaySlot.name}</span>
-            {todaySlot.traits?.length > 0 && (
-              <> ({todaySlot.traits.join(" · ")})</>
-            )}
             . Submit artwork inspired by this NFT. Human and AI submissions
             welcome. Accepted work earns COMMON from the auction rewards pool.
           </p>
