@@ -120,9 +120,6 @@ export default function AuctionCarousel() {
                 <h1 className="font-blackletter text-2xl md:text-4xl text-gold mb-2">
                   {auctionData.name}
                 </h1>
-                {auctionData.traits?.length > 0 && (
-                  <p className="text-muted">{auctionData.traits.join(" · ")}</p>
-                )}
                 {auctionData.seller && (
                   <p className="text-xs text-muted mt-3">
                     Listed by {auctionData.seller.slice(0, 4)}…

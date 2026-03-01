@@ -196,9 +196,6 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
           <h3 className="font-blackletter text-2xl text-gold leading-tight">
             {slotMeta?.name || "Commoner"}
           </h3>
-          {slotMeta?.traits?.length > 0 && (
-            <p className="text-sm text-muted mt-1">{slotMeta.traits.join(" · ")}</p>
-          )}
           {slotMeta?.seller && (
             <p className="text-xs text-muted mt-1">
               Listed by{" "}
@@ -405,9 +402,6 @@ export default function CurrentAuction() {
           <div className="p-5 md:p-6 flex flex-col gap-4">
             <div>
               <h3 className="font-blackletter text-2xl text-gold leading-tight">{todaySlot.name}</h3>
-              {todaySlot.traits?.length > 0 && (
-                <p className="text-sm text-muted mt-1">{todaySlot.traits.join(" · ")}</p>
-              )}
             </div>
             <p className="text-sm text-muted">Bidding opens shortly — check back soon.</p>
           </div>
