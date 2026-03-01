@@ -17,7 +17,6 @@ const links = [
   { href: "/gallery", label: "Gallery" },
   { href: "/bounty", label: "Bounty" },
   { href: "/holders", label: "Holders" },
-  { href: "/treasury", label: "Treasury" },
   { href: "/governance", label: "Governance" },
   { href: "/about", label: "About" },
 ];
