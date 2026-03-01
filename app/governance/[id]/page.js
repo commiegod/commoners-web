@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import Link from "next/link";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
@@ -62,7 +62,7 @@ function VoteBar({ forV, against, abstain, thresholds }) {
 }
 
 export default function ProposalPage({ params }) {
-  const { id } = params;
+  const { id } = use(params);
 
   // ── Proposal data (fetched at runtime from GitHub via API) ─────────────────
   const [proposal, setProposal] = useState(null);
