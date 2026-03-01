@@ -306,14 +306,14 @@ export default function AuctionCarousel() {
           <>
             <button
               onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-card/80 border border-border text-muted hover:text-foreground transition-colors text-lg leading-none"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-card/80 border border-border text-muted hover:text-foreground transition-colors text-lg leading-none cursor-pointer"
               aria-label="Previous slide"
             >
               ‹
             </button>
             <button
               onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-card/80 border border-border text-muted hover:text-foreground transition-colors text-lg leading-none"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center bg-card/80 border border-border text-muted hover:text-foreground transition-colors text-lg leading-none cursor-pointer"
               aria-label="Next slide"
             >
               ›
