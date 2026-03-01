@@ -56,7 +56,7 @@ export default function RootLayout({ children }) {
                 <img src="/icon.png" alt="" className="h-10 w-auto" />
                 <img src="/wordmark.png" alt="Commoner's DAO" className="h-7 w-auto" style={{ mixBlendMode: "multiply" }} />
               </div>
-              <p className="text-muted text-xs">3-Trait MidEvils · Daily Auctions</p>
+
             </div>
           </footer>
           </ErrorBoundary>
