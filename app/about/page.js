@@ -9,10 +9,10 @@ export default function AboutPage() {
         {/* 1. Mission */}
         <section>
           <h2 className="font-blackletter text-xl text-gold mb-3">
-            What is the Commoner&apos;s SubDAO
+            What is the Commoner&apos;s DAO
           </h2>
           <p className="text-muted leading-relaxed">
-            The Commoner&apos;s SubDAO turns individual self-interest into
+            The Commoner&apos;s DAO turns individual self-interest into
             collective good. Holders of the 120 identified 3-trait MidEvils
             govern a shared treasury, run daily auctions, and commission artwork
             — building a community-owned institution on Solana that rewards
@@ -30,7 +30,7 @@ export default function AboutPage() {
             Commoners are the rare subset with exactly 3 non-&quot;None&quot; traits —
             Background, Skin, and one additional trait — making them the
             simplest, most minimal characters in the set. There are exactly 120
-            of them. Each Commoner NFT grants 1 vote in SubDAO governance.
+            of them. Each Commoner NFT grants 1 vote in DAO governance.
           </p>
         </section>
 
@@ -43,7 +43,7 @@ export default function AboutPage() {
             <li>Any MidEvil NFT (not just Commoners) can be listed for auction.</li>
             <li>Each auction runs for 24 hours starting at midnight UTC.</li>
             <li>
-              A fee on the final sale price is sent to the SubDAO treasury;
+              A fee on the final sale price is sent to the DAO treasury;
               proceeds go to the seller.
             </li>
             <li>

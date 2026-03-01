@@ -17,7 +17,7 @@ export default function Home() {
       >
         <div className="px-5 py-16 md:py-24 text-center max-w-2xl mx-auto">
           <p className="text-xs tracking-[0.2em] text-muted mb-5 uppercase">
-            Commoner&apos;s SubDAO
+            Commoner&apos;s DAO
           </p>
           <h2 className="font-blackletter text-3xl md:text-5xl text-gold mb-6 leading-tight">
             Every MidEvil Deserves Its Day.

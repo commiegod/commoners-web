@@ -31,7 +31,7 @@ export default function LandingAccordion() {
         Common Folk. Uncommon Purpose.
       </h2>
       <p className="text-muted leading-relaxed mb-8">
-        The Commoner&apos;s SubDAO turns individual self-interest into collective
+        The Commoner&apos;s DAO turns individual self-interest into collective
         good. Holders of the 120 identified 3-trait MidEvils govern a shared
         treasury, run daily auctions, and commission artwork — building a
         community-owned institution on Solana that rewards participation and
@@ -45,7 +45,7 @@ export default function LandingAccordion() {
             Commoners are the rare subset with exactly 3 non-&quot;None&quot; traits —
             Background, Skin, and one additional trait — making them the
             simplest, most minimal characters in the set. There are exactly 120
-            of them. Each Commoner NFT grants 1 vote in SubDAO governance.
+            of them. Each Commoner NFT grants 1 vote in DAO governance.
           </p>
         </AccordionItem>
 
@@ -54,7 +54,7 @@ export default function LandingAccordion() {
             <li>Any MidEvil NFT (not just Commoners) can be listed for auction.</li>
             <li>Each auction runs for 24 hours starting at midnight UTC.</li>
             <li>
-              A fee on the final sale price is sent to the SubDAO treasury;
+              A fee on the final sale price is sent to the DAO treasury;
               proceeds go to the seller.
             </li>
             <li>
