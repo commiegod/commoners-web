@@ -9,9 +9,8 @@ export async function GET(request) {
   }
 
   const { content } = await getFile("data/proposals.json");
-  const now = new Date().toISOString();
   const ready = (content || []).filter(
-    (p) => p.status === "active" && p.endsAt < now && p.chainId
+    (p) => p.status === "active" && p.chainId
   );
   return NextResponse.json(ready);
 }

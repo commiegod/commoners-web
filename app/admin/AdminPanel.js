@@ -237,7 +237,10 @@ function FinalizeCard({ prop, token, onDone }) {
     }
   }
 
-  const endedAt = new Date(prop.endsAt).toLocaleString("en-US", {
+  const now = new Date();
+  const endsAt = new Date(prop.endsAt);
+  const votingOpen = endsAt > now;
+  const endLabel = endsAt.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -258,7 +261,13 @@ function FinalizeCard({ prop, token, onDone }) {
                 {prop.treasurySol} SOL
               </span>
             )}
-            <span className="text-xs text-muted">Ended {endedAt}</span>
+            {votingOpen ? (
+              <span className="text-xs text-amber-600 border border-amber-300 px-1.5 py-0.5">
+                Voting open until {endLabel}
+              </span>
+            ) : (
+              <span className="text-xs text-muted">Ended {endLabel}</span>
+            )}
           </div>
         </div>
         {/* On-chain vote tallies from proposals.json (populated by cast_vote) */}
@@ -456,7 +465,7 @@ export default function AdminPanel({ token }) {
           Finalize Proposals
           {!loading && (
             <span className="ml-3 text-lg font-sans text-muted font-normal">
-              ({activeProps.length} ready)
+              ({activeProps.length} active)
             </span>
           )}
         </h2>
