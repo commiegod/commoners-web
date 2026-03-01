@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "prop-1772402343970-8ydh",
+    "type": "builder-bounty",
+    "title": "bob the builder bounty",
+    "description": "give bob all the money",
+    "treasurySol": 4,
+    "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+    "imageUrl": "",
+    "submittedAt": "2026-03-01T21:59:03.970Z"
+  }
+]
