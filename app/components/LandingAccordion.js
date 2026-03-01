@@ -131,10 +131,12 @@ export default function LandingAccordion() {
         <AccordionItem title="COMMON Token">
           <p className="text-muted leading-relaxed mb-4">
             Fixed supply of 1,000,000,000 COMMON. No team or founder allocation —
-            all distribution is community-driven. Commoner holders receive the
-            primary airdrop and hold governance rights. Purpose: auction fee
-            reduction, artist bounty rewards, DAO liquidity, staking yield, and
-            futarchy.
+            all distribution is community-driven. Holders of the 120 Commoner NFTs
+            receive the primary airdrop and hold governance rights. The broader
+            MidEvils community receives a smaller allocation to enable futarchy
+            market participation (Phase 4) and platform alignment without diluting
+            Commoner governance power. Purpose: auction fee reduction, artist
+            bounty rewards, DAO liquidity, staking yield, and futarchy.
           </p>
 
           <div className="overflow-x-auto mb-6">
