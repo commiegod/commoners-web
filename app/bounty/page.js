@@ -245,12 +245,23 @@ export default function BountyPage() {
           Artist Bounty
         </h1>
         {todaySlot ? (
-          <p className="text-muted leading-relaxed max-w-2xl">
-            Today&apos;s auction features{" "}
-            <span className="text-foreground font-medium">{todaySlot.name}</span>
-            . Submit artwork inspired by this NFT. Human and AI submissions
-            welcome. Accepted work earns COMMON from the auction rewards pool.
-          </p>
+          <>
+            <p className="text-muted leading-relaxed max-w-2xl">
+              Today&apos;s auction features{" "}
+              <span className="text-foreground font-medium">{todaySlot.name}</span>
+              . Submit artwork inspired by this NFT. Human and AI submissions
+              welcome. Accepted work earns COMMON from the auction rewards pool.
+            </p>
+            {todaySlot.image && (
+              <div className="mt-6">
+                <img
+                  src={todaySlot.image}
+                  alt={todaySlot.name}
+                  className="h-64 w-64 object-cover border border-border"
+                />
+              </div>
+            )}
+          </>
         ) : (
           <p className="text-muted leading-relaxed max-w-2xl">
             Submit artwork inspired by the current auction NFT. Human and AI
