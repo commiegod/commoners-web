@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "prop-1772395715019-8vfe",
+    "type": "common-threshold",
+    "title": "Change Common Threshold",
+    "description": "Lower common threshold to 10,000 common",
+    "treasurySol": 0,
+    "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+    "submittedAt": "2026-03-01T20:08:35.019Z"
+  }
+]
