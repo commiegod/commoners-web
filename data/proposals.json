@@ -26,13 +26,15 @@
     "description": "just burn the treasury",
     "treasurySol": 0,
     "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-    "status": "active",
+    "status": "queued",
     "endsAt": "2026-03-04T20:12:57.655Z",
     "votes": {
       "yes": 0,
       "no": 0,
       "abstain": 0
     },
-    "txSig": "2LUAGHigMMNb1vs77h4B2bm5JaVK7NY7ujJsQMQBvHBmsdb22tbgFQuoHqxik6uUUtodsrw6kCCco9aBMawUNMdV"
+    "txSig": "2LUAGHigMMNb1vs77h4B2bm5JaVK7NY7ujJsQMQBvHBmsdb22tbgFQuoHqxik6uUUtodsrw6kCCco9aBMawUNMdV",
+    "finalizedAt": "2026-03-01T21:47:15.066Z",
+    "finalizeTxSig": "tKLkSp8GvvDdBkRqdNVRv5tADaHweKhafXWJW1mwTHx95LTsubgs1vzJoSJhWJpZCxhb5JJ2tVJG3y3Bfu5AKJ4"
   }
 ]
