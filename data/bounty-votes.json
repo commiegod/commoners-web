@@ -9,5 +9,18 @@
         "votedFor": "1771700000003-grok2"
       }
     }
+  },
+  "2026-03-01": {
+    "tallies": {
+      "1772399634926-uefh": 5
+    },
+    "voters": {
+      "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41": {
+        "weight": 24,
+        "allocations": {
+          "1772399634926-uefh": 5
+        }
+      }
+    }
   }
 }
