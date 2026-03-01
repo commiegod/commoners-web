@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import bounties from "../../data/bounties.json";
-import { RPC_URL } from "../../lib/programClient";
+import { RPC_URL, findAuctionByMint, getConnection } from "../../lib/programClient";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
@@ -41,34 +41,59 @@ export default function AuctionCarousel() {
   // Derive today's or next upcoming auction
   useEffect(() => {
     if (scheduleLoading) return;
-    const today = new Date().toISOString().split("T")[0];
-    // There can be multiple slots registered for the same date (e.g. if a
-    // different seller also registered a slot).  Prefer the consumed slot —
-    // consumed=true means createAuction was already called on it, so it is the
-    // one actually running today.  Fall back to the first escrowed slot, then
-    // any slot.
-    const todaySlots = slots.filter((s) => s.dateStr === today);
-    const todaySlot =
-      todaySlots.find((s) => s.consumed) ??
-      todaySlots.find((s) => s.escrowed) ??
-      todaySlots[0] ??
-      null;
-    if (todaySlot) {
-      setAuctionData({ ...todaySlot, date: todaySlot.dateStr });
-      setLabel("TODAY'S AUCTION");
-    } else {
-      // No slot for today — find the next upcoming one
-      const upcomingSlots = slots.filter((s) => s.dateStr > today);
-      const next =
-        upcomingSlots.find((s) => s.escrowed && !s.consumed) ??
-        upcomingSlots[0] ??
-        null;
-      if (next) {
-        setAuctionData({ ...next, date: next.dateStr });
-        setLabel(`UPCOMING · ${next.dateStr}`);
+
+    async function pickSlot() {
+      const today = new Date().toISOString().split("T")[0];
+      const todaySlots = slots.filter((s) => s.dateStr === today);
+
+      let chosenSlot = null;
+
+      if (todaySlots.length === 1) {
+        chosenSlot = todaySlots[0];
+      } else if (todaySlots.length > 1) {
+        // Multiple slots share this date (e.g. a second seller registered the
+        // same day).  Ask the chain which mint actually has a live auction.
+        const conn = getConnection();
+        for (const slot of todaySlots) {
+          try {
+            const result = await findAuctionByMint(
+              conn,
+              new PublicKey(slot.nftMint)
+            );
+            if (result && !result.state.settled) {
+              chosenSlot = slot;
+              break;
+            }
+          } catch (_) {}
+        }
+        // Fallback: prefer the consumed slot (createAuction was called on it)
+        if (!chosenSlot) {
+          chosenSlot =
+            todaySlots.find((s) => s.consumed) ??
+            todaySlots.find((s) => s.escrowed) ??
+            todaySlots[0];
+        }
       }
+
+      if (chosenSlot) {
+        setAuctionData({ ...chosenSlot, date: chosenSlot.dateStr });
+        setLabel("TODAY'S AUCTION");
+      } else {
+        // No slot for today — find the next upcoming one
+        const next =
+          slots.find((s) => s.dateStr > today && s.escrowed && !s.consumed) ??
+          slots.find((s) => s.dateStr > today) ??
+          null;
+        if (next) {
+          setAuctionData({ ...next, date: next.dateStr });
+          setLabel(`UPCOMING · ${next.dateStr}`);
+        }
+      }
+
+      setMounted(true);
     }
-    setMounted(true);
+
+    pickSlot();
   }, [slots, scheduleLoading]);
 
   // Fetch live vote data for bounty slides
