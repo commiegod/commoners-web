@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "prop-1772395831442-iguw",
+    "type": "governance-experiment",
+    "title": "give away money",
+    "description": "just burn the treasury",
+    "treasurySol": 0,
+    "proposedBy": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+    "submittedAt": "2026-03-01T20:10:31.442Z"
+  }
+]
