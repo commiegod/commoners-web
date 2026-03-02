@@ -251,11 +251,11 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">SOL</span>
                 </div>
                 {wallet.publicKey ? (
-                  <button onClick={placeBid} disabled={bidding} className="px-5 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity">
+                  <button onClick={placeBid} disabled={bidding} className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity">
                     {bidding ? "Sending…" : "Place Bid"}
                   </button>
                 ) : (
-                  <WalletMultiButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: 0, height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
+                  <WalletMultiButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
                 )}
               </div>
               {txError && <p className="text-xs text-red-600">{txError}</p>}

@@ -125,7 +125,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         </div>
         {submitError && <p className="text-xs text-red-600 mb-3">{submitError}</p>}
         <div className="flex gap-2">
-          <button onClick={handleFinalSubmit} disabled={submitting} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+          <button onClick={handleFinalSubmit} disabled={submitting} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50">
             {submitting ? "Submitting…" : "Submit Proposal"}
           </button>
           <button onClick={() => setStage("form")} className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors">
@@ -199,7 +199,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
       </div>
 
       <div className="flex gap-2">
-        <button type="submit" disabled={!form.title.trim() || !form.description.trim() || commonerCount === 0} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">
+        <button type="submit" disabled={!form.title.trim() || !form.description.trim() || commonerCount === 0} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">
           Preview
         </button>
         <button type="button" onClick={onClose} className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors">
@@ -302,7 +302,7 @@ export default function GovernancePage() {
             commonerCount > 0 && !showForm ? (
               <button
                 onClick={() => setShowForm(true)}
-                className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 transition-opacity cursor-pointer"
               >
                 Submit Proposal
               </button>
@@ -318,7 +318,7 @@ export default function GovernancePage() {
                 border: "1px solid #1a1a1a",
                 color: "#1a1a1a",
                 fontSize: "0.75rem",
-                borderRadius: 0,
+                borderRadius: "9999px",
                 height: "auto",
                 padding: "0.375rem 0.75rem",
                 lineHeight: 1.5,

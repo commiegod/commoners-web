@@ -511,7 +511,7 @@ export default function ProposalPage({ params }) {
                     <WalletMultiButton
                       style={{
                         backgroundColor: "#1a1a1a", color: "#f5f5f5",
-                        fontSize: "0.75rem", borderRadius: 0, height: "auto",
+                        fontSize: "0.75rem", borderRadius: "9999px", height: "auto",
                         padding: "0.375rem 0.75rem", lineHeight: 1.5,
                         width: "100%", justifyContent: "center",
                       }}
@@ -575,7 +575,7 @@ export default function ProposalPage({ params }) {
                     <button
                       onClick={handleVote}
                       disabled={voting || allocTotal === 0}
-                      className="w-full px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
+                      className="w-full px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
                     >
                       {voting ? "Submitting…" : `Submit Vote${hasChain ? " (on-chain)" : ""}`}
                     </button>

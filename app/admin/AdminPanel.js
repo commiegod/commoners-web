@@ -65,7 +65,7 @@ function SubmissionCard({ sub, token, onDone }) {
                 <button
                   onClick={() => act("approve")}
                   disabled={!!status}
-                  className="px-3 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                  className="px-3 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity"
                 >
                   {status === "approving" ? "…" : "Approve"}
                 </button>
@@ -183,7 +183,7 @@ function ProposalCard({ prop, token, onDone }) {
               <button
                 onClick={() => act("approve-proposal")}
                 disabled={!!status}
-                className="px-3 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                className="px-3 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity"
               >
                 {status === "approving" ? "…" : "Approve"}
               </button>
@@ -323,7 +323,7 @@ function FinalizeCard({ prop, token, onDone }) {
           <div className="flex gap-2">
             <button
               onClick={() => setConfirming(autoStatus)}
-              className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 transition-opacity"
             >
               Finalize as {STATUS_LABELS[autoStatus]} →
             </button>
@@ -350,7 +350,7 @@ function FinalizeCard({ prop, token, onDone }) {
             <button
               onClick={() => finalize(confirming)}
               disabled={busy}
-              className="px-4 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+              className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity"
             >
               {busy ? "Recording on-chain…" : "Confirm"}
             </button>

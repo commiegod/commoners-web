@@ -320,7 +320,7 @@ export default function BountyPage() {
                     key={m}
                     type="button"
                     onClick={() => setImageMode(m)}
-                    className={`px-3 py-0.5 capitalize transition-colors ${
+                    className={`px-3 py-0.5 rounded-full capitalize transition-colors ${
                       imageMode === m
                         ? "bg-gold text-card"
                         : "text-muted hover:text-foreground"
@@ -472,7 +472,7 @@ export default function BountyPage() {
           <button
             type="submit"
             disabled={submitting || uploading}
-            className="px-5 py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
             {uploading ? "Uploading…" : submitting ? "Submitting…" : "Submit"}
           </button>
@@ -646,7 +646,7 @@ export default function BountyPage() {
                         <button
                           onClick={() => handleSplitVote(dateStr)}
                           disabled={submittingDay === dateStr || totalAllocated === 0}
-                          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity"
                         >
                           {submittingDay === dateStr ? "Submitting…" : "Submit Votes"}
                         </button>

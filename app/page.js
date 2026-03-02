@@ -31,7 +31,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
               href="/bounty"
-              className="px-5 py-2.5 bg-gold text-card text-sm hover:opacity-80 transition-opacity"
+              className="px-5 py-2.5 bg-gold text-card text-sm rounded-full hover:opacity-80 transition-opacity"
             >
               Submit Artwork
             </a>

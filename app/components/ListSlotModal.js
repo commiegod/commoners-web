@@ -197,7 +197,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
               style={{
                 backgroundColor: "#1a1a1a",
                 color: "#f5f5f5",
-                borderRadius: 0,
+                borderRadius: "9999px",
                 fontSize: "0.875rem",
               }}
             />
@@ -302,7 +302,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
             <button
               onClick={submit}
               disabled={!selectedMint || !selectedDate || step === "submitting"}
-              className="w-full py-2 bg-gold text-card text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="w-full py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {step === "submitting" ? "Submitting…" : "Register Slot"}
             </button>
