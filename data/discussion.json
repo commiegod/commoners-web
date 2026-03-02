@@ -1,12 +1,3 @@
 {
-  "threads": [
-    {
-      "id": "mm9rvdh8gqyi",
-      "subject": "first",
-      "body": "this is the first post. hello world!",
-      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-      "timestamp": 1772491830524,
-      "replies": []
-    }
-  ]
+  "threads": []
 }
