@@ -378,7 +378,7 @@ export default function TreasuryPage() {
 
       {updatedLabel && (
         <p className="text-xs text-muted mt-4 text-right">
-          Data from devnet · updated {updatedLabel} · cache refreshes every 2 min
+          {IS_DEVNET ? "Devnet · " : ""}Updated {updatedLabel} · cache refreshes every 2 min
         </p>
       )}
     </div>

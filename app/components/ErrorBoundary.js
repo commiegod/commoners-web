@@ -9,11 +9,7 @@ export default class ErrorBoundary extends Component {
   }
 
   static getDerivedStateFromError(error) {
-    return { error };
-  }
-
-  static getDerivedStateFromError(error) {
-    if (typeof console !== "undefined") console.error("ErrorBoundary caught:", error);
+    console.error("ErrorBoundary caught:", error);
     return { error };
   }
 
