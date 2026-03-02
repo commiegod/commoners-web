@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -28,7 +28,7 @@ function shortAddr(addr) {
 }
 
 export default function ThreadPage({ params }) {
-  const { id } = params;
+  const { id } = use(params);
   const { connected, publicKey } = useWallet();
   const walletAddress = publicKey?.toBase58() ?? null;
 
