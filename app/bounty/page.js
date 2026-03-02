@@ -146,17 +146,25 @@ export default function BountyPage() {
 
   useEffect(() => {
     if (scheduleLoading) return;
-    const today = new Date().toISOString().split("T")[0];
-    const slot = slots.find((s) => s.dateStr === today) || slots.find((s) => s.dateStr >= today);
+    const nowSec = Date.now() / 1000;
+    // Prefer a slot whose 24-hour auction window contains right now
+    const active = slots.find(
+      (s) => s.scheduledDate && s.scheduledDate <= nowSec && nowSec < s.scheduledDate + 86400
+    );
+    // Fall back to the next upcoming slot
+    const next = slots.find((s) => s.scheduledDate > nowSec);
+    const slot = active || next || null;
     setTodaySlot(slot || null);
     if (slot && !form.date) {
       setForm((f) => ({ ...f, date: slot.dateStr }));
     }
   }, [slots, scheduleLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Build upcoming date options from slots
-  const today = new Date().toISOString().split("T")[0];
-  const upcomingSlots = slots.filter((s) => s.dateStr >= today);
+  // Upcoming = current active slot + anything whose window hasn't expired yet
+  const nowSec = Date.now() / 1000;
+  const upcomingSlots = slots.filter(
+    (s) => !s.scheduledDate || s.scheduledDate + 86400 > nowSec
+  );
 
   function setField(key, val) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -233,6 +241,9 @@ export default function BountyPage() {
       setSubmitting(false);
     }
   }
+
+  // "today" for the image wall = the dateStr of the currently-active slot
+  const activeDate = todaySlot?.dateStr ?? null;
 
   // Build grouped image wall from bounties.json
   const groupedByDate = Object.entries(bounties)
@@ -495,7 +506,7 @@ export default function BountyPage() {
           </h2>
           <div className="space-y-12">
             {groupedByDate.map(({ dateStr, slotForDate, allSubmissions }) => {
-              const isToday = dateStr === today;
+              const isToday = dateStr === activeDate;
               const dayVotes = votes[dateStr] || { tallies: {}, voters: {} };
               const myVote = connected
                 ? dayVotes.voters[publicKey?.toBase58()]
