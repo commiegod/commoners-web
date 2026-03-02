@@ -4,10 +4,6 @@ import { Buffer } from "buffer";
 import { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
 import { RPC_URL } from "../lib/programClient";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -17,10 +13,10 @@ if (typeof globalThis !== "undefined") {
 }
 
 export function Providers({ children }) {
-  const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
-    []
-  );
+  // Empty array: Phantom, Solflare and other Wallet Standard wallets are
+  // auto-detected by WalletProvider. Explicitly registering them triggers
+  // deprecation warnings in @solana/wallet-adapter-wallets >= 0.19.
+  const wallets = useMemo(() => [], []);
 
   return (
     <ConnectionProvider endpoint={RPC_URL}>
