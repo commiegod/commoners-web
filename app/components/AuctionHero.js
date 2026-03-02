@@ -299,7 +299,7 @@ export default function AuctionHero() {
                         <button
                           onClick={placeBid}
                           disabled={bidding}
-                          className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity"
+                          className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
                         >
                           {bidding ? "Sending…" : "Place Bid"}
                         </button>

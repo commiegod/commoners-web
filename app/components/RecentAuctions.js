@@ -42,7 +42,7 @@ export default function RecentAuctions() {
         <h2 className="font-blackletter text-2xl text-gold">Auction Schedule</h2>
         <button
           onClick={() => setShowModal(true)}
-          className="text-sm text-muted hover:text-foreground border border-border px-3 py-1 transition-colors"
+          className="text-sm text-muted hover:text-foreground border border-border px-3 py-1 rounded-full transition-colors cursor-pointer"
         >
           List your NFT
         </button>
@@ -66,7 +66,7 @@ export default function RecentAuctions() {
               <button
                 key={slot.dateStr}
                 onClick={() => setSelected(slot)}
-                className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden text-left hover:border-gold transition-colors focus:outline-none"
+                className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden text-left hover:border-gold transition-colors focus:outline-none cursor-pointer"
               >
                 {slot.image ? (
                   <img
@@ -99,7 +99,7 @@ export default function RecentAuctions() {
           >
             <button
               onClick={() => setSelected(null)}
-              className="absolute top-2 right-2 z-10 text-muted hover:text-foreground bg-black/60 w-7 h-7 flex items-center justify-center text-sm"
+              className="absolute top-2 right-2 z-10 text-muted hover:text-foreground bg-black/60 w-7 h-7 flex items-center justify-center text-sm cursor-pointer"
             >
               ✕
             </button>

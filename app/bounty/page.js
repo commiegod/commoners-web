@@ -47,7 +47,7 @@ function Lightbox({ src, alt, onClose }) {
       />
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white text-2xl leading-none hover:opacity-70"
+        className="absolute top-4 right-4 text-white text-2xl leading-none hover:opacity-70 cursor-pointer"
         aria-label="Close"
       >
         ×
@@ -472,7 +472,7 @@ export default function BountyPage() {
           <button
             type="submit"
             disabled={submitting || uploading}
-            className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
           >
             {uploading ? "Uploading…" : submitting ? "Submitting…" : "Submit"}
           </button>
@@ -550,7 +550,7 @@ export default function BountyPage() {
                                 alt: b.artistName || b.artist || "Bounty art",
                               })
                             }
-                            className="w-full block"
+                            className="w-full block cursor-pointer"
                           >
                             <img
                               src={b.imageUrl || b.image || ""}
@@ -646,7 +646,7 @@ export default function BountyPage() {
                         <button
                           onClick={() => handleSplitVote(dateStr)}
                           disabled={submittingDay === dateStr || totalAllocated === 0}
-                          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity"
+                          className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
                         >
                           {submittingDay === dateStr ? "Submitting…" : "Submit Votes"}
                         </button>

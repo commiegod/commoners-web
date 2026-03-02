@@ -36,7 +36,7 @@ const STATUS_STYLES = {
 
 function StatusBadge({ status }) {
   return (
-    <span className={`text-xs px-2 py-0.5 font-medium capitalize ${STATUS_STYLES[status] ?? STATUS_STYLES.pending}`}>
+    <span className={`text-xs px-2.5 py-0.5 font-medium capitalize rounded-full ${STATUS_STYLES[status] ?? STATUS_STYLES.pending}`}>
       {status}
     </span>
   );
@@ -98,7 +98,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         <p className="text-sm text-muted mb-4">
           Your proposal has been received and will appear here once an admin approves it for a 72-hour vote.
         </p>
-        <button onClick={onClose} className="text-sm text-muted border border-border px-4 py-1.5 hover:text-foreground transition-colors">
+        <button onClick={onClose} className="text-sm text-muted border border-border px-4 py-1.5 rounded-full hover:text-foreground transition-colors cursor-pointer">
           Close
         </button>
       </div>
@@ -128,7 +128,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
           <button onClick={handleFinalSubmit} disabled={submitting} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50">
             {submitting ? "Submitting…" : "Submit Proposal"}
           </button>
-          <button onClick={() => setStage("form")} className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors">
+          <button onClick={() => setStage("form")} className="px-4 py-1.5 border border-border text-muted text-sm rounded-full hover:text-foreground transition-colors cursor-pointer">
             ← Edit
           </button>
         </div>
@@ -140,7 +140,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
     <form onSubmit={(e) => { e.preventDefault(); setStage("preview"); }} className="bg-card border border-border p-5 mb-8 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">Submit a Proposal</h3>
-        <button type="button" onClick={onClose} className="text-muted hover:text-foreground text-lg leading-none transition-colors">×</button>
+        <button type="button" onClick={onClose} className="text-muted hover:text-foreground text-lg leading-none transition-colors cursor-pointer">×</button>
       </div>
 
       {commonerCount === 0 && (
@@ -202,7 +202,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         <button type="submit" disabled={!form.title.trim() || !form.description.trim() || commonerCount === 0} className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">
           Preview
         </button>
-        <button type="button" onClick={onClose} className="px-4 py-1.5 border border-border text-muted text-sm hover:text-foreground transition-colors">
+        <button type="button" onClick={onClose} className="px-4 py-1.5 border border-border text-muted text-sm rounded-full hover:text-foreground transition-colors cursor-pointer">
           Cancel
         </button>
       </div>
@@ -219,7 +219,7 @@ function ProposalRow({ proposal, index }) {
 
   return (
     <Link href={`/governance/${proposal.id}`}>
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border hover:bg-card/60 transition-colors cursor-pointer">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border hover:bg-card/60 transition-colors cursor-pointer group">
         <div className="flex items-center gap-4 min-w-0">
           <span className="text-muted text-sm font-mono shrink-0">#{index + 1}</span>
           <div className="min-w-0">
@@ -302,7 +302,7 @@ export default function GovernancePage() {
             commonerCount > 0 && !showForm ? (
               <button
                 onClick={() => setShowForm(true)}
-                className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+                className="px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 transition-opacity cursor-pointer shrink-0"
               >
                 Submit Proposal
               </button>
@@ -377,12 +377,12 @@ export default function GovernancePage() {
       )}
 
       {/* ── Voting rules (compact) ── */}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted mb-8 border-b border-border pb-4">
-        <span><span className="text-foreground">Eligibility</span> — ≥1 Commoner NFT</span>
-        <span><span className="text-foreground">Standard</span> — 51% majority, 24/120 quorum</span>
-        <span><span className="text-foreground">Treasury 5–20 SOL</span> — 67%, 36/120</span>
-        <span><span className="text-foreground">Window</span> — 72 hours</span>
-        <span><span className="text-foreground">Voting power</span> — 1 vote per NFT</span>
+      <div className="flex flex-wrap gap-2 text-xs mb-8 border-b border-border pb-4">
+        <span className="bg-card border border-border px-3 py-1 rounded-full"><span className="text-foreground font-medium">Eligibility</span> — ≥1 Commoner NFT</span>
+        <span className="bg-card border border-border px-3 py-1 rounded-full"><span className="text-foreground font-medium">Standard</span> — 51% majority, 24/120 quorum</span>
+        <span className="bg-card border border-border px-3 py-1 rounded-full"><span className="text-foreground font-medium">Treasury 5–20 SOL</span> — 67%, 36/120</span>
+        <span className="bg-card border border-border px-3 py-1 rounded-full"><span className="text-foreground font-medium">Window</span> — 72 hours</span>
+        <span className="bg-card border border-border px-3 py-1 rounded-full"><span className="text-foreground font-medium">Voting power</span> — 1 vote per NFT</span>
       </div>
 
       {/* ── Holder status ── */}
@@ -404,8 +404,8 @@ export default function GovernancePage() {
       {/* ── Active proposals ── */}
       <section className="mb-10">
         <div className="border border-border overflow-hidden">
-          <div className="px-5 py-3 border-b border-border bg-card/40 flex items-center justify-between">
-            <h2 className="font-blackletter text-lg text-gold">Active Proposals</h2>
+          <div className="px-5 py-3.5 border-b border-border bg-card flex items-center justify-between">
+            <h2 className="font-blackletter text-xl text-foreground tracking-wide">Active Proposals</h2>
           </div>
 
           {activeProposals.length === 0 ? (
@@ -427,8 +427,8 @@ export default function GovernancePage() {
       {pastProposals.length > 0 && (
         <section>
           <div className="border border-border overflow-hidden">
-            <div className="px-5 py-3 border-b border-border bg-card/40">
-              <h2 className="font-blackletter text-lg text-gold">Past Proposals</h2>
+            <div className="px-5 py-3.5 border-b border-border bg-card">
+              <h2 className="font-blackletter text-xl text-foreground tracking-wide">Past Proposals</h2>
             </div>
             {pastProposals.map((p, i) => (
               <ProposalRow key={p.id} proposal={p} index={activeProposals.length + i} />

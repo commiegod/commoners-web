@@ -138,7 +138,7 @@ export default function GalleryPage() {
               <div key={type} className="relative">
                 <button
                   onClick={() => setOpenDropdown(isOpen ? null : type)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm border transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm border transition-colors whitespace-nowrap cursor-pointer ${
                     active
                       ? "border-gold text-gold bg-gold/10"
                       : "border-border text-muted hover:text-foreground bg-card"
@@ -152,7 +152,7 @@ export default function GalleryPage() {
                   <div className="absolute top-full left-0 mt-1 bg-background border border-border shadow-xl z-50 max-h-60 overflow-y-auto min-w-[160px]">
                     <button
                       onClick={() => setFilter(type, null)}
-                      className="w-full text-left px-3 py-2 text-sm text-muted hover:text-foreground hover:bg-card"
+                      className="w-full text-left px-3 py-2 text-sm text-muted hover:text-foreground hover:bg-card cursor-pointer"
                     >
                       All
                     </button>
@@ -160,7 +160,7 @@ export default function GalleryPage() {
                       <button
                         key={val}
                         onClick={() => setFilter(type, val)}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-card ${
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-card cursor-pointer ${
                           active === val ? "text-gold" : "text-foreground"
                         }`}
                       >
@@ -177,7 +177,7 @@ export default function GalleryPage() {
           {(activeFilterCount > 0 || search || sort !== "number-asc") && (
             <button
               onClick={clearAll}
-              className="px-3 py-1.5 text-sm text-gold hover:text-foreground border border-gold/30 hover:border-border transition-colors"
+              className="px-3 py-1.5 text-sm text-gold hover:text-foreground border border-gold/30 hover:border-border transition-colors cursor-pointer"
             >
               Clear all
             </button>
@@ -210,7 +210,7 @@ export default function GalleryPage() {
             <button
               key={nft.id}
               onClick={() => setSelected(nft)}
-              className="group relative overflow-hidden bg-background aspect-square focus:outline-none"
+              className="group relative overflow-hidden bg-background aspect-square focus:outline-none cursor-pointer"
             >
               <img
                 src={nft.image}
@@ -247,7 +247,7 @@ export default function GalleryPage() {
             {/* Close */}
             <button
               onClick={() => setSelected(null)}
-              className="absolute top-2 right-2 z-10 text-muted hover:text-foreground bg-black/60 w-7 h-7 flex items-center justify-center text-sm"
+              className="absolute top-2 right-2 z-10 text-muted hover:text-foreground bg-black/60 w-7 h-7 flex items-center justify-center text-sm cursor-pointer"
             >
               ✕
             </button>
@@ -256,7 +256,7 @@ export default function GalleryPage() {
             {filtered.indexOf(selected) > 0 && (
               <button
                 onClick={() => navigate(-1)}
-                className="absolute left-2 top-1/3 z-10 text-white/70 hover:text-white bg-black/50 w-7 h-7 flex items-center justify-center text-sm"
+                className="absolute left-2 top-1/3 z-10 text-white/70 hover:text-white bg-black/50 w-7 h-7 flex items-center justify-center text-sm cursor-pointer"
               >
                 ‹
               </button>
@@ -264,7 +264,7 @@ export default function GalleryPage() {
             {filtered.indexOf(selected) < filtered.length - 1 && (
               <button
                 onClick={() => navigate(1)}
-                className="absolute right-2 top-1/3 z-10 text-white/70 hover:text-white bg-black/50 w-7 h-7 flex items-center justify-center text-sm"
+                className="absolute right-2 top-1/3 z-10 text-white/70 hover:text-white bg-black/50 w-7 h-7 flex items-center justify-center text-sm cursor-pointer"
               >
                 ›
               </button>
@@ -298,7 +298,7 @@ export default function GalleryPage() {
                       setSelected(null);
                     }}
                     title={`Filter by ${t.trait_type}: ${t.value}`}
-                    className="bg-card border border-border px-3 py-1.5 text-left hover:border-gold/50 transition-colors"
+                    className="bg-card border border-border px-3 py-1.5 text-left hover:border-gold/50 transition-colors cursor-pointer"
                   >
                     <p className="text-[10px] text-muted uppercase tracking-wider">
                       {t.trait_type}
