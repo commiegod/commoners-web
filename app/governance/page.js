@@ -169,7 +169,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         <div>
           <label className="block text-xs text-muted mb-1">Treasury request (SOL)</label>
           <input type="number" min="0" step="0.1" value={form.treasurySol} onChange={(e) => set("treasurySol", e.target.value)} placeholder="0.00" className="w-full bg-background border border-border text-sm px-3 py-2 placeholder:text-muted/50" />
-          {solAmount > 20 && <p className="text-xs text-blue-700 mt-1">Requires 75% supermajority + futarchy (Phase 4)</p>}
+          {solAmount > 20 && <p className="text-xs text-blue-700 mt-1">Requires 75% supermajority</p>}
           {solAmount >= 5 && solAmount <= 20 && <p className="text-xs text-gold mt-1">Requires 67% supermajority, 36/120 quorum</p>}
         </div>
       )}
@@ -437,9 +437,9 @@ export default function GovernancePage() {
         </section>
       )}
 
-      {/* ── Phase 4 note ── */}
+      {/* ── governance note ── */}
       <p className="text-xs text-muted mt-10 border-t border-border pt-4">
-        Votes are currently recorded off-chain. Phase 4 will deploy on-chain governance with autonomous proposal execution.
+        Approved proposals are recorded on-chain. Autonomous proposal execution is planned for a future phase.
       </p>
     </div>
   );

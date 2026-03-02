@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import commoners from "../../data/commoners.json";
+import { RPC_URL } from "../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 // Commoners are mainnet NFTs — always query mainnet DAS regardless of which
 // devnet RPC the auction program uses.
@@ -184,7 +187,7 @@ export default function HoldersPage() {
                   <span className="text-muted text-sm">{i + 1}</span>
                   <span className="font-mono text-sm truncate">
                     <a
-                      href={`https://solscan.io/account/${row.wallet}?cluster=devnet`}
+                      href={`https://solscan.io/account/${row.wallet}${IS_DEVNET ? "?cluster=devnet" : ""}`}
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}

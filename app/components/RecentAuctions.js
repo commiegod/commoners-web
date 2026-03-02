@@ -25,7 +25,14 @@ export default function RecentAuctions() {
   const today = new Date().toISOString().split("T")[0];
   const upcoming = slots.filter((s) => s.dateStr >= today).slice(0, 10);
 
-  if (!loading && upcoming.length === 0) return null;
+  if (!loading && upcoming.length === 0) {
+    return (
+      <section>
+        <h2 className="font-blackletter text-2xl text-gold mb-4">Auction Schedule</h2>
+        <p className="text-muted text-sm">No auctions scheduled yet. List your NFT to claim the next slot.</p>
+      </section>
+    );
+  }
 
   const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 

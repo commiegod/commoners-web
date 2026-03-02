@@ -80,10 +80,10 @@ export default function LandingAccordion() {
             </li>
             <li>
               <span className="text-foreground font-medium">
-                Futarchy Prioritization (Layer 2, Phase 4)
+                Futarchy Prioritization (Layer 2, planned)
               </span>{" "}
-              — MetaDAO prediction markets rank competing proposals by expected
-              impact. Active from Phase 4 onwards.
+              — Prediction markets rank competing proposals by expected impact.
+              Planned for a future phase.
             </li>
             <li>
               <span className="text-foreground font-medium">
@@ -120,7 +120,7 @@ export default function LandingAccordion() {
                 </tr>
                 <tr>
                   <td className="px-3 py-2 text-muted">&gt; 20 SOL</td>
-                  <td className="px-3 py-2">75% + futarchy</td>
+                  <td className="px-3 py-2">75%</td>
                   <td className="px-3 py-2">36 / 120</td>
                 </tr>
               </tbody>
@@ -133,10 +133,9 @@ export default function LandingAccordion() {
             Fixed supply of 1,000,000,000 COMMON. No team or founder allocation —
             all distribution is community-driven. Holders of the 120 Commoner NFTs
             receive the primary airdrop and hold governance rights. The broader
-            MidEvils community receives a smaller allocation to enable futarchy
-            market participation (Phase 4) and platform alignment without diluting
-            Commoner governance power. Purpose: auction fee reduction, artist
-            bounty rewards, DAO liquidity, staking yield, and futarchy.
+            MidEvils community receives a smaller allocation for platform alignment
+            without diluting Commoner governance power. Purpose: auction fee reduction,
+            artist bounty rewards, DAO liquidity, and staking yield.
           </p>
 
           <div className="overflow-x-auto mb-6">
@@ -166,7 +165,7 @@ export default function LandingAccordion() {
                   <td className="px-3 py-2">MidEvil Airdrop</td>
                   <td className="px-3 py-2 text-muted">100M (10%)</td>
                   <td className="px-3 py-2 text-muted">
-                    ~20,490 per non-Commoner MidEvil — enables futarchy participation
+                    ~20,490 per non-Commoner MidEvil — platform alignment and future governance participation
                   </td>
                 </tr>
                 <tr className="border-b border-border">
@@ -187,7 +186,7 @@ export default function LandingAccordion() {
                   <td className="px-3 py-2">Staking Emissions</td>
                   <td className="px-3 py-2 text-muted">50M (5%)</td>
                   <td className="px-3 py-2 text-muted">
-                    Earned by locking COMMON 30/90/180 days (Phase 4)
+                    Earned by locking COMMON 30/90/180 days
                   </td>
                 </tr>
               </tbody>

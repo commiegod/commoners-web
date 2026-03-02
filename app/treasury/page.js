@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
 import idl from "../../lib/idl.json";
-import { getConnection, PROGRAM_ID, configPDA } from "../../lib/programClient";
+import { getConnection, PROGRAM_ID, configPDA, RPC_URL } from "../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 const MEMO_PROGRAM = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
 const AUCTION_PROGRAM = PROGRAM_ID.toBase58();
@@ -260,7 +262,7 @@ export default function TreasuryPage() {
         </p>
         {treasury && (
           <a
-            href={`https://explorer.solana.com/address/${treasury}?cluster=devnet`}
+            href={`https://explorer.solana.com/address/${treasury}${IS_DEVNET ? "?cluster=devnet" : ""}`}
             target="_blank"
             rel="noreferrer"
             className="font-mono text-xs text-muted hover:text-foreground transition-colors"
@@ -360,7 +362,7 @@ export default function TreasuryPage() {
 
                 {/* Solscan link */}
                 <a
-                  href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                  href={`https://explorer.solana.com/tx/${tx.signature}${IS_DEVNET ? "?cluster=devnet" : ""}`}
                   target="_blank"
                   rel="noreferrer"
                   className="shrink-0 text-xs text-muted hover:text-gold transition-colors mt-0.5"

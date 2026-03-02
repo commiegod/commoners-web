@@ -13,7 +13,10 @@ import {
   bidVaultPDA,
   findAuctionByMint,
   computeMinNextBid,
+  RPC_URL,
 } from "../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 
 function formatCountdown(endTimeSecs) {
@@ -323,7 +326,7 @@ export default function AuctionHero() {
                       <p className="text-xs text-green-700 break-all">
                         Bid placed!{" "}
                         <a
-                          href={`https://explorer.solana.com/tx/${txSuccess}?cluster=devnet`}
+                          href={`https://explorer.solana.com/tx/${txSuccess}${IS_DEVNET ? "?cluster=devnet" : ""}`}
                           target="_blank"
                           rel="noreferrer"
                           className="underline"
