@@ -368,6 +368,251 @@ function FinalizeCard({ prop, token, onDone }) {
   );
 }
 
+// ── Discussion helpers ────────────────────────────────────────────────────────
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
+function shortAddr(addr) {
+  return addr.slice(0, 4) + "…" + addr.slice(-4);
+}
+
+// ── Thread card (admin) ───────────────────────────────────────────────────────
+
+function ThreadCard({ thread, token, onDeleted }) {
+  const [confirmThread, setConfirmThread] = useState(false);
+  const [deletingThread, setDeletingThread] = useState(false);
+  const [confirmReply, setConfirmReply] = useState(null); // replyId
+  const [deletingReply, setDeletingReply] = useState(null); // replyId
+  const [error, setError] = useState(null);
+
+  async function deleteThread() {
+    setDeletingThread(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/discussion", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ threadId: thread.id }),
+      });
+      const data = await res.json();
+      if (data.ok) onDeleted(thread.id, null, null);
+      else setError(data.error || "Delete failed.");
+    } catch {
+      setError("Network error.");
+    } finally {
+      setDeletingThread(false);
+      setConfirmThread(false);
+    }
+  }
+
+  async function deleteReply(replyId) {
+    setDeletingReply(replyId);
+    setError(null);
+    try {
+      const res = await fetch("/api/discussion/reply", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ threadId: thread.id, replyId }),
+      });
+      const data = await res.json();
+      if (data.ok) onDeleted(null, thread.id, replyId);
+      else setError(data.error || "Delete failed.");
+    } catch {
+      setError("Network error.");
+    } finally {
+      setDeletingReply(null);
+      setConfirmReply(null);
+    }
+  }
+
+  return (
+    <div className="bg-card border border-border p-4 space-y-3">
+      {/* Thread header */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold truncate">{thread.subject}</p>
+          <p className="text-xs text-muted font-mono mt-0.5">
+            {shortAddr(thread.author)} · {timeAgo(thread.timestamp)} ·{" "}
+            {thread.replies.length} {thread.replies.length === 1 ? "reply" : "replies"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {confirmThread ? (
+            <>
+              <span className="text-xs text-muted">Delete thread + all replies?</span>
+              <button
+                onClick={deleteThread}
+                disabled={deletingThread}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+              >
+                {deletingThread ? "…" : "Confirm"}
+              </button>
+              <button
+                onClick={() => setConfirmThread(false)}
+                className="px-3 py-1.5 border border-border text-muted text-xs rounded-full hover:text-foreground cursor-pointer"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setConfirmThread(true)}
+              className="px-3 py-1.5 border border-red-300 text-red-600 text-xs rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              Delete Thread
+            </button>
+          )}
+        </div>
+      </div>
+
+      <p className="text-sm text-muted line-clamp-3 leading-snug">{thread.body}</p>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+
+      {/* Replies */}
+      {thread.replies.length > 0 && (
+        <div className="border-t border-border pt-3 space-y-3">
+          <p className="text-xs text-muted uppercase tracking-widest">Replies</p>
+          {thread.replies.map((reply, i) => (
+            <div key={reply.id} className="flex items-start gap-3 pl-3 border-l-2 border-border">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted font-mono mb-1">
+                  #{i + 1} · {shortAddr(reply.author)} · {timeAgo(reply.timestamp)}
+                </p>
+                <p className="text-sm text-foreground line-clamp-3 leading-snug">{reply.body}</p>
+              </div>
+              <div className="shrink-0 pt-0.5">
+                {confirmReply === reply.id ? (
+                  <div className="flex gap-1.5 items-center">
+                    <button
+                      onClick={() => deleteReply(reply.id)}
+                      disabled={deletingReply === reply.id}
+                      className="px-2.5 py-0.5 bg-red-600 text-white text-xs rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+                    >
+                      {deletingReply === reply.id ? "…" : "Confirm"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmReply(null)}
+                      className="px-2.5 py-0.5 border border-border text-muted text-xs rounded-full hover:text-foreground cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmReply(reply.id)}
+                    className="text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Discussion section ────────────────────────────────────────────────────────
+
+function DiscussionSection({ token }) {
+  const [threads, setThreads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/discussion");
+      if (res.ok) {
+        const data = await res.json();
+        setThreads(data.threads || []);
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  function onDeleted(threadId, parentThreadId, replyId) {
+    if (threadId) {
+      setThreads((t) => t.filter((th) => th.id !== threadId));
+    } else {
+      setThreads((t) =>
+        t.map((th) =>
+          th.id === parentThreadId
+            ? { ...th, replies: th.replies.filter((r) => r.id !== replyId) }
+            : th
+        )
+      );
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-blackletter text-2xl text-gold">
+          The Board
+          {!loading && (
+            <span className="ml-3 text-lg font-sans text-muted font-normal">
+              ({threads.length} thread{threads.length !== 1 ? "s" : ""})
+            </span>
+          )}
+        </h2>
+        <button
+          onClick={load}
+          className="text-xs text-muted hover:text-foreground border border-border px-3 py-1.5 rounded-full cursor-pointer"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-muted text-sm">Loading…</p>
+      ) : error ? (
+        <p className="text-sm text-red-600">{error}</p>
+      ) : threads.length === 0 ? (
+        <div className="bg-card border border-border p-8 text-center text-muted text-sm">
+          No threads yet.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {threads.map((thread) => (
+            <ThreadCard
+              key={thread.id}
+              thread={thread}
+              token={token}
+              onDeleted={onDeleted}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Admin panel ───────────────────────────────────────────────────────────────
 
 export default function AdminPanel({ token }) {
@@ -556,6 +801,9 @@ export default function AdminPanel({ token }) {
           </div>
         )}
       </div>
+
+      {/* ── Discussion board moderation ── */}
+      <DiscussionSection token={token} />
 
       <p className="text-xs text-muted">
         Approval commits to GitHub → triggers Vercel redeploy → live in ~30s.
