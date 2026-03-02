@@ -16,8 +16,8 @@ const WalletMultiButton = dynamic(
 const links = [
   { href: "/bounty", label: "Bounty" },
   { href: "/governance", label: "Governance" },
+  { href: "/discussion", label: "The Board" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/holders", label: "Holders" },
 ];
 
 export default function Nav() {
