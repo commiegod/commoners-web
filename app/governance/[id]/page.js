@@ -54,7 +54,7 @@ function VoteBar({ forV, against, abstain, thresholds }) {
         <div className="bg-red-500 transition-all" style={{ width: `${againstPct}%` }} />
       </div>
       <div className="flex justify-between text-xs text-muted mt-1">
-        <span>{quorumMet ? "Quorum met ✓" : `Need ${thresholds.quorum - total} more votes for quorum`}</span>
+        <span>{quorumMet ? "Quorum met" : `${thresholds.quorum - total} more votes needed for quorum`}</span>
         <span>{total} / {thresholds.quorum} quorum</span>
       </div>
     </div>
@@ -332,8 +332,19 @@ export default function ProposalPage({ params }) {
         >
           {proposal.status}
         </span>
-        {hasChain && (
-          <span className="text-xs text-muted border border-border px-2 py-0.5">On-chain ✓</span>
+        {hasChain && proposal.txSig && (
+          <a
+            href={`https://solscan.io/tx/${proposal.txSig}${cluster}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted border border-border px-2 py-0.5 hover:text-gold transition-colors"
+            title="View proposal creation transaction on Solscan"
+          >
+            On-chain ↗
+          </a>
+        )}
+        {hasChain && !proposal.txSig && (
+          <span className="text-xs text-muted border border-border px-2 py-0.5">On-chain</span>
         )}
       </div>
 
@@ -482,27 +493,27 @@ export default function ProposalPage({ params }) {
             {isActive && !expired && (
               <div className="pt-2">
                 {hasVoted ? (
-                  <div className="text-sm text-gold">
-                    Voted ✓{" "}
+                  <div className="border border-green-300 bg-green-50 px-3 py-2.5 text-sm">
+                    <p className="font-medium text-green-700 mb-1">Vote recorded</p>
+                    {chainVoteRecord && (
+                      <p className="text-xs text-green-700">
+                        For {chainVoteRecord.yes?.toNumber?.() ?? 0} · Against {chainVoteRecord.no?.toNumber?.() ?? 0} · Abstain {chainVoteRecord.abstain?.toNumber?.() ?? 0}
+                      </p>
+                    )}
+                    {!hasChain && myVote?.allocations && (
+                      <p className="text-xs text-green-700">
+                        For {myVote.allocations.yes ?? 0} · Against {myVote.allocations.no ?? 0} · Abstain {myVote.allocations.abstain ?? 0}
+                      </p>
+                    )}
                     {hasChain && txSig && (
                       <a
                         href={`https://solscan.io/tx/${txSig}${cluster}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-muted hover:text-gold font-mono"
+                        className="text-xs text-green-700 hover:underline font-mono mt-1 block"
                       >
-                        view tx ↗
+                        View on Solscan ↗
                       </a>
-                    )}
-                    {chainVoteRecord && (
-                      <p className="text-xs text-muted font-normal mt-1">
-                        Yes: {chainVoteRecord.yes?.toNumber?.() ?? 0} · No: {chainVoteRecord.no?.toNumber?.() ?? 0} · Abstain: {chainVoteRecord.abstain?.toNumber?.() ?? 0}
-                      </p>
-                    )}
-                    {!hasChain && myVote?.allocations && (
-                      <p className="text-xs text-muted font-normal mt-1">
-                        Yes: {myVote.allocations.yes ?? 0} · No: {myVote.allocations.no ?? 0} · Abstain: {myVote.allocations.abstain ?? 0}
-                      </p>
                     )}
                   </div>
                 ) : !connected ? (
@@ -528,7 +539,10 @@ export default function ProposalPage({ params }) {
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-xs text-muted">{commonerCount} vote{commonerCount !== 1 ? "s" : ""} available</p>
+                    <p className="text-xs text-muted">
+                      You have <span className="text-foreground font-medium">{commonerCount} vote{commonerCount !== 1 ? "s" : ""}</span> — 1 per Commoner NFT held.
+                      Split them any way you like.
+                    </p>
                     {[
                       { key: "yes", label: "For", cls: "border-green-300 focus:border-green-500" },
                       { key: "no", label: "Against", cls: "border-red-300 focus:border-red-500" },
@@ -555,7 +569,7 @@ export default function ProposalPage({ params }) {
                       </label>
                     ))}
                     <div className="text-xs text-muted text-right">
-                      {commonerCount - allocTotal} remaining
+                      {commonerCount - allocTotal} unallocated
                     </div>
                     {voteError && (
                       <div className="text-xs text-red-600 space-y-1">
@@ -577,10 +591,12 @@ export default function ProposalPage({ params }) {
                       disabled={voting || allocTotal === 0}
                       className="w-full px-4 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
                     >
-                      {voting ? "Submitting…" : `Submit Vote${hasChain ? " (on-chain)" : ""}`}
+                      {voting ? "Waiting for signature…" : "Submit Vote"}
                     </button>
                     {hasChain && (
-                      <p className="text-xs text-muted text-center">Requires wallet signature · ~0.001 SOL</p>
+                      <p className="text-xs text-muted text-center leading-relaxed">
+                        Your wallet will ask you to sign a Solana transaction (~0.001 SOL fee). Votes are permanent and publicly verifiable.
+                      </p>
                     )}
                   </div>
                 )}

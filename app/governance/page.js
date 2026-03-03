@@ -399,6 +399,33 @@ export default function GovernancePage() {
         </div>
       )}
 
+      {/* ── How It Works ── */}
+      <div className="grid sm:grid-cols-3 gap-px bg-border mb-10">
+        {[
+          {
+            n: "1",
+            title: "Submit",
+            body: "Any Commoner NFT holder can submit a proposal. An admin reviews it and posts it on-chain to open a 72-hour voting window.",
+          },
+          {
+            n: "2",
+            title: "Vote",
+            body: "Connect your wallet and split your votes (1 per Commoner NFT) across For, Against, or Abstain. Each vote is a signed Solana transaction — permanent and publicly verifiable.",
+          },
+          {
+            n: "3",
+            title: "Execute",
+            body: "If the proposal meets the required majority and quorum, it passes. Treasury disbursements are currently executed by admin after confirmation; autonomous execution is planned for a future phase.",
+          },
+        ].map(({ n, title, body }) => (
+          <div key={n} className="bg-background p-5">
+            <p className="text-xs text-muted tracking-widest uppercase mb-1">Step {n}</p>
+            <p className="font-semibold text-sm mb-2">{title}</p>
+            <p className="text-xs text-muted leading-relaxed">{body}</p>
+          </div>
+        ))}
+      </div>
+
       {/* ── Active proposals ── */}
       <section className="mb-10">
         <div className="border border-border overflow-hidden">
