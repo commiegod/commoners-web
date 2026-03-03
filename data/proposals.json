@@ -2,6 +2,7 @@
   {
     "id": "prop-1772395715019-8vfe",
     "chainId": "1772395738365",
+    "isTest": true,
     "type": "common-threshold",
     "title": "Devnet Test: On-Chain Voting System",
     "description": "System test used to validate the on-chain governance voting flow during devnet development. The cast_vote and finalize_proposal instructions were exercised here. Not a real governance decision.",
@@ -21,6 +22,7 @@
   {
     "id": "prop-1772395831442-iguw",
     "chainId": "1772395976540",
+    "isTest": true,
     "type": "governance-experiment",
     "title": "Devnet Test: Proposal Submission Flow",
     "description": "System test used to validate the proposal submission and admin approval workflow during devnet development. Not a real governance decision.",
@@ -40,6 +42,7 @@
   {
     "id": "prop-1772402343970-8ydh",
     "chainId": "1772403034335",
+    "isTest": true,
     "type": "builder-bounty",
     "title": "Devnet Test: Treasury Proposal Type",
     "description": "System test used to validate the treasury proposal type and builder bounty flow during devnet development. Not a real governance decision.",

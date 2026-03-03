@@ -8,7 +8,7 @@ const nextConfig = {
     return [
       {
         // Public read-only API routes — accessible to agents and external callers
-        source: "/api/:path(status|proposals|discussion)",
+        source: "/api/:path(status|proposals|discussion|discussion/:id)",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Access-Control-Allow-Methods", value: "GET, OPTIONS" },
