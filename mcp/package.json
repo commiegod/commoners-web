@@ -1,0 +1,24 @@
+{
+  "name": "commonersdao-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Commoner's DAO — auction, governance, treasury, and discussion tools for AI agents",
+  "type": "module",
+  "bin": {
+    "commonersdao-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1"
+  },
+  "keywords": [
+    "mcp",
+    "solana",
+    "dao",
+    "nft",
+    "governance",
+    "commoners"
+  ],
+  "license": "MIT"
+}
