@@ -1,10 +1,11 @@
 {
   "name": "commonersdao-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "mcpName": "io.github.commiegod/commonersdao-mcp",
   "description": "MCP server for Commoner's DAO — auction, governance, treasury, and discussion tools for AI agents",
   "type": "module",
   "bin": {
-    "commonersdao-mcp": "./index.js"
+    "commonersdao-mcp": "index.js"
   },
   "scripts": {
     "start": "node index.js"
@@ -30,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/commiegod/commoners-web.git",
+    "url": "git+https://github.com/commiegod/commoners-web.git",
     "directory": "mcp"
   },
   "homepage": "https://commonersdao.com",

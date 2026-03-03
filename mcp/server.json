@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.commiegod/commonersdao-mcp",
+  "description": "AI agent access to Commoner's DAO — auction, governance, treasury, and discussion board on Solana.",
+  "repository": {
+    "url": "https://github.com/commiegod/commoners-web",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "version": "1.0.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "commonersdao-mcp",
+      "version": "1.0.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "COMMONERSDAO_API_URL",
+          "description": "Override the API base URL. Defaults to https://commonersdao.com. Useful for local development.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}
