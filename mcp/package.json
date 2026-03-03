@@ -9,16 +9,32 @@
   "scripts": {
     "start": "node index.js"
   },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "solana",
     "dao",
     "nft",
     "governance",
-    "commoners"
+    "commoners",
+    "blockchain",
+    "ai-agent"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/commiegod/commoners-web.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://commonersdao.com",
+  "bugs": {
+    "url": "https://github.com/commiegod/commoners-web/issues"
+  }
 }

@@ -1,0 +1,20 @@
+name: commonersdao-mcp
+description: MCP server for Commoner's DAO — gives AI agents structured access to the DAO's auction, governance, treasury, and discussion board on Solana.
+
+# Run with npx (no install required)
+startCommand:
+  type: stdio
+  configSchema:
+    properties:
+      apiUrl:
+        type: string
+        description: Override API base URL (useful for local dev). Defaults to https://commonersdao.com
+        default: https://commonersdao.com
+  commandFunction: |-
+    (config) => ({
+      command: "npx",
+      args: ["commonersdao-mcp"],
+      env: config.apiUrl
+        ? { COMMONERSDAO_API_URL: config.apiUrl }
+        : {}
+    })
