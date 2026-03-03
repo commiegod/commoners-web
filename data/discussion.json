@@ -1,3 +1,52 @@
 {
-  "threads": []
+  "threads": [
+    {
+      "id": "mmaqzudnigj7",
+      "subject": "Introduce yourself",
+      "body": "Starting the board properly. Who are you, how did you find the MidEvils, and which Commoners are you holding?\n\nIf you have skills you would like to bring to the DAO — art, dev, community, connections — mention it. The 120 Commoner NFT holders are the founding membership. This is a good place to start getting to know each other before the real governance work begins.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772550825611,
+      "replies": []
+    },
+    {
+      "id": "mmaqzudnsukz",
+      "subject": "Bounty judging: what makes a good submission?",
+      "body": "The artist bounty program is almost ready to go live. Holders vote on submissions each day and the winner earns COMMON from the rewards pool.\n\nWe have not defined what \"good\" means yet. A few angles to consider:\n\n- Technical quality — is the work well-executed on its own terms?\n- Fidelity to the NFT — does it capture the specific traits (background, skin, feature)?\n- Originality — does it add something beyond the obvious interpretation?\n- Presentation — framing, composition, context?\n\nOpen questions:\n- Should human and AI submissions be judged by the same criteria?\n- Should there be a minimum vote threshold before a winner is declared?\n- What happens when only one submission exists — automatic win, or no award?\n- Should there be a cooldown before the same artist can win back-to-back days?\n\nPost your instincts. We will use this thread to draft formal criteria before bounties go live.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772550525611,
+      "replies": []
+    },
+    {
+      "id": "mmaqzudn2dnu",
+      "subject": "What should the treasury prioritize?",
+      "body": "Every auction generates fees that flow to the treasury. Once SOL starts building up the DAO needs a framework for allocation before individual proposals start arriving asking for specific amounts.\n\nObvious categories:\n- Artist bounty rewards (COMMON handles some of this but SOL bounties are possible too)\n- Development: audits, tooling, infrastructure\n- Liquidity: seeding a SOL/COMMON pool when the token launches\n- Marketing and community growth\n- Reserves: hold it\n\nA few questions worth settling early:\n- What is the minimum reserve we should maintain before spending anything?\n- Should there be a standing allocation to bounties, or hold everything for formal proposals?\n- Is there a category that should be off-limits or prioritized above all others?\n\nThis is not a formal proposal yet — just want to understand where people's heads are at before the first treasury request comes in.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772550225611,
+      "replies": []
+    },
+    {
+      "id": "mmaqzudnolu2",
+      "subject": "Quorum thresholds: 24/120 for standard, 36/120 for treasury — right call?",
+      "body": "The current governance thresholds:\n\n- Standard proposals: 51% majority, 24/120 quorum (20% of all votes)\n- Treasury 5–20 SOL: 67% majority, 36/120 quorum (30%)\n- Treasury > 20 SOL: 75% majority, 36/120 quorum (30%)\n\n24/120 is intentionally low — set that way because we do not know what participation rates will look like early on and governance gridlock would be worse than an easy-to-pass proposal.\n\nArguments for keeping it low: prevents stalling when the DAO is new and participation is unpredictable.\n\nArguments for raising it: a 24-vote majority deciding something that affects 120 holders feels thin.\n\nA few things to consider:\n- Should quorum scale up over time as the DAO matures and participation patterns become clear?\n- Should community initiatives (no treasury ask) have a lower bar than parameter changes?\n- At what point would you feel comfortable saying a proposal genuinely represents the community?",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549925611,
+      "replies": []
+    },
+    {
+      "id": "mmaqzudnm7q0",
+      "subject": "Staking emissions: what APY per lock duration?",
+      "body": "50M COMMON (5% of total supply) is allocated for staking rewards. The lock durations are 30, 90, and 180 days. The allocation is set but the rates are not.\n\nThings to weigh:\n- Higher APY encourages locking, reduces circulating supply, which may support token value\n- Aggressive emissions dilute holders who do not stake\n- The 180-day lock should reward meaningfully more than 30 days — what is a reasonable multiple?\n\nSome numbers to react to:\n- 30 days: 5% APY / 90 days: 12% APY / 180 days: 20% APY\n- Or a multiplier model: base rate × 1 / × 2.5 / × 4\n\nThe total rewards pool (50M COMMON) effectively caps how long staking can run at any given rate. If we go aggressive early we burn through it faster — so the rate decision is also a decision about how many years the program lasts.\n\nWhat feels right?",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549625611,
+      "replies": []
+    },
+    {
+      "id": "mmaqzudn4jxr",
+      "subject": "COMMON fee threshold — what should the cutoffs be?",
+      "body": "The COMMON token gives holders reduced auction fees. Hold more COMMON, pay less. The current placeholder tiers are:\n\n- 0 – 1,666,666 COMMON: 9% (standard)\n- 1,666,667 – 3,333,332 COMMON: 6%\n- 3,333,333 – 4,999,999 COMMON: 3%\n- 5,000,000+ COMMON: 0% (fee-free)\n\nThese numbers were set as placeholders and are explicitly meant to be the first real governance proposal. The community votes to confirm or adjust.\n\nWorth noting: the 60% Commoner airdrop gives each of the 120 NFT holders roughly 5M COMMON at snapshot. So the zero-fee threshold is currently set exactly at what a single Commoner holder would receive from the airdrop alone — meaning every Commoner holder who claims starts fee-free by default.\n\nThat might be intentional or it might be too easy. Questions:\n- Is fee-free at the full airdrop amount the right call, or should it require accumulation beyond the baseline?\n- Are the intermediate tiers (6% and 3%) at the right breakpoints?\n- The listing minimum is 20,000 COMMON — does that feel right as a barrier to list?\n\nPost your reasoning. Once there is a rough consensus here we will write it up as a formal proposal.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549325611,
+      "replies": []
+    }
+  ]
 }
