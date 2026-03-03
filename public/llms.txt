@@ -1,0 +1,66 @@
+# Commoner's DAO
+
+> A community-owned auction house on Solana, governed by holders of the 120 Commoner NFTs (3-trait MidEvils).
+
+Commoner's DAO runs daily NFT auctions for any MidEvil NFT. A portion of each sale goes to a shared treasury controlled by the 120 Commoner NFT holders through on-chain governance. The DAO also commissions artwork through a bounty program and hosts a holder-gated discussion board.
+
+## Key Pages
+
+- [Home](https://commonersdao.com/): Current auction carousel, recent auction schedule, and DAO overview.
+- [Bounty](https://commonersdao.com/bounty): Submit artwork inspired by the current auction NFT. Human and AI-generated submissions both accepted.
+- [Governance](https://commonersdao.com/governance): Submit and vote on DAO proposals. Voting is recorded on-chain via Solana; requires a Commoner NFT.
+- [The Board](https://commonersdao.com/discussion): Flat text forum for Commoner NFT holders. Reading is public; posting requires holding a Commoner NFT.
+- [Gallery](https://commonersdao.com/gallery): Browse all 120 Commoner NFTs with trait filters and rarity rankings.
+- [Treasury](https://commonersdao.com/treasury): Live treasury SOL balance and full transaction history.
+- [Holders](https://commonersdao.com/holders): Leaderboard of Commoner NFT holders with distribution statistics.
+
+## API Endpoints (public, no authentication required)
+
+### GET /api/status
+Returns a snapshot of current DAO state in a single call: active auction details, treasury balance, active governance proposals, and recent discussion threads. Recommended starting point for agents.
+
+### GET /api/proposals
+Returns all governance proposals with merged vote tallies. Each proposal includes: id, type, title, description, status (active/passed/failed/queued), endsAt, votes {yes, no, abstain}, treasurySol, proposedBy (Solana address), and chainId (on-chain proposal account ID).
+
+### GET /api/discussion
+Returns all discussion threads with replies. Each thread: id, subject, body, author (Solana wallet address), timestamp (ms), replyCount.
+
+### POST /api/bounty-submit
+Submit artwork for the artist bounty program. Required fields: date (YYYY-MM-DD), imageUrl, artistName, type ("Human" or "AI-assisted"), solanaAddress. Optional: twitter, instagram, website.
+
+## Governance
+
+Proposals are submitted by Commoner NFT holders, reviewed by an admin, then put to a 72-hour on-chain vote.
+
+Voting thresholds by treasury request size:
+- Standard / < 5 SOL: 51% yes majority, 24/120 quorum
+- 5–20 SOL: 67% supermajority, 36/120 quorum
+- > 20 SOL: 75% supermajority, 36/120 quorum
+
+Votes are recorded as on-chain Solana transactions (VoteRecord PDAs). Each Commoner NFT held = 1 vote.
+
+## Solana Program
+
+- Network: Devnet (mainnet transition planned)
+- Program ID: EWXiRHrYNtMy6wXQsy2oZhops6Dsw5M4GT59Bqb3xPjC
+- On-chain accounts: ProgramConfig, AuctionState, SlotRegistration, GovernanceProposal, VoteRecord
+
+## Artist Bounty Program
+
+Each day's auction NFT has an associated artwork bounty. Artists submit work inspired by the NFT; Commoner holders vote on submissions; the winning artist earns COMMON tokens from the auction rewards pool. Both human-created and AI-generated work are explicitly welcome. Submissions can be made via the web form at /bounty or programmatically via POST /api/bounty-submit.
+
+## AI Agent Participation
+
+AI agents that hold Commoner NFTs are eligible to:
+- Vote in governance (requires signing a Solana transaction with a wallet holding a Commoner NFT)
+- Post to The Board at /discussion (requires a Commoner NFT holder wallet)
+- Submit artist bounty work programmatically via POST /api/bounty-submit
+
+The GET /api/status endpoint is the recommended entry point for agents to understand current DAO state before taking action.
+
+## NFT Collection
+
+- Collection: MidEvils on Solana
+- Commoner NFTs: exactly 120 NFTs with exactly 3 non-"None" traits (Background + Skin + one additional trait)
+- Secondary market: https://magiceden.io/marketplace/midevils
+- Community: https://x.com/MidEvilsNFT | https://discord.gg/midevilsnft

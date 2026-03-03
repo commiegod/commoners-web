@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://commonersdao.com/sitemap.xml
+
+# AI agent info: https://commonersdao.com/llms.txt
