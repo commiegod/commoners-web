@@ -155,7 +155,10 @@
       "name": "create_auction",
       "docs": [
         "Called by the backend crank at the start of each auction day",
-        "to open bidding for the scheduled NFT."
+        "to open bidding for the scheduled NFT.",
+        "`end_time` is the explicit Unix timestamp for auction close —",
+        "pass the next midnight UTC so the auction ends deterministically",
+        "regardless of when the crank actually runs."
       ],
       "discriminator": [
         234,
@@ -267,6 +270,10 @@
         {
           "name": "auction_id",
           "type": "u64"
+        },
+        {
+          "name": "end_time",
+          "type": "i64"
         }
       ]
     },
@@ -1635,36 +1642,41 @@
     },
     {
       "code": 6014,
+      "name": "InvalidEndTime",
+      "msg": "end_time must be in the future and no more than 48 hours away"
+    },
+    {
+      "code": 6015,
       "name": "ProposalNotActive",
       "msg": "Proposal is not active"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "VotingEnded",
       "msg": "Voting period has ended"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "AllocationExceedsWeight",
       "msg": "Vote allocation exceeds voter's weight"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "NoVotesAllocated",
       "msg": "No votes allocated"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "TitleTooLong",
       "msg": "Title exceeds maximum length"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "DescriptionTooLong",
       "msg": "Description exceeds maximum length"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "TypeTooLong",
       "msg": "Proposal type exceeds maximum length"
     }
