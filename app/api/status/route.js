@@ -33,14 +33,25 @@ async function fetchCurrentAuction(connection) {
   const { state } = active[0];
 
   const mint = state.nft_mint.toBase58();
+
+  // Try Helius DAS first, fall back to auction schedule JSON for devnet mints
   const assets = await fetchMetadataBatch([mint]);
   const asset = assets[0];
+  let nftName = asset?.content?.metadata?.name ?? null;
+  let nftImage = asset?.content?.links?.image ?? asset?.content?.files?.[0]?.uri ?? null;
+
+  if (!nftName || !nftImage) {
+    const { content: schedule } = await getFile("data/auction-schedule.json").catch(() => ({ content: {} }));
+    const entry = Object.values(schedule || {}).find((e) => e.nftId === mint);
+    nftName = nftName ?? entry?.name ?? null;
+    nftImage = nftImage ?? entry?.image ?? null;
+  }
 
   return {
     auctionId: state.auction_id.toNumber(),
     nftMint: mint,
-    nftName: asset?.content?.metadata?.name ?? null,
-    nftImage: asset?.content?.links?.image ?? asset?.content?.files?.[0]?.uri ?? null,
+    nftName,
+    nftImage,
     currentBidSol: state.current_bid.toNumber() / LAMPORTS_PER_SOL,
     reservePriceSol: state.reserve_price.toNumber() / LAMPORTS_PER_SOL,
     highestBidder: state.highest_bidder?.toBase58?.() ?? null,
