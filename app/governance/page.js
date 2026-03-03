@@ -350,14 +350,12 @@ export default function GovernancePage() {
             {balanceSol !== null ? `${balanceSol.toFixed(4)} SOL` : "—"}
           </p>
           {treasury && (
-            <a
-              href={`https://explorer.solana.com/address/${treasury}${cluster}`}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/treasury"
               className="text-xs text-muted hover:text-gold transition-colors mt-1 inline-block"
             >
               Transaction history ↗
-            </a>
+            </Link>
           )}
         </div>
         <div className="sm:pl-6 text-sm text-muted leading-relaxed">

@@ -51,12 +51,16 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <footer className="border-t border-border py-8 mt-16">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-3">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-4">
               <div className="flex items-center gap-2">
                 <img src="/icon.png" alt="" className="h-10 w-auto" />
                 <img src="/wordmark.png" alt="Commoner's DAO" className="h-7 w-auto" style={{ mixBlendMode: "multiply" }} />
               </div>
-
+              <div className="flex items-center gap-5 text-xs text-muted">
+                <a href="https://x.com/MidEvilsNFT" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Twitter / X</a>
+                <a href="https://discord.gg/midevilsnft" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Discord</a>
+                <a href="https://magiceden.io/marketplace/midevils" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Magic Eden</a>
+              </div>
             </div>
           </footer>
           </ErrorBoundary>

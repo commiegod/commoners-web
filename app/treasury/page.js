@@ -46,10 +46,14 @@ function extractMemo(instructions) {
   return null;
 }
 
-// Extract Helius API key from the devnet RPC URL env var
-const HELIUS_KEY = (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "").match(
-  /api-key=([^&]+)/
-)?.[1];
+// Extract Helius API key from the appropriate RPC URL env var
+const _heliusRpcUrl = IS_DEVNET
+  ? (process.env.NEXT_PUBLIC_HELIUS_RPC_URL || "")
+  : (process.env.NEXT_PUBLIC_HELIUS_MAINNET_RPC_URL || "");
+const HELIUS_KEY = _heliusRpcUrl.match(/api-key=([^&]+)/)?.[1];
+const HELIUS_BASE = IS_DEVNET
+  ? "https://api-devnet.helius.xyz"
+  : "https://api.helius.xyz";
 
 async function loadTreasuryData(skipCache = false) {
   if (!skipCache) {
@@ -79,7 +83,7 @@ async function loadTreasuryData(skipCache = false) {
 
   if (HELIUS_KEY) {
     // Use Helius Enhanced Transactions API — one request, pre-parsed, no batch limit
-    const url = `https://api-devnet.helius.xyz/v0/addresses/${treasury}/transactions?api-key=${HELIUS_KEY}&limit=25`;
+    const url = `${HELIUS_BASE}/v0/addresses/${treasury}/transactions?api-key=${HELIUS_KEY}&limit=25`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`${res.status} : ${await res.text()}`);
     const enhanced = await res.json();
@@ -244,7 +248,7 @@ export default function TreasuryPage() {
         <button
           onClick={() => load(true)}
           disabled={loading}
-          className="text-xs text-muted hover:text-foreground border border-border px-3 py-1.5 transition-colors disabled:opacity-40"
+          className="text-xs text-muted hover:text-foreground border border-border px-3 py-1.5 rounded-full transition-colors disabled:opacity-40 cursor-pointer"
         >
           {loading ? "Loading…" : "Refresh"}
         </button>
