@@ -488,6 +488,19 @@ export default function BountyPage() {
       </section>
 
       {/* ── Section 3: Image Wall ── */}
+      {groupedByDate.length === 0 && (
+        <section>
+          <div className="border border-border p-6 max-w-lg text-sm text-muted leading-relaxed">
+            <p className="font-medium text-foreground mb-2">No submissions yet.</p>
+            <p>
+              The bounty program launches alongside the daily auctions. Once active, artwork
+              submitted for each auction NFT will appear here — human and AI-generated work
+              both welcome. Approved submissions are eligible for COMMON from the auction
+              rewards pool.
+            </p>
+          </div>
+        </section>
+      )}
       {groupedByDate.length > 0 && (
         <section>
           <h2 className="font-blackletter text-2xl text-gold mb-8">

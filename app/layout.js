@@ -61,6 +61,11 @@ export default function RootLayout({ children }) {
                 <a href="https://discord.gg/midevilsnft" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Discord</a>
                 <a href="https://magiceden.io/marketplace/midevils" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Magic Eden</a>
               </div>
+              <div className="flex items-center gap-5 text-xs text-muted">
+                <a href="/holders" className="hover:text-foreground transition-colors">Holders</a>
+                <a href="/treasury" className="hover:text-foreground transition-colors">Treasury</a>
+                <a href="/gallery" className="hover:text-foreground transition-colors">Gallery</a>
+              </div>
             </div>
           </footer>
           </ErrorBoundary>

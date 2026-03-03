@@ -102,6 +102,15 @@ export default function GalleryPage() {
     // Full-bleed breakout from layout's max-w-6xl padding
     <div style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", marginTop: "-2rem" }}>
 
+      {/* ── Context header ── */}
+      <div className="px-4 pt-6 pb-4 max-w-6xl mx-auto">
+        <h1 className="font-blackletter text-3xl text-gold mb-1">Gallery</h1>
+        <p className="text-sm text-muted">
+          The 120 Commoner NFTs — 3-trait MidEvils with exactly Background, Skin, and one additional
+          trait. Each grants one vote in the DAO.
+        </p>
+      </div>
+
       {/* ── Sticky toolbar ── */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex flex-wrap items-center gap-2 px-4 py-2.5">
