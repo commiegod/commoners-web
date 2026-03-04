@@ -5,7 +5,7 @@ import LandingAccordion from "./components/LandingAccordion";
 
 export default function Home() {
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-16 pb-16 overflow-x-hidden">
       <AuctionCarousel />
       <CurrentAuction />
       <RecentAuctions />

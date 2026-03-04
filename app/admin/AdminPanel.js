@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { getThresholds } from "../../lib/commoners";
+import { getConnection, fetchActiveAuctions, RPC_URL } from "../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 // ── Bounty submission card ────────────────────────────────────────────────────
 
@@ -613,6 +617,133 @@ function DiscussionSection({ token }) {
   );
 }
 
+// ── Auction Status section ────────────────────────────────────────────────────
+
+function AuctionStatusSection() {
+  const [auctions, setAuctions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const cluster = IS_DEVNET ? "?cluster=devnet" : "";
+  const now = Math.floor(Date.now() / 1000);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const conn = getConnection();
+      const active = await fetchActiveAuctions(conn);
+      active.sort((a, b) => b.state.auction_id.toNumber() - a.state.auction_id.toNumber());
+      setAuctions(active);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  function shortMint(mint) {
+    const s = mint.toBase58();
+    return s.slice(0, 4) + "…" + s.slice(-4);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-blackletter text-2xl text-gold">
+          Auction Status
+          {!loading && (
+            <span className="ml-3 text-lg font-sans text-muted font-normal">
+              ({auctions.length} unsettled)
+            </span>
+          )}
+        </h2>
+        <button
+          onClick={load}
+          className="text-xs text-muted hover:text-foreground transition-colors border border-border px-3 py-1.5 cursor-pointer"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-muted text-sm">Loading…</p>
+      ) : error ? (
+        <p className="text-sm text-red-600">{error}</p>
+      ) : auctions.length === 0 ? (
+        <div className="bg-card border border-border p-8 text-center text-muted text-sm">
+          No unsettled auctions.
+        </div>
+      ) : (
+        <div className="border border-border overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-card text-xs text-muted uppercase tracking-wider">
+                <th className="px-4 py-2.5 text-left">ID</th>
+                <th className="px-4 py-2.5 text-left">NFT Mint</th>
+                <th className="px-4 py-2.5 text-left">Ends</th>
+                <th className="px-4 py-2.5 text-right">Bid (SOL)</th>
+                <th className="px-4 py-2.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {auctions.map(({ pubkey, state }) => {
+                const auctionId = state.auction_id.toNumber();
+                const mintStr = state.nft_mint.toBase58();
+                const endTime = state.end_time.toNumber();
+                const ended = endTime < now;
+                const bidSol = state.current_bid.toNumber() / LAMPORTS_PER_SOL;
+                const isStale = ended && !state.settled;
+
+                return (
+                  <tr
+                    key={pubkey.toBase58()}
+                    className={`border-b border-border last:border-0 ${isStale ? "bg-amber-50" : "hover:bg-card/60"}`}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs">{auctionId}</td>
+                    <td className="px-4 py-3 font-mono text-xs">
+                      <a
+                        href={`https://solscan.io/token/${mintStr}${cluster}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-gold transition-colors"
+                      >
+                        {shortMint(state.nft_mint)} ↗
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted">
+                      {new Date(endTime * 1000).toLocaleString("en-US", {
+                        month: "short", day: "numeric",
+                        hour: "numeric", minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">
+                      {bidSol > 0 ? bidSol.toFixed(4) : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {isStale ? (
+                        <span className="text-xs text-amber-700 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                          Stale
+                        </span>
+                      ) : (
+                        <span className="text-xs text-green-700 bg-green-50 border border-green-300 px-2 py-0.5 rounded-full">
+                          Live
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Admin panel ───────────────────────────────────────────────────────────────
 
 export default function AdminPanel({ token }) {
@@ -681,6 +812,9 @@ export default function AdminPanel({ token }) {
 
   return (
     <div className="max-w-3xl space-y-16">
+      {/* ── Auction status ── */}
+      <AuctionStatusSection />
+
       {/* ── Bounty submissions ── */}
       <div>
         <div className="flex items-center justify-between mb-8">

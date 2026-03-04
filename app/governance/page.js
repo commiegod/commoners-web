@@ -110,11 +110,11 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
       <div className="bg-card border border-border p-5 mb-8">
         <p className="text-xs text-muted uppercase tracking-widest mb-4">Review Your Proposal</p>
         <div className="space-y-2 mb-5 text-sm">
-          <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Type</span><span>{typeInfo?.label}</span></div>
-          <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Title</span><span className="font-semibold">{form.title}</span></div>
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Type</span><span>{typeInfo?.label}</span></div>
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Title</span><span className="font-semibold">{form.title}</span></div>
           {solAmount > 0 && <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Treasury ask</span><span className="text-gold font-semibold">{solAmount} SOL</span></div>}
-          <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Threshold</span><span className="text-muted">{thresholds.majority}% majority · {thresholds.quorum}/{TOTAL_NFTS} quorum</span></div>
-          <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Proposer</span><span className="font-mono text-xs text-muted">{short}</span></div>
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Threshold</span><span className="text-muted">{thresholds.majority}% majority · {thresholds.quorum}/{TOTAL_NFTS} quorum</span></div>
+          <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Proposer</span><span className="font-mono text-xs text-muted">{short}</span></div>
         </div>
         <div className="border-t border-border pt-4 mb-5">
           <p className="text-xs text-muted uppercase tracking-wider mb-2">Description</p>
@@ -292,7 +292,7 @@ export default function GovernancePage() {
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <p className="text-sm text-muted mb-1">Governance</p>
-          <h1 className="font-blackletter text-4xl text-foreground leading-tight">
+          <h1 className="font-blackletter text-2xl sm:text-4xl text-foreground leading-tight">
             Commoner&apos;s DAO
           </h1>
         </div>

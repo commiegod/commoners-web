@@ -101,7 +101,7 @@ export default function DiscussionPage() {
   return (
     <div className="max-w-3xl">
       {/* Header */}
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex flex-wrap items-end justify-between gap-y-2 mb-6">
         <div>
           <h1 className="font-blackletter text-4xl text-foreground">The Board</h1>
           <p className="text-xs text-muted mt-1">

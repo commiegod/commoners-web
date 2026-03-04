@@ -23,16 +23,19 @@ export default function RecentAuctions() {
   const [selected, setSelected] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
-  const upcoming = slots.filter((s) => s.dateStr >= today).slice(0, 10);
 
-  if (!loading && upcoming.length === 0) {
-    return (
-      <section>
-        <h2 className="font-blackletter text-2xl text-gold mb-4">Auction Schedule</h2>
-        <p className="text-muted text-sm">No auctions scheduled yet. List your NFT to claim the next slot.</p>
-      </section>
-    );
+  // Build a map of registered slots by date
+  const slotByDate = {};
+  for (const s of slots) {
+    if (s.dateStr >= today) slotByDate[s.dateStr] = s;
   }
+
+  // Generate 10 calendar days starting today
+  const calendarDays = Array.from({ length: 10 }, (_, i) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + i);
+    return d.toISOString().split("T")[0];
+  });
 
   const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 
@@ -56,35 +59,54 @@ export default function RecentAuctions() {
                 className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden animate-pulse"
               >
                 <div className="w-full aspect-square bg-border/30" />
-                <div className="p-2 space-y-1">
+                <div className="p-3 space-y-1.5">
                   <div className="h-3 bg-border rounded w-3/4" />
                   <div className="h-3 bg-border rounded w-1/2" />
                 </div>
               </div>
             ))
-          : upcoming.map((slot) => (
-              <button
-                key={slot.dateStr}
-                onClick={() => setSelected(slot)}
-                className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden text-left hover:border-gold transition-colors focus:outline-none cursor-pointer"
-              >
-                {slot.image ? (
-                  <img
-                    src={slot.image}
-                    alt={slot.name}
-                    className="w-full aspect-square object-cover"
-                  />
-                ) : (
-                  <div className="w-full aspect-square bg-border/30 flex items-center justify-center">
-                    <span className="font-blackletter text-2xl text-muted/30">?</span>
+          : calendarDays.map((dateStr) => {
+              const slot = slotByDate[dateStr];
+              if (slot) {
+                return (
+                  <button
+                    key={dateStr}
+                    onClick={() => setSelected(slot)}
+                    className="flex-shrink-0 w-40 bg-card border border-border overflow-hidden text-left hover:border-gold transition-colors focus:outline-none cursor-pointer"
+                  >
+                    {slot.image ? (
+                      <img
+                        src={slot.image}
+                        alt={slot.name}
+                        className="w-full aspect-square object-cover"
+                      />
+                    ) : (
+                      <div className="w-full aspect-square bg-border/30 flex items-center justify-center">
+                        <span className="font-blackletter text-2xl text-muted/30">?</span>
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <p className="text-sm font-medium truncate">{slot.name}</p>
+                      <p className="text-xs text-muted">{dateStr}</p>
+                    </div>
+                  </button>
+                );
+              }
+              return (
+                <div
+                  key={dateStr}
+                  className="flex-shrink-0 w-40 bg-card border border-dashed border-border overflow-hidden"
+                >
+                  <div className="w-full aspect-square bg-border/10 flex items-center justify-center">
+                    <span className="text-xs text-muted/40 uppercase tracking-widest">Open</span>
                   </div>
-                )}
-                <div className="p-2">
-                  <p className="text-sm font-medium truncate">{slot.name}</p>
-                  <p className="text-xs text-muted">{slot.dateStr}</p>
+                  <div className="p-3">
+                    <p className="text-sm font-medium text-muted/50">— Open —</p>
+                    <p className="text-xs text-muted">{dateStr}</p>
+                  </div>
                 </div>
-              </button>
-            ))}
+              );
+            })}
       </div>
 
       {/* ── Slot detail modal ── */}
