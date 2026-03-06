@@ -1,6 +1,21 @@
 {
   "threads": [
     {
+      "id": "mmaqzudn4jxr",
+      "subject": "COMMON fee threshold — what should the cutoffs be?",
+      "body": "The COMMON token gives holders reduced auction fees. Hold more COMMON, pay less. The current placeholder tiers are:\n\n- 0 – 1,666,666 COMMON: 9% (standard)\n- 1,666,667 – 3,333,332 COMMON: 6%\n- 3,333,333 – 4,999,999 COMMON: 3%\n- 5,000,000+ COMMON: 0% (fee-free)\n\nThese numbers were set as placeholders and are explicitly meant to be the first real governance proposal. The community votes to confirm or adjust.\n\nWorth noting: the 60% Commoner airdrop gives each of the 120 NFT holders roughly 5M COMMON at snapshot. So the zero-fee threshold is currently set exactly at what a single Commoner holder would receive from the airdrop alone — meaning every Commoner holder who claims starts fee-free by default.\n\nThat might be intentional or it might be too easy. Questions:\n- Is fee-free at the full airdrop amount the right call, or should it require accumulation beyond the baseline?\n- Are the intermediate tiers (6% and 3%) at the right breakpoints?\n- The listing minimum is 20,000 COMMON — does that feel right as a barrier to list?\n\nPost your reasoning. Once there is a rough consensus here we will write it up as a formal proposal.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549325611,
+      "replies": [
+        {
+          "id": "mmfgv5ci2pgl",
+          "body": "i love the 9% tax as a way to grow the treasury and incentivize COMMON demand. \n\nwith the current COMMON tokenomic proposal giving each commoner 5M tokens, they would still be able to list for free. \n\nother midevil holders would also be getting airdropped 20,000+ tokens, which is more than enough to list.\n\ni'm flexible on all of the details in between.",
+          "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+          "timestamp": 1772836141266
+        }
+      ]
+    },
+    {
       "id": "mmaqzudnm7q0",
       "subject": "Staking emissions: what APY per lock duration?",
       "body": "50M COMMON (5% of total supply) is allocated for staking rewards. The lock durations are 30, 90, and 180 days. The allocation is set but the rates are not.\n\nThings to weigh:\n- Higher APY encourages locking, reduces circulating supply, which may support token value\n- Aggressive emissions dilute holders who do not stake\n- The 180-day lock should reward meaningfully more than 30 days — what is a reasonable multiple?\n\nSome numbers to react to:\n- 30 days: 5% APY / 90 days: 12% APY / 180 days: 20% APY\n- Or a multiplier model: base rate × 1 / × 2.5 / × 4\n\nThe total rewards pool (50M COMMON) effectively caps how long staking can run at any given rate. If we go aggressive early we burn through it faster — so the rate decision is also a decision about how many years the program lasts.\n\nWhat feels right?",
@@ -74,14 +89,6 @@
           "timestamp": 1772834145215
         }
       ]
-    },
-    {
-      "id": "mmaqzudn4jxr",
-      "subject": "COMMON fee threshold — what should the cutoffs be?",
-      "body": "The COMMON token gives holders reduced auction fees. Hold more COMMON, pay less. The current placeholder tiers are:\n\n- 0 – 1,666,666 COMMON: 9% (standard)\n- 1,666,667 – 3,333,332 COMMON: 6%\n- 3,333,333 – 4,999,999 COMMON: 3%\n- 5,000,000+ COMMON: 0% (fee-free)\n\nThese numbers were set as placeholders and are explicitly meant to be the first real governance proposal. The community votes to confirm or adjust.\n\nWorth noting: the 60% Commoner airdrop gives each of the 120 NFT holders roughly 5M COMMON at snapshot. So the zero-fee threshold is currently set exactly at what a single Commoner holder would receive from the airdrop alone — meaning every Commoner holder who claims starts fee-free by default.\n\nThat might be intentional or it might be too easy. Questions:\n- Is fee-free at the full airdrop amount the right call, or should it require accumulation beyond the baseline?\n- Are the intermediate tiers (6% and 3%) at the right breakpoints?\n- The listing minimum is 20,000 COMMON — does that feel right as a barrier to list?\n\nPost your reasoning. Once there is a rough consensus here we will write it up as a formal proposal.",
-      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-      "timestamp": 1772549325611,
-      "replies": []
     }
   ]
 }
