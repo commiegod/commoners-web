@@ -9,6 +9,7 @@ import idl from "../../lib/idl.json";
 import {
   configPDA,
   bidVaultPDA,
+  slotPDA,
   computeMinNextBid,
   PROGRAM_ID,
   RPC_URL,
@@ -17,6 +18,16 @@ import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
+
+const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+
+function getAta(owner, mint) {
+  return PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  )[0];
+}
 
 function formatCountdown(endTimeSecs) {
   const now = Math.floor(Date.now() / 1000);
@@ -103,6 +114,9 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
   const [txSuccess, setTxSuccess] = useState(null);
   const [bidHistory, setBidHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [settleError, setSettleError] = useState(null);
+  const [settleSuccess, setSettleSuccess] = useState(null);
   const countdownRef = useRef(null);
 
   // Countdown ticker
@@ -166,6 +180,59 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
       );
     } finally {
       setBidding(false);
+    }
+  }
+
+  async function settleAuction() {
+    if (!wallet.publicKey) return;
+    setSettleError(null);
+    setSettleSuccess(null);
+    setSettling(true);
+    try {
+      const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
+      const program = new Program(idl, provider);
+
+      const [configAddress] = configPDA();
+      const config = await program.account.programConfig.fetch(configAddress);
+
+      const nftMint = state.nft_mint;
+      const seller = state.seller;
+      const winner = state.current_bidder ?? wallet.publicKey;
+      const [slotAddress] = slotPDA(nftMint, state.auction_id);
+      const [bidVault] = bidVaultPDA(state.auction_id);
+
+      const escrowTokenAccount = getAta(slotAddress, nftMint);
+      const winnerTokenAccount = getAta(winner, nftMint);
+      const sellerTokenAccount = getAta(seller, nftMint);
+
+      const sig = await program.methods
+        .settleAuction()
+        .accounts({
+          payer: wallet.publicKey,
+          config: configAddress,
+          auction: pubkey,
+          slot: slotAddress,
+          nftMint,
+          escrowTokenAccount,
+          winnerTokenAccount,
+          sellerTokenAccount,
+          bidVault,
+          seller,
+          winner,
+          treasury: config.treasury,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      setSettleSuccess(sig);
+    } catch (e) {
+      setSettleError(
+        e?.message?.match(/custom program error: (0x\w+)/)?.[0] || e?.message || "Transaction failed"
+      );
+    } finally {
+      setSettling(false);
     }
   }
 
@@ -269,7 +336,42 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted">Auction ended — awaiting settlement.</p>
+            <div className="space-y-3">
+              {settleSuccess ? (
+                <p className="text-xs text-green-700">
+                  Settlement complete!{" "}
+                  <a href={`https://explorer.solana.com/tx/${settleSuccess}${IS_DEVNET ? "?cluster=devnet" : ""}`} target="_blank" rel="noreferrer" className="underline">
+                    View tx ↗
+                  </a>
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm text-muted">
+                    {state.current_bidder
+                      ? wallet.publicKey?.toBase58() === state.current_bidder.toBase58()
+                        ? "You won this auction. Claim your NFT now."
+                        : "Auction ended. Anyone can settle — the NFT transfers to the winner."
+                      : "Auction ended with no bids. Settle to return the NFT to the seller."}
+                  </p>
+                  {wallet.publicKey ? (
+                    <button
+                      onClick={settleAuction}
+                      disabled={settling}
+                      className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    >
+                      {settling
+                        ? "Settling…"
+                        : state.current_bidder?.toBase58() === wallet.publicKey?.toBase58()
+                        ? "Claim Your NFT"
+                        : "Settle Auction"}
+                    </button>
+                  ) : (
+                    <WalletMultiButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
+                  )}
+                  {settleError && <p className="text-xs text-red-600">{settleError}</p>}
+                </>
+              )}
+            </div>
           )}
         </div>
 
@@ -373,7 +475,7 @@ export default function CurrentAuction() {
 
       {hasActiveOnChain ? (
         <div className="space-y-8">
-          {sorted.map((auctionData) => {
+          {sorted.slice(0, 1).map((auctionData) => {
             const mintStr = auctionData.state.nft_mint?.toBase58?.() ?? "";
             const slotMeta = mintToSlot[mintStr] || null;
             return (
