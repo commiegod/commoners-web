@@ -1,6 +1,21 @@
 {
   "threads": [
     {
+      "id": "mmaqzudnsukz",
+      "subject": "Bounty judging: what makes a good submission?",
+      "body": "The artist bounty program is almost ready to go live. Holders vote on submissions each day and the winner earns COMMON from the rewards pool.\n\nWe have not defined what \"good\" means yet. A few angles to consider:\n\n- Technical quality — is the work well-executed on its own terms?\n- Fidelity to the NFT — does it capture the specific traits (background, skin, feature)?\n- Originality — does it add something beyond the obvious interpretation?\n- Presentation — framing, composition, context?\n\nOpen questions:\n- Should human and AI submissions be judged by the same criteria?\n- Should there be a minimum vote threshold before a winner is declared?\n- What happens when only one submission exists — automatic win, or no award?\n- Should there be a cooldown before the same artist can win back-to-back days?\n\nPost your instincts. We will use this thread to draft formal criteria before bounties go live.",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772550525611,
+      "replies": [
+        {
+          "id": "mmffxh8uyji5",
+          "body": "market decides what \"good\" will be. since the bounty is divided by how many votes each image has. \n\ni don't think minimum vote or submission thresholds or cooldowns are necessary. we should incentivize anybody creating art for the community. \n\ni wanted to make the process as permissionless as possible but some moderation is needed here to filter obscenity, et al. what process should we use for moderation?",
+          "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+          "timestamp": 1772834570382
+        }
+      ]
+    },
+    {
       "id": "mmaqzudnigj7",
       "subject": "Introduce yourself",
       "body": "Starting the board properly. Who are you, how did you find the MidEvils, and which Commoners are you holding?\n\nIf you have skills you would like to bring to the DAO — art, dev, community, connections — mention it. The 120 Commoner NFT holders are the founding membership. This is a good place to start getting to know each other before the real governance work begins.",
@@ -14,14 +29,6 @@
           "timestamp": 1772834145215
         }
       ]
-    },
-    {
-      "id": "mmaqzudnsukz",
-      "subject": "Bounty judging: what makes a good submission?",
-      "body": "The artist bounty program is almost ready to go live. Holders vote on submissions each day and the winner earns COMMON from the rewards pool.\n\nWe have not defined what \"good\" means yet. A few angles to consider:\n\n- Technical quality — is the work well-executed on its own terms?\n- Fidelity to the NFT — does it capture the specific traits (background, skin, feature)?\n- Originality — does it add something beyond the obvious interpretation?\n- Presentation — framing, composition, context?\n\nOpen questions:\n- Should human and AI submissions be judged by the same criteria?\n- Should there be a minimum vote threshold before a winner is declared?\n- What happens when only one submission exists — automatic win, or no award?\n- Should there be a cooldown before the same artist can win back-to-back days?\n\nPost your instincts. We will use this thread to draft formal criteria before bounties go live.",
-      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-      "timestamp": 1772550525611,
-      "replies": []
     },
     {
       "id": "mmaqzudn2dnu",
