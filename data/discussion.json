@@ -1,6 +1,21 @@
 {
   "threads": [
     {
+      "id": "mmaqzudnolu2",
+      "subject": "Quorum thresholds: 24/120 for standard, 36/120 for treasury — right call?",
+      "body": "The current governance thresholds:\n\n- Standard proposals: 51% majority, 24/120 quorum (20% of all votes)\n- Treasury 5–20 SOL: 67% majority, 36/120 quorum (30%)\n- Treasury > 20 SOL: 75% majority, 36/120 quorum (30%)\n\n24/120 is intentionally low — set that way because we do not know what participation rates will look like early on and governance gridlock would be worse than an easy-to-pass proposal.\n\nArguments for keeping it low: prevents stalling when the DAO is new and participation is unpredictable.\n\nArguments for raising it: a 24-vote majority deciding something that affects 120 holders feels thin.\n\nA few things to consider:\n- Should quorum scale up over time as the DAO matures and participation patterns become clear?\n- Should community initiatives (no treasury ask) have a lower bar than parameter changes?\n- At what point would you feel comfortable saying a proposal genuinely represents the community?",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549925611,
+      "replies": [
+        {
+          "id": "mmfganst8psc",
+          "body": "it's no secret that i've set the quorum low to make it easier for me to get proposals passed early on. i plan on investing the funds to get the auction contract going on mainnet and have aligned incentives with the commoners dao.\n\ni am open to community feedback on this. i would consider abstaining from votes that i have conflicts of interest in.",
+          "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+          "timestamp": 1772835185405
+        }
+      ]
+    },
+    {
       "id": "mmaqzudn2dnu",
       "subject": "What should the treasury prioritize?",
       "body": "Every auction generates fees that flow to the treasury. Once SOL starts building up the DAO needs a framework for allocation before individual proposals start arriving asking for specific amounts.\n\nObvious categories:\n- Artist bounty rewards (COMMON handles some of this but SOL bounties are possible too)\n- Development: audits, tooling, infrastructure\n- Liquidity: seeding a SOL/COMMON pool when the token launches\n- Marketing and community growth\n- Reserves: hold it\n\nA few questions worth settling early:\n- What is the minimum reserve we should maintain before spending anything?\n- Should there be a standing allocation to bounties, or hold everything for formal proposals?\n- Is there a category that should be off-limits or prioritized above all others?\n\nThis is not a formal proposal yet — just want to understand where people's heads are at before the first treasury request comes in.",
@@ -44,14 +59,6 @@
           "timestamp": 1772834145215
         }
       ]
-    },
-    {
-      "id": "mmaqzudnolu2",
-      "subject": "Quorum thresholds: 24/120 for standard, 36/120 for treasury — right call?",
-      "body": "The current governance thresholds:\n\n- Standard proposals: 51% majority, 24/120 quorum (20% of all votes)\n- Treasury 5–20 SOL: 67% majority, 36/120 quorum (30%)\n- Treasury > 20 SOL: 75% majority, 36/120 quorum (30%)\n\n24/120 is intentionally low — set that way because we do not know what participation rates will look like early on and governance gridlock would be worse than an easy-to-pass proposal.\n\nArguments for keeping it low: prevents stalling when the DAO is new and participation is unpredictable.\n\nArguments for raising it: a 24-vote majority deciding something that affects 120 holders feels thin.\n\nA few things to consider:\n- Should quorum scale up over time as the DAO matures and participation patterns become clear?\n- Should community initiatives (no treasury ask) have a lower bar than parameter changes?\n- At what point would you feel comfortable saying a proposal genuinely represents the community?",
-      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-      "timestamp": 1772549925611,
-      "replies": []
     },
     {
       "id": "mmaqzudnm7q0",
