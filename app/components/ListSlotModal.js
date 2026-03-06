@@ -16,6 +16,9 @@ const TOKEN_PROGRAM_ID = new PublicKey(
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
   "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
 );
+const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
+  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+);
 
 const COMMONER_MINTS = new Set(commoners.nfts.map((n) => n.id));
 const COMMONER_BY_MINT = Object.fromEntries(
@@ -133,6 +136,10 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
       const [slot] = slotPDA(mintPubkey, scheduledDateBn);
       const holderTokenAccount = getAta(wallet.publicKey, mintPubkey);
       const escrowTokenAccount = getAta(slot, mintPubkey);
+      const [nftMetadata] = PublicKey.findProgramAddressSync(
+        [Buffer.from("metadata"), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mintPubkey.toBuffer()],
+        TOKEN_METADATA_PROGRAM_ID
+      );
 
       await program.methods
         .listSlot(scheduledDateBn, reserveLamports)
@@ -140,6 +147,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
           holder: wallet.publicKey,
           config,
           nftMint: mintPubkey,
+          nftMetadata,
           holderTokenAccount,
           escrowTokenAccount,
           slot,
