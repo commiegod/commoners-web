@@ -1,6 +1,21 @@
 {
   "threads": [
     {
+      "id": "mmaqzudnm7q0",
+      "subject": "Staking emissions: what APY per lock duration?",
+      "body": "50M COMMON (5% of total supply) is allocated for staking rewards. The lock durations are 30, 90, and 180 days. The allocation is set but the rates are not.\n\nThings to weigh:\n- Higher APY encourages locking, reduces circulating supply, which may support token value\n- Aggressive emissions dilute holders who do not stake\n- The 180-day lock should reward meaningfully more than 30 days — what is a reasonable multiple?\n\nSome numbers to react to:\n- 30 days: 5% APY / 90 days: 12% APY / 180 days: 20% APY\n- Or a multiplier model: base rate × 1 / × 2.5 / × 4\n\nThe total rewards pool (50M COMMON) effectively caps how long staking can run at any given rate. If we go aggressive early we burn through it faster — so the rate decision is also a decision about how many years the program lasts.\n\nWhat feels right?",
+      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+      "timestamp": 1772549625611,
+      "replies": [
+        {
+          "id": "mmfgk5l5dzir",
+          "body": "my initial feeling is to have bitcoin-style halvings every few years where the rewards are cut in half, maybe subject to a governance vote.",
+          "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
+          "timestamp": 1772835628361
+        }
+      ]
+    },
+    {
       "id": "mmaqzudnolu2",
       "subject": "Quorum thresholds: 24/120 for standard, 36/120 for treasury — right call?",
       "body": "The current governance thresholds:\n\n- Standard proposals: 51% majority, 24/120 quorum (20% of all votes)\n- Treasury 5–20 SOL: 67% majority, 36/120 quorum (30%)\n- Treasury > 20 SOL: 75% majority, 36/120 quorum (30%)\n\n24/120 is intentionally low — set that way because we do not know what participation rates will look like early on and governance gridlock would be worse than an easy-to-pass proposal.\n\nArguments for keeping it low: prevents stalling when the DAO is new and participation is unpredictable.\n\nArguments for raising it: a 24-vote majority deciding something that affects 120 holders feels thin.\n\nA few things to consider:\n- Should quorum scale up over time as the DAO matures and participation patterns become clear?\n- Should community initiatives (no treasury ask) have a lower bar than parameter changes?\n- At what point would you feel comfortable saying a proposal genuinely represents the community?",
@@ -59,14 +74,6 @@
           "timestamp": 1772834145215
         }
       ]
-    },
-    {
-      "id": "mmaqzudnm7q0",
-      "subject": "Staking emissions: what APY per lock duration?",
-      "body": "50M COMMON (5% of total supply) is allocated for staking rewards. The lock durations are 30, 90, and 180 days. The allocation is set but the rates are not.\n\nThings to weigh:\n- Higher APY encourages locking, reduces circulating supply, which may support token value\n- Aggressive emissions dilute holders who do not stake\n- The 180-day lock should reward meaningfully more than 30 days — what is a reasonable multiple?\n\nSome numbers to react to:\n- 30 days: 5% APY / 90 days: 12% APY / 180 days: 20% APY\n- Or a multiplier model: base rate × 1 / × 2.5 / × 4\n\nThe total rewards pool (50M COMMON) effectively caps how long staking can run at any given rate. If we go aggressive early we burn through it faster — so the rate decision is also a decision about how many years the program lasts.\n\nWhat feels right?",
-      "author": "HFX5pP5wBwXe2qRYDcjNExL5ibtPJajPyNBBn6c4LC41",
-      "timestamp": 1772549625611,
-      "replies": []
     },
     {
       "id": "mmaqzudn4jxr",
