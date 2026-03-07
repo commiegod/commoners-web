@@ -47,7 +47,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <ErrorBoundary>
           <Nav />
-          <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 overflow-x-clip">
             {children}
           </main>
           <footer className="border-t border-border py-8 mt-16">

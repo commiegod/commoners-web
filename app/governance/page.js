@@ -112,7 +112,7 @@ function SubmitForm({ onClose, walletAddress, commonerCount }) {
         <div className="space-y-2 mb-5 text-sm">
           <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Type</span><span>{typeInfo?.label}</span></div>
           <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Title</span><span className="font-semibold">{form.title}</span></div>
-          {solAmount > 0 && <div className="grid grid-cols-[140px_1fr] gap-2"><span className="text-muted">Treasury ask</span><span className="text-gold font-semibold">{solAmount} SOL</span></div>}
+          {solAmount > 0 && <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Treasury ask</span><span className="text-gold font-semibold">{solAmount} SOL</span></div>}
           <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Threshold</span><span className="text-muted">{thresholds.majority}% majority · {thresholds.quorum}/{TOTAL_NFTS} quorum</span></div>
           <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-2"><span className="text-muted">Proposer</span><span className="font-mono text-xs text-muted">{short}</span></div>
         </div>
