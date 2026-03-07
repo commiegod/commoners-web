@@ -17,9 +17,16 @@ function collectionName(name) {
   return match ? match[1].trim() : null;
 }
 
+function formatCardDate(dateStr) {
+  return new Date(dateStr + "T12:00:00Z").toLocaleDateString("en-US", {
+    month: "short", day: "numeric", timeZone: "UTC",
+  });
+}
+
 export default function RecentAuctions() {
   const { slots, loading, invalidate } = useAuctionSchedule();
   const [showModal, setShowModal] = useState(false);
+  const [modalDefaultDate, setModalDefaultDate] = useState(null);
   const [selected, setSelected] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
@@ -87,24 +94,25 @@ export default function RecentAuctions() {
                     )}
                     <div className="p-3">
                       <p className="text-sm font-medium truncate">{slot.name}</p>
-                      <p className="text-xs text-muted">{dateStr}</p>
+                      <p className="text-xs text-muted">{formatCardDate(dateStr)}</p>
                     </div>
                   </button>
                 );
               }
               return (
-                <div
+                <button
                   key={dateStr}
-                  className="flex-shrink-0 w-40 bg-card border border-dashed border-border overflow-hidden"
+                  onClick={() => { setModalDefaultDate(dateStr); setShowModal(true); }}
+                  className="flex-shrink-0 w-40 bg-card border border-dashed border-border overflow-hidden text-left hover:border-gold transition-colors focus:outline-none cursor-pointer"
                 >
                   <div className="w-full aspect-square bg-border/10 flex items-center justify-center">
                     <span className="text-xs text-muted/40 uppercase tracking-widest">Open</span>
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-medium text-muted/50">— Open —</p>
-                    <p className="text-xs text-muted">{dateStr}</p>
+                    <p className="text-xs text-muted">{formatCardDate(dateStr)}</p>
                   </div>
-                </div>
+                </button>
               );
             })}
       </div>
@@ -216,11 +224,9 @@ export default function RecentAuctions() {
       {showModal && (
         <ListSlotModal
           takenDates={slots.map((s) => s.dateStr)}
-          onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            setShowModal(false);
-            invalidate();
-          }}
+          defaultDate={modalDefaultDate}
+          onClose={() => { setShowModal(false); setModalDefaultDate(null); }}
+          onSuccess={() => { setShowModal(false); setModalDefaultDate(null); invalidate(); }}
         />
       )}
     </section>

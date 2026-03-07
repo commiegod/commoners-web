@@ -59,14 +59,16 @@ function getAvailableDates(takenDates) {
   return dates;
 }
 
-export default function ListSlotModal({ takenDates, onClose, onSuccess }) {
+export default function ListSlotModal({ takenDates, onClose, onSuccess, defaultDate }) {
   const { connection } = useConnection();
   const wallet = useWallet();
 
   const [step, setStep] = useState("loading"); // loading | pick | submitting | done
   const [myNfts, setMyNfts] = useState([]);
   const [selectedMint, setSelectedMint] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    defaultDate ? availableDates.find((d) => d.str === defaultDate) || null : null
+  );
   const [reserveSol, setReserveSol] = useState(IS_DEVNET ? "0.05" : "0.1");
   const [txError, setTxError] = useState(null);
 
