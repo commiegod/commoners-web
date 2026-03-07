@@ -67,7 +67,7 @@ export default function ListSlotModal({ takenDates, onClose, onSuccess, defaultD
   const [myNfts, setMyNfts] = useState([]);
   const [selectedMint, setSelectedMint] = useState(null);
   const [selectedDate, setSelectedDate] = useState(
-    defaultDate ? availableDates.find((d) => d.str === defaultDate) || null : null
+    () => defaultDate ? getAvailableDates(takenDates).find((d) => d.str === defaultDate) || null : null
   );
   const [reserveSol, setReserveSol] = useState(IS_DEVNET ? "0.05" : "0.1");
   const [txError, setTxError] = useState(null);
