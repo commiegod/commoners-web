@@ -30,7 +30,7 @@ export async function POST(request) {
     );
   }
 
-  // Build seed → name map per region from R1 matchups
+  // Build seed → { name, logo } map per region from R1 matchups
   const regionSeeds = { east: {}, west: {}, south: {}, midwest: {} };
 
   for (const game of r1Games) {
@@ -41,7 +41,7 @@ export async function POST(request) {
 
     for (const c of competitors) {
       if (c.seed >= 1 && c.seed <= 16) {
-        regionSeeds[info.region][c.seed] = c.name;
+        regionSeeds[info.region][c.seed] = { name: c.name, logo: c.logo };
       }
     }
   }
@@ -67,11 +67,12 @@ export async function POST(request) {
   let updated = 0;
   for (const [regionKey, seedMap] of Object.entries(regionSeeds)) {
     if (!bracket.regions[regionKey]) continue;
-    for (const [seedStr, name] of Object.entries(seedMap)) {
+    for (const [seedStr, { name, logo }] of Object.entries(seedMap)) {
       const seed = parseInt(seedStr, 10);
       const team = bracket.regions[regionKey].teams.find((t) => t.seed === seed);
       if (team && team.name !== name) {
         team.name = name;
+        if (logo) team.logoUrl = logo;
         updated++;
       }
     }

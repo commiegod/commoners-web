@@ -61,6 +61,9 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
       }
     >
       <span className="text-muted/60 w-3 shrink-0 text-right leading-none">{team.seed}</span>
+      {team.logoUrl && (
+        <img src={team.logoUrl} alt="" className="w-3.5 h-3.5 object-contain shrink-0" aria-hidden="true" />
+      )}
       <span className="truncate leading-tight">{team.name || "TBD"}</span>
     </div>
   );

@@ -650,6 +650,7 @@ function BracketAdminSection({ token }) {
   // ESPN sync state
   const [espnSyncing, setEspnSyncing] = useState(null); // "teams" | "results" | null
   const [espnMsg, setEspnMsg] = useState(null);
+  const [clearingTeams, setClearingTeams] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -758,6 +759,26 @@ function BracketAdminSection({ token }) {
       setEspnMsg(`Error: ${e.message}`);
     } finally {
       setEspnSyncing(null);
+    }
+  }
+
+  async function clearAllTeams() {
+    if (!confirm("Clear all 64 team names and logos? This cannot be undone.")) return;
+    setClearingTeams(true);
+    setEspnMsg(null);
+    try {
+      const res = await fetch("/api/admin/bracket-reset-teams", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Reset failed");
+      setEspnMsg(`Cleared ${data.cleared} team slots.`);
+      await load();
+    } catch (e) {
+      setEspnMsg(`Error: ${e.message}`);
+    } finally {
+      setClearingTeams(false);
     }
   }
 
@@ -1010,6 +1031,13 @@ function BracketAdminSection({ token }) {
           >
             {espnSyncing === "results" ? "Syncing results…" : "Sync Results from ESPN"}
           </button>
+          <button
+            onClick={clearAllTeams}
+            disabled={clearingTeams || !!espnSyncing}
+            className="px-4 py-1.5 border border-red-300 text-red-500 text-xs hover:bg-red-50 disabled:opacity-40 cursor-pointer"
+          >
+            {clearingTeams ? "Clearing…" : "Clear All Teams"}
+          </button>
           {espnMsg && (
             <span className={`text-xs ${espnMsg.startsWith("Error") ? "text-red-500" : "text-green-700"}`}>
               {espnMsg}
@@ -1019,6 +1047,7 @@ function BracketAdminSection({ token }) {
         <p className="text-xs text-muted/60">
           Sync Teams: run once after Selection Sunday to auto-fill all 64 teams.
           Sync Results: run after each round to pull completed game winners from ESPN.
+          Clear All Teams: wipe all team names to start fresh before re-syncing.
         </p>
       </div>
 
