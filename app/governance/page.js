@@ -297,6 +297,7 @@ export default function GovernancePage() {
           backgroundImage: "url('/banner-governance.png')",
           backgroundSize: "cover",
           backgroundPosition: "center 25%",
+          backgroundColor: "#c00",
         }}
         className="mb-8"
       />
