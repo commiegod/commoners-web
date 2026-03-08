@@ -189,82 +189,82 @@
         {
           "id": "south_s1",
           "seed": 1,
-          "name": "TBD"
+          "name": "Florida"
         },
         {
           "id": "south_s2",
           "seed": 2,
-          "name": "TBD"
+          "name": "Houston"
         },
         {
           "id": "south_s3",
           "seed": 3,
-          "name": "TBD"
+          "name": "Nebraska"
         },
         {
           "id": "south_s4",
           "seed": 4,
-          "name": "TBD"
+          "name": "Kansas"
         },
         {
           "id": "south_s5",
           "seed": 5,
-          "name": "TBD"
+          "name": "Arkansas"
         },
         {
           "id": "south_s6",
           "seed": 6,
-          "name": "TBD"
+          "name": "Louisville"
         },
         {
           "id": "south_s7",
           "seed": 7,
-          "name": "TBD"
+          "name": "St. Mary's"
         },
         {
           "id": "south_s8",
           "seed": 8,
-          "name": "TBD"
+          "name": "Miami"
         },
         {
           "id": "south_s9",
           "seed": 9,
-          "name": "TBD"
+          "name": "Ohio St."
         },
         {
           "id": "south_s10",
           "seed": 10,
-          "name": "TBD"
+          "name": "Texas"
         },
         {
           "id": "south_s11",
           "seed": 11,
-          "name": "TBD"
+          "name": "UCF"
         },
         {
           "id": "south_s12",
           "seed": 12,
-          "name": "TBD"
+          "name": "South Florida"
         },
         {
           "id": "south_s13",
           "seed": 13,
-          "name": "TBD"
+          "name": "UNC Wilmington"
         },
         {
           "id": "south_s14",
           "seed": 14,
-          "name": "TBD"
+          "name": "ETSU"
         },
         {
           "id": "south_s15",
           "seed": 15,
-          "name": "TBD"
+          "name": "C Arkansas"
         },
         {
           "id": "south_s16",
           "seed": 16,
-          "name": "TBD"
+          "name": "Howard"
         }
       ]
     },
