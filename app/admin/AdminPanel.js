@@ -1464,7 +1464,8 @@ export default function AdminPanel({ token }) {
           </div>
         )}
       </div>
-      </div>}
+      </div>
+      }
 
       {/* ── Governance ── */}
       {activeTab === "governance" && <div className="space-y-16">
@@ -1541,7 +1542,8 @@ export default function AdminPanel({ token }) {
         )}
       </div>
 
-      </div>}
+      </div>
+      }
 
       {/* ── Discussion ── */}
       {activeTab === "discussion" && (

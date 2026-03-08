@@ -297,7 +297,6 @@ export default function GovernancePage() {
           backgroundImage: "url('/banner-governance.png')",
           backgroundSize: "cover",
           backgroundPosition: "center 25%",
-          backgroundColor: "#c00",
         }}
         className="mb-8"
       />
@@ -306,9 +305,8 @@ export default function GovernancePage() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <p className="text-sm text-muted mb-1">Governance</p>
           <h1 className="font-blackletter text-2xl sm:text-4xl text-foreground leading-tight">
-            Commoner&apos;s DAO
+            Governance
           </h1>
         </div>
 
