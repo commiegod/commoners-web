@@ -256,9 +256,16 @@ export default function TreasuryPage() {
 
       {/* Balance card */}
       <div className="bg-card border border-border p-6 mb-4">
-        <p className="text-xs text-muted tracking-widest uppercase mb-1">
-          Treasury Balance
-        </p>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-xs text-muted tracking-widest uppercase">
+            Treasury Balance
+          </p>
+          {IS_DEVNET && (
+            <span className="text-[10px] font-semibold px-1.5 py-px rounded border border-amber-300 text-amber-600 bg-amber-50 uppercase tracking-wide leading-none">
+              Devnet
+            </span>
+          )}
+        </div>
         <p className="text-4xl font-bold text-gold mb-1">
           {loading && balance === null
             ? "—"

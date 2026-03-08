@@ -345,7 +345,14 @@ export default function GovernancePage() {
       {/* ── Treasury card ── */}
       <div className="border border-border p-5 mb-8 grid sm:grid-cols-2 gap-5 sm:gap-0 sm:divide-x sm:divide-border">
         <div className="sm:pr-6">
-          <p className="text-xs text-muted tracking-widest uppercase mb-2">Treasury</p>
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-xs text-muted tracking-widest uppercase">Treasury</p>
+            {IS_DEVNET && (
+              <span className="text-[10px] font-semibold px-1.5 py-px rounded border border-amber-300 text-amber-600 bg-amber-50 uppercase tracking-wide leading-none">
+                Devnet
+              </span>
+            )}
+          </div>
           <p className="text-3xl font-bold">
             {balanceSol !== null ? `${balanceSol.toFixed(4)} SOL` : "—"}
           </p>
