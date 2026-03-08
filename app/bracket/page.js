@@ -135,16 +135,16 @@ export default function BracketPage() {
                   no strings attached.
                 </p>
                 <p className="text-sm text-muted leading-relaxed">
-                  Chadwick debuted in our{" "}
+                  Chadwick debuted in{" "}
                   <a
                     href="https://x.com/CommieGod/status/2025915421598044319"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
                   >
-                    Mid of the Day
+                    the Mid of the Day series
                   </a>{" "}
-                  series on X. He belongs with someone who calls their shot.
+                  on X. He belongs with someone who calls their shot.
                 </p>
                 <p className="text-xs text-muted/60">
                   MidEvils holders only — up to 5 entries per wallet.
