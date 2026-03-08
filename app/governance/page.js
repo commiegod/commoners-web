@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
@@ -288,23 +287,21 @@ export default function GovernancePage() {
   const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 
   return (
-    <div className="max-w-3xl">
+    <div>
       {/* Hero banner — full-bleed */}
       <div
         style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
         className="overflow-hidden mb-8"
       >
-        <Image
+        <img
           src="/banner-governance.png"
           alt="MidEvils seated at a council table"
-          width={1500}
-          height={500}
           className="w-full object-cover"
-          style={{ maxHeight: "220px", objectPosition: "center 25%" }}
-          priority
+          style={{ height: "220px", objectPosition: "center 25%" }}
         />
       </div>
 
+      <div className="max-w-3xl">
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
@@ -490,6 +487,7 @@ export default function GovernancePage() {
       <p className="text-xs text-muted mt-10 border-t border-border pt-4">
         Approved proposals are recorded on-chain. Autonomous proposal execution is planned for a future phase.
       </p>
+    </div>
     </div>
   );
 }
