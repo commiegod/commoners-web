@@ -4,7 +4,7 @@ import { scoreEntry, maxPossibleScore } from "../../../../../lib/bracket";
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const [{ content: bracket }, { content: entriesData }] = await Promise.all([
       getFile("data/bracket-2026.json"),
