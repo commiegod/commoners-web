@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { getCommonerCount } from "../../lib/commoners";
 
 const WalletMultiButton = dynamic(
@@ -100,6 +101,22 @@ export default function DiscussionPage() {
 
   return (
     <div className="max-w-3xl">
+      {/* Hero banner — full-bleed */}
+      <div
+        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+        className="overflow-hidden mb-8"
+      >
+        <Image
+          src="/banner-the-board.png"
+          alt="A MidEvil writing by candlelight"
+          width={1500}
+          height={600}
+          className="w-full object-cover"
+          style={{ maxHeight: "220px", objectPosition: "center 30%" }}
+          priority
+        />
+      </div>
+
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-y-2 mb-6">
         <div>

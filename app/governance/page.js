@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
@@ -288,6 +289,22 @@ export default function GovernancePage() {
 
   return (
     <div className="max-w-3xl">
+      {/* Hero banner — full-bleed */}
+      <div
+        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+        className="overflow-hidden mb-8"
+      >
+        <Image
+          src="/banner-governance.png"
+          alt="MidEvils seated at a council table"
+          width={1500}
+          height={500}
+          className="w-full object-cover"
+          style={{ maxHeight: "220px", objectPosition: "center 25%" }}
+          priority
+        />
+      </div>
+
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
