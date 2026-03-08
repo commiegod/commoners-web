@@ -644,6 +644,7 @@ function BracketAdminSection({ token }) {
   const [expandedRegion, setExpandedRegion] = useState(null);
   // Which round's results are expanded
   const [expandedResults, setExpandedResults] = useState(null);
+  const [deletingEntryId, setDeletingEntryId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -719,6 +720,24 @@ function BracketAdminSection({ token }) {
 
   function saveResults() {
     save({ results: resultsEdits });
+  }
+
+  async function deleteEntry(id) {
+    if (!confirm("Delete this entry? This cannot be undone.")) return;
+    setDeletingEntryId(id);
+    try {
+      const res = await fetch(`/api/admin/bracket-entries/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Delete failed");
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setDeletingEntryId(null);
+    }
   }
 
   // Get all teams for a game's two slots (from edited teamNames)
@@ -957,23 +976,35 @@ function BracketAdminSection({ token }) {
         </div>
       </div>
 
-      {/* Entry summary */}
-      {entries.length > 0 && (
-        <div className="bg-card border border-border p-4 space-y-3">
-          <p className="text-xs text-muted uppercase tracking-widest mb-3">Top Entries ({entries.length} total)</p>
+      {/* Entry list */}
+      <div className="bg-card border border-border p-4 space-y-3">
+        <p className="text-xs text-muted uppercase tracking-widest mb-3">
+          Entries ({entries.length} total)
+        </p>
+        {entries.length === 0 ? (
+          <p className="text-xs text-muted/60">No entries yet.</p>
+        ) : (
           <div className="space-y-1">
-            {entries.slice(0, 10).map((entry, i) => (
-              <div key={entry.id} className="flex items-center justify-between text-xs py-1 border-b border-border/50 last:border-0">
-                <span className="text-muted w-6">#{i+1}</span>
+            {entries.map((entry, i) => (
+              <div key={entry.id} className="flex items-center gap-2 text-xs py-1 border-b border-border/50 last:border-0">
+                <span className="text-muted w-6 shrink-0">#{i+1}</span>
                 <span className="flex-1 font-medium truncate">{entry.username}</span>
-                <span className="font-mono text-muted">{entry.walletAddress?.slice(0,4)}…{entry.walletAddress?.slice(-4)}</span>
-                <span className="ml-4 font-semibold text-gold">{entry.score ?? 0} pts</span>
-                <a href={`/bracket/${entry.id}`} target="_blank" rel="noreferrer" className="ml-3 text-muted hover:text-foreground">↗</a>
+                <span className="font-mono text-muted shrink-0">{entry.walletAddress?.slice(0,4)}…{entry.walletAddress?.slice(-4)}</span>
+                <span className="font-semibold text-gold shrink-0">{entry.score ?? 0} pts</span>
+                <a href={`/bracket/${entry.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-foreground shrink-0">↗</a>
+                <button
+                  onClick={() => deleteEntry(entry.id)}
+                  disabled={deletingEntryId === entry.id}
+                  className="text-muted hover:text-red-500 transition-colors shrink-0 disabled:opacity-40 cursor-pointer"
+                  title="Delete entry"
+                >
+                  {deletingEntryId === entry.id ? "…" : "✕"}
+                </button>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
