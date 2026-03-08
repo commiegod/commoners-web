@@ -203,6 +203,31 @@ export default function BracketPage() {
             </div>
           )}
 
+          {/* Your entries (wallet connected) */}
+          {walletAddress && !loading && (() => {
+            const mine = entries.filter((e) => e.walletAddress === walletAddress);
+            if (mine.length === 0) return null;
+            return (
+              <div className="mb-6">
+                <h2 className="text-sm text-muted uppercase tracking-widest mb-3">Your Entries</h2>
+                <div className="border border-border rounded bg-background divide-y divide-border">
+                  {mine.map((entry) => (
+                    <Link
+                      key={entry.id}
+                      href={`/bracket/${entry.id}`}
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-card transition-colors"
+                    >
+                      <span className="text-sm text-gold font-medium">{entry.username}</span>
+                      {tournamentStarted && (
+                        <span className="text-xs text-muted">{entry.score} pts</span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Leaderboard + dribble image */}
           <div className="mb-2 flex gap-4 items-start">
             <div className="flex-1">
