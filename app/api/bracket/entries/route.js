@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../../lib/githubApi";
 import { scoreEntry, maxPossibleScore } from "../../../../lib/bracket";
 import { getMidEvilCount } from "../../../../lib/midevils";
+import { ed25519 } from "@noble/curves/ed25519";
+import { PublicKey } from "@solana/web3.js";
+
+const SIGNATURE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+const ENTRY_LIMIT = 5;
 
 function makeId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -27,6 +32,33 @@ function computeRankedEntries(entries, results) {
   return scored.map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
+/**
+ * Verify the signed challenge message.
+ * Returns { ok: true } or { ok: false, reason: string }.
+ */
+function verifySignature(walletAddress, signedMessage, signature) {
+  try {
+    // Parse timestamp from message: last line "Timestamp: <ms>"
+    const match = signedMessage.match(/Timestamp:\s*(\d+)/);
+    if (!match) return { ok: false, reason: "Invalid challenge message format" };
+    const ts = parseInt(match[1], 10);
+    if (isNaN(ts)) return { ok: false, reason: "Invalid timestamp in challenge" };
+    if (Date.now() - ts > SIGNATURE_MAX_AGE_MS) {
+      return { ok: false, reason: "Challenge message expired — please try again" };
+    }
+
+    const msgBytes = new TextEncoder().encode(signedMessage);
+    const sigBytes = Buffer.from(signature, "base64");
+    const pubKeyBytes = new PublicKey(walletAddress).toBytes();
+
+    const valid = ed25519.verify(sigBytes, msgBytes, pubKeyBytes);
+    if (!valid) return { ok: false, reason: "Signature verification failed" };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: "Signature verification error" };
+  }
+}
+
 export async function GET() {
   try {
     const [{ content: bracket }, { content: entriesData }] = await Promise.all([
@@ -48,7 +80,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { walletAddress, username, picks } = body ?? {};
+    const { walletAddress, username, picks, signature, signedMessage } = body ?? {};
 
     // ── Basic validation ────────────────────────────────────────────────────
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -73,6 +105,18 @@ export async function POST(request) {
         { error: `picks must have exactly 63 keys, got ${Object.keys(picks).length}` },
         { status: 400 }
       );
+    }
+
+    // ── Verify wallet signature ─────────────────────────────────────────────
+    if (!signature || !signedMessage) {
+      return NextResponse.json(
+        { error: "Wallet signature is required" },
+        { status: 400 }
+      );
+    }
+    const sigResult = verifySignature(walletAddress, signedMessage, signature);
+    if (!sigResult.ok) {
+      return NextResponse.json({ error: sigResult.reason }, { status: 403 });
     }
 
     // ── Load bracket + entries ───────────────────────────────────────────────
@@ -110,14 +154,15 @@ export async function POST(request) {
       );
     }
 
-    // ── Check entry count for this wallet ───────────────────────────────────
+    // ── Check entry count (1 entry per MidEvil held, max 5) ─────────────────
     const entries = entriesData?.entries ?? [];
-    const walletEntries = entries.filter(
-      (e) => e.walletAddress === walletAddress
-    );
-    if (walletEntries.length >= 5) {
+    const walletEntries = entries.filter((e) => e.walletAddress === walletAddress);
+    const maxEntries = Math.min(midEvilCount, ENTRY_LIMIT);
+    if (walletEntries.length >= maxEntries) {
       return NextResponse.json(
-        { error: "You have reached the maximum of 5 entries" },
+        {
+          error: `You have used all ${maxEntries} ${maxEntries === 1 ? "entry" : "entries"} allowed for your ${midEvilCount} MidEvil${midEvilCount !== 1 ? "s" : ""}`,
+        },
         { status: 403 }
       );
     }

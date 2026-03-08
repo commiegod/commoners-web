@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+
+function buildChallengeMessage() {
+  return `Submit bracket entry for MidEvils March Madness 2026.\nTimestamp: ${Date.now()}`;
+}
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import BracketView from "../../components/BracketView";
@@ -79,7 +83,7 @@ function cascadePicks(oldPicks, changedGameId, newTeamId, bracket) {
 }
 
 export default function EnterBracketPage() {
-  const { publicKey } = useWallet();
+  const { publicKey, signMessage } = useWallet();
   const walletAddress = publicKey?.toBase58() ?? null;
 
   const [bracket, setBracket] = useState(null);
@@ -160,10 +164,26 @@ export default function EnterBracketPage() {
     setSubmitError(null);
 
     try {
+      if (!signMessage) {
+        setSubmitError("Your wallet does not support message signing. Please use Phantom or Backpack.");
+        setSubmitting(false);
+        return;
+      }
+      const signedMessage = buildChallengeMessage();
+      const msgBytes = new TextEncoder().encode(signedMessage);
+      const signatureBytes = await signMessage(msgBytes);
+      const signature = Buffer.from(signatureBytes).toString("base64");
+
       const res = await fetch("/api/bracket/entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress, username: username.trim(), picks }),
+        body: JSON.stringify({
+          walletAddress,
+          username: username.trim(),
+          picks,
+          signature,
+          signedMessage,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -279,14 +299,16 @@ export default function EnterBracketPage() {
     );
   }
 
-  if (myEntries.length >= 5) {
+  const maxEntries = Math.min(midEvilCount ?? 0, 5);
+
+  if (myEntries.length >= maxEntries) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <h1 className="font-blackletter text-3xl text-gold mb-4">
           Enter Your Bracket
         </h1>
         <div className="bg-card border border-border rounded px-4 py-4 text-sm text-muted">
-          You have used all 5 of your entries for this tournament.
+          You have used all {maxEntries} {maxEntries === 1 ? "entry" : "entries"} allowed for your {midEvilCount} MidEvil{midEvilCount !== 1 ? "s" : ""}.
         </div>
         <div className="mt-4 flex flex-col gap-2">
           {myEntries.map((e) => (
@@ -332,7 +354,7 @@ export default function EnterBracketPage() {
       <div className="mb-6">
         <h1 className="font-blackletter text-3xl text-gold">Enter Your Bracket</h1>
         <p className="text-sm text-muted mt-1">
-          Entry {myEntries.length + 1} of 5 — {midEvilCount} MidEvil
+          Entry {myEntries.length + 1} of {maxEntries} — {midEvilCount} MidEvil
           {midEvilCount !== 1 ? "s" : ""} held
         </p>
       </div>
