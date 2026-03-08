@@ -102,16 +102,16 @@ export default function DiscussionPage() {
     <div>
       {/* Hero banner — full-bleed */}
       <div
-        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
-        className="overflow-hidden mb-8"
-      >
-        <img
-          src="/banner-the-board.png"
-          alt="A MidEvil writing by candlelight"
-          className="w-full object-cover"
-          style={{ height: "220px", objectPosition: "center 30%" }}
-        />
-      </div>
+        style={{
+          width: "100vw",
+          marginLeft: "calc(50% - 50vw)",
+          height: "220px",
+          backgroundImage: "url('/banner-the-board.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 30%",
+        }}
+        className="mb-8"
+      />
 
       <div className="max-w-3xl">
       {/* Header */}

@@ -290,16 +290,16 @@ export default function GovernancePage() {
     <div>
       {/* Hero banner — full-bleed */}
       <div
-        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
-        className="overflow-hidden mb-8"
-      >
-        <img
-          src="/banner-governance.png"
-          alt="MidEvils seated at a council table"
-          className="w-full object-cover"
-          style={{ height: "220px", objectPosition: "center 25%" }}
-        />
-      </div>
+        style={{
+          width: "100vw",
+          marginLeft: "calc(50% - 50vw)",
+          height: "220px",
+          backgroundImage: "url('/banner-governance.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 25%",
+        }}
+        className="mb-8"
+      />
 
       <div className="max-w-3xl">
       {/* ── Header ── */}
