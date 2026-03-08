@@ -1418,7 +1418,8 @@ export default function AdminPanel({ token }) {
       )}
 
       {/* ── Bounty submissions ── */}
-      {activeTab === "bounties" && <div>
+      {activeTab === "bounties" && (
+      <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-blackletter text-3xl text-gold">
             Bounty Submissions
@@ -1464,11 +1465,11 @@ export default function AdminPanel({ token }) {
           </div>
         )}
       </div>
-      </div>
-      }
+      )}
 
       {/* ── Governance ── */}
-      {activeTab === "governance" && <div className="space-y-16">
+      {activeTab === "governance" && (
+      <div className="space-y-16">
       {/* ── Governance proposals ── */}
       <div>
         <h2 className="font-blackletter text-2xl text-gold mb-6">
@@ -1541,9 +1542,8 @@ export default function AdminPanel({ token }) {
           </div>
         )}
       </div>
-
       </div>
-      }
+      )}
 
       {/* ── Discussion ── */}
       {activeTab === "discussion" && (
