@@ -645,6 +645,9 @@ function BracketAdminSection({ token }) {
   // Which round's results are expanded
   const [expandedResults, setExpandedResults] = useState(null);
   const [deletingEntryId, setDeletingEntryId] = useState(null);
+  // ESPN sync state
+  const [espnSyncing, setEspnSyncing] = useState(null); // "teams" | "results" | null
+  const [espnMsg, setEspnMsg] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -720,6 +723,35 @@ function BracketAdminSection({ token }) {
 
   function saveResults() {
     save({ results: resultsEdits });
+  }
+
+  async function espnSync(type) {
+    setEspnSyncing(type);
+    setEspnMsg(null);
+    const route = type === "teams"
+      ? "/api/admin/bracket-sync"
+      : "/api/admin/bracket-results-sync";
+    try {
+      const res = await fetch(route, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sync failed");
+      if (type === "teams") {
+        setEspnMsg(`Done — ${data.teamsFound} teams found, ${data.updated} updated.`);
+      } else {
+        const note = data.updated > 0
+          ? `${data.updated} new result${data.updated !== 1 ? "s" : ""} added (${data.total} games checked).`
+          : `No new results (${data.total} completed games checked).`;
+        setEspnMsg(data.message ?? note);
+      }
+      await load();
+    } catch (e) {
+      setEspnMsg(`Error: ${e.message}`);
+    } finally {
+      setEspnSyncing(null);
+    }
   }
 
   async function deleteEntry(id) {
@@ -929,6 +961,36 @@ function BracketAdminSection({ token }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* ESPN Sync */}
+      <div className="bg-card border border-border p-4 space-y-3">
+        <p className="text-xs text-muted uppercase tracking-widest">ESPN Auto-Sync</p>
+        <div className="flex flex-wrap gap-3 items-center">
+          <button
+            onClick={() => espnSync("teams")}
+            disabled={!!espnSyncing}
+            className="px-4 py-1.5 border border-border text-xs hover:bg-background disabled:opacity-40 cursor-pointer"
+          >
+            {espnSyncing === "teams" ? "Syncing teams…" : "Sync Teams from ESPN"}
+          </button>
+          <button
+            onClick={() => espnSync("results")}
+            disabled={!!espnSyncing}
+            className="px-4 py-1.5 border border-border text-xs hover:bg-background disabled:opacity-40 cursor-pointer"
+          >
+            {espnSyncing === "results" ? "Syncing results…" : "Sync Results from ESPN"}
+          </button>
+          {espnMsg && (
+            <span className={`text-xs ${espnMsg.startsWith("Error") ? "text-red-500" : "text-green-700"}`}>
+              {espnMsg}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted/60">
+          Sync Teams: run once after Selection Sunday to auto-fill all 64 teams.
+          Sync Results: run after each round to pull completed game winners from ESPN.
+        </p>
       </div>
 
       {/* Results input */}
