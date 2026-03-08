@@ -1,0 +1,281 @@
+"use client";
+
+import { getGameTeams, R1_MATCHUPS } from "../../lib/bracket";
+
+// ── Team slot ─────────────────────────────────────────────────────────────────
+
+function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
+  if (!team) {
+    return (
+      <div className="flex items-center gap-1.5 px-2 py-1 text-xs border-b border-border last:border-0 text-muted/40">
+        <span className="text-muted/30 w-3 shrink-0"></span>
+        <span className="truncate italic">TBD</span>
+      </div>
+    );
+  }
+
+  const result = results[gameId];
+  const pick = picks[gameId];
+  const isWinner = result === team.id;
+  const isLoser = result && result !== team.id;
+  const isPicked = !result && pick === team.id;
+  const isCorrectPick = result && pick === team.id && result === pick;
+  const isWrongPick = result && pick && pick !== result && pick === team.id;
+  const isClickable = mode === "pick" && onPickChange && !result;
+
+  let textClass = "text-foreground";
+  if (isLoser) textClass = "text-muted line-through";
+  if (isWinner) textClass = "text-foreground font-semibold";
+  if (isCorrectPick) textClass = "text-green-600 font-semibold";
+  if (isWrongPick) textClass = "text-red-500 line-through";
+
+  let bgClass = "";
+  if (isWinner || isCorrectPick) bgClass = "bg-gold/10";
+  if (isPicked) bgClass = "bg-card";
+
+  return (
+    <div
+      className={`flex items-center gap-1.5 px-2 py-1 text-xs border-b border-border last:border-0 transition-colors ${bgClass} ${textClass} ${isClickable ? "cursor-pointer hover:bg-card" : ""}`}
+      onClick={isClickable ? () => onPickChange(gameId, team.id) : undefined}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onPickChange(gameId, team.id);
+              }
+            }
+          : undefined
+      }
+    >
+      <span className="text-muted/60 w-3 shrink-0 text-right leading-none">
+        {team.seed}
+      </span>
+      <span className="truncate leading-tight">{team.name || "TBD"}</span>
+    </div>
+  );
+}
+
+// ── Single matchup box ────────────────────────────────────────────────────────
+
+function Matchup({ gameId, bracket, results, picks, onPickChange, mode }) {
+  const { teamA, teamB } = getGameTeams(gameId, bracket, results, picks);
+
+  return (
+    <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden rounded-sm">
+      <TeamSlot
+        team={teamA}
+        gameId={gameId}
+        results={results}
+        picks={picks}
+        onPickChange={onPickChange}
+        mode={mode}
+      />
+      <TeamSlot
+        team={teamB}
+        gameId={gameId}
+        results={results}
+        picks={picks}
+        onPickChange={onPickChange}
+        mode={mode}
+      />
+    </div>
+  );
+}
+
+// ── Region column ─────────────────────────────────────────────────────────────
+
+function RegionRound({ region, round, count, bracket, results, picks, onPickChange, mode }) {
+  const gameIds = [];
+  for (let i = 0; i < count; i++) {
+    if (round === 1) gameIds.push(`r1_${region}_${i}`);
+    else if (round === 2) gameIds.push(`r2_${region}_${i}`);
+    else if (round === 3) gameIds.push(`r3_${region}_${i}`);
+    else if (round === 4) gameIds.push(`r4_${region}`);
+  }
+
+  return (
+    <div className="flex flex-col justify-around h-[416px] gap-1">
+      {gameIds.map((gameId) => (
+        <Matchup
+          key={gameId}
+          gameId={gameId}
+          bracket={bracket}
+          results={results}
+          picks={picks}
+          onPickChange={onPickChange}
+          mode={mode}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Full region block (4 rounds) ──────────────────────────────────────────────
+
+function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, flip }) {
+  const regionData = bracket.regions[regionKey];
+  if (!regionData) return null;
+
+  const rounds = [
+    { round: 1, count: 8 },
+    { round: 2, count: 4 },
+    { round: 3, count: 2 },
+    { round: 4, count: 1 },
+  ];
+
+  const cols = rounds.map(({ round, count }) => (
+    <RegionRound
+      key={round}
+      region={regionKey}
+      round={round}
+      count={count}
+      bracket={bracket}
+      results={results}
+      picks={picks}
+      onPickChange={onPickChange}
+      mode={mode}
+    />
+  ));
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-xs text-muted uppercase tracking-widest mb-1 text-center">
+        {regionData.name}
+      </p>
+      <div className={`flex gap-1 ${flip ? "flex-row-reverse" : "flex-row"}`}>
+        {cols}
+      </div>
+    </div>
+  );
+}
+
+// ── Center Final Four + Championship column ───────────────────────────────────
+
+function CenterColumn({ bracket, results, picks, onPickChange, mode }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-6 px-4 min-w-[160px]">
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">
+          Final Four
+        </p>
+        <Matchup
+          gameId="ff_0"
+          bracket={bracket}
+          results={results}
+          picks={picks}
+          onPickChange={onPickChange}
+          mode={mode}
+        />
+      </div>
+
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-xs text-gold tracking-widest uppercase text-center mb-1 font-semibold">
+          Championship
+        </p>
+        <Matchup
+          gameId="champ"
+          bracket={bracket}
+          results={results}
+          picks={picks}
+          onPickChange={onPickChange}
+          mode={mode}
+        />
+      </div>
+
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">
+          Final Four
+        </p>
+        <Matchup
+          gameId="ff_1"
+          bracket={bracket}
+          results={results}
+          picks={picks}
+          onPickChange={onPickChange}
+          mode={mode}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── BracketView (exported) ────────────────────────────────────────────────────
+
+export default function BracketView({
+  bracket,
+  results = {},
+  picks = {},
+  onPickChange = null,
+  mode = "view",
+}) {
+  if (!bracket) {
+    return (
+      <div className="text-muted text-sm py-8 text-center">
+        Loading bracket...
+      </div>
+    );
+  }
+
+  // Layout: [East+South left] [Center FF/Champ] [West+Midwest right]
+  return (
+    <div className="overflow-x-auto">
+      <div className="flex flex-row gap-2 min-w-max py-4 px-2">
+        {/* Left half: East (top) + South (bottom) */}
+        <div className="flex flex-col gap-4">
+          <RegionBlock
+            regionKey="east"
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+            flip={false}
+          />
+          <RegionBlock
+            regionKey="south"
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+            flip={false}
+          />
+        </div>
+
+        {/* Center: Final Four + Championship */}
+        <CenterColumn
+          bracket={bracket}
+          results={results}
+          picks={picks}
+          onPickChange={onPickChange}
+          mode={mode}
+        />
+
+        {/* Right half: West (top) + Midwest (bottom) — mirrored */}
+        <div className="flex flex-col gap-4">
+          <RegionBlock
+            regionKey="west"
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+            flip={true}
+          />
+          <RegionBlock
+            regionKey="midwest"
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+            flip={true}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

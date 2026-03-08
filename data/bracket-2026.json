@@ -1,0 +1,93 @@
+{
+  "year": 2026,
+  "status": "pending",
+  "entryDeadline": null,
+  "ffPairings": [["east", "west"], ["south", "midwest"]],
+  "regions": {
+    "east": {
+      "name": "East",
+      "teams": [
+        { "id": "east_s1",  "seed": 1,  "name": "TBD" },
+        { "id": "east_s2",  "seed": 2,  "name": "TBD" },
+        { "id": "east_s3",  "seed": 3,  "name": "TBD" },
+        { "id": "east_s4",  "seed": 4,  "name": "TBD" },
+        { "id": "east_s5",  "seed": 5,  "name": "TBD" },
+        { "id": "east_s6",  "seed": 6,  "name": "TBD" },
+        { "id": "east_s7",  "seed": 7,  "name": "TBD" },
+        { "id": "east_s8",  "seed": 8,  "name": "TBD" },
+        { "id": "east_s9",  "seed": 9,  "name": "TBD" },
+        { "id": "east_s10", "seed": 10, "name": "TBD" },
+        { "id": "east_s11", "seed": 11, "name": "TBD" },
+        { "id": "east_s12", "seed": 12, "name": "TBD" },
+        { "id": "east_s13", "seed": 13, "name": "TBD" },
+        { "id": "east_s14", "seed": 14, "name": "TBD" },
+        { "id": "east_s15", "seed": 15, "name": "TBD" },
+        { "id": "east_s16", "seed": 16, "name": "TBD" }
+      ]
+    },
+    "west": {
+      "name": "West",
+      "teams": [
+        { "id": "west_s1",  "seed": 1,  "name": "TBD" },
+        { "id": "west_s2",  "seed": 2,  "name": "TBD" },
+        { "id": "west_s3",  "seed": 3,  "name": "TBD" },
+        { "id": "west_s4",  "seed": 4,  "name": "TBD" },
+        { "id": "west_s5",  "seed": 5,  "name": "TBD" },
+        { "id": "west_s6",  "seed": 6,  "name": "TBD" },
+        { "id": "west_s7",  "seed": 7,  "name": "TBD" },
+        { "id": "west_s8",  "seed": 8,  "name": "TBD" },
+        { "id": "west_s9",  "seed": 9,  "name": "TBD" },
+        { "id": "west_s10", "seed": 10, "name": "TBD" },
+        { "id": "west_s11", "seed": 11, "name": "TBD" },
+        { "id": "west_s12", "seed": 12, "name": "TBD" },
+        { "id": "west_s13", "seed": 13, "name": "TBD" },
+        { "id": "west_s14", "seed": 14, "name": "TBD" },
+        { "id": "west_s15", "seed": 15, "name": "TBD" },
+        { "id": "west_s16", "seed": 16, "name": "TBD" }
+      ]
+    },
+    "south": {
+      "name": "South",
+      "teams": [
+        { "id": "south_s1",  "seed": 1,  "name": "TBD" },
+        { "id": "south_s2",  "seed": 2,  "name": "TBD" },
+        { "id": "south_s3",  "seed": 3,  "name": "TBD" },
+        { "id": "south_s4",  "seed": 4,  "name": "TBD" },
+        { "id": "south_s5",  "seed": 5,  "name": "TBD" },
+        { "id": "south_s6",  "seed": 6,  "name": "TBD" },
+        { "id": "south_s7",  "seed": 7,  "name": "TBD" },
+        { "id": "south_s8",  "seed": 8,  "name": "TBD" },
+        { "id": "south_s9",  "seed": 9,  "name": "TBD" },
+        { "id": "south_s10", "seed": 10, "name": "TBD" },
+        { "id": "south_s11", "seed": 11, "name": "TBD" },
+        { "id": "south_s12", "seed": 12, "name": "TBD" },
+        { "id": "south_s13", "seed": 13, "name": "TBD" },
+        { "id": "south_s14", "seed": 14, "name": "TBD" },
+        { "id": "south_s15", "seed": 15, "name": "TBD" },
+        { "id": "south_s16", "seed": 16, "name": "TBD" }
+      ]
+    },
+    "midwest": {
+      "name": "Midwest",
+      "teams": [
+        { "id": "midwest_s1",  "seed": 1,  "name": "TBD" },
+        { "id": "midwest_s2",  "seed": 2,  "name": "TBD" },
+        { "id": "midwest_s3",  "seed": 3,  "name": "TBD" },
+        { "id": "midwest_s4",  "seed": 4,  "name": "TBD" },
+        { "id": "midwest_s5",  "seed": 5,  "name": "TBD" },
+        { "id": "midwest_s6",  "seed": 6,  "name": "TBD" },
+        { "id": "midwest_s7",  "seed": 7,  "name": "TBD" },
+        { "id": "midwest_s8",  "seed": 8,  "name": "TBD" },
+        { "id": "midwest_s9",  "seed": 9,  "name": "TBD" },
+        { "id": "midwest_s10", "seed": 10, "name": "TBD" },
+        { "id": "midwest_s11", "seed": 11, "name": "TBD" },
+        { "id": "midwest_s12", "seed": 12, "name": "TBD" },
+        { "id": "midwest_s13", "seed": 13, "name": "TBD" },
+        { "id": "midwest_s14", "seed": 14, "name": "TBD" },
+        { "id": "midwest_s15", "seed": 15, "name": "TBD" },
+        { "id": "midwest_s16", "seed": 16, "name": "TBD" }
+      ]
+    }
+  },
+  "results": {}
+}
