@@ -274,82 +274,82 @@
         {
           "id": "midwest_s1",
           "seed": 1,
-          "name": "TBD"
+          "name": "Michigan"
         },
         {
           "id": "midwest_s2",
           "seed": 2,
-          "name": "TBD"
+          "name": "Uconn"
         },
         {
           "id": "midwest_s3",
           "seed": 3,
-          "name": "TBD"
+          "name": "Purdue"
         },
         {
           "id": "midwest_s4",
           "seed": 4,
-          "name": "TBD"
+          "name": "Virginia"
         },
         {
           "id": "midwest_s5",
           "seed": 5,
-          "name": "TBD"
+          "name": "Tennessee"
         },
         {
           "id": "midwest_s6",
           "seed": 6,
-          "name": "TBD"
+          "name": "North Carolina"
         },
         {
           "id": "midwest_s7",
           "seed": 7,
-          "name": "TBD"
+          "name": "Georgia"
         },
         {
           "id": "midwest_s8",
           "seed": 8,
-          "name": "TBD"
+          "name": "Saint Louis"
         },
         {
           "id": "midwest_s9",
           "seed": 9,
-          "name": "TBD"
+          "name": "TCU"
         },
         {
           "id": "midwest_s10",
           "seed": 10,
-          "name": "TBD"
+          "name": "NC State"
         },
         {
           "id": "midwest_s11",
           "seed": 11,
-          "name": "TBD"
+          "name": "VCU"
         },
         {
           "id": "midwest_s12",
           "seed": 12,
-          "name": "TBD"
+          "name": "Liberty"
         },
         {
           "id": "midwest_s13",
           "seed": 13,
-          "name": "TBD"
+          "name": "N Dakota St."
         },
         {
           "id": "midwest_s14",
           "seed": 14,
-          "name": "TBD"
+          "name": "Navy"
         },
         {
           "id": "midwest_s15",
           "seed": 15,
-          "name": "TBD"
+          "name": "Merrimack"
         },
         {
           "id": "midwest_s16",
           "seed": 16,
-          "name": "TBD"
+          "name": "UMBC"
         }
       ]
     }
