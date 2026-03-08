@@ -625,13 +625,14 @@ const R1_MATCHUPS = [[1,16],[8,9],[5,12],[4,13],[6,11],[3,14],[7,10],[2,15]];
 const ROUND_LABELS = { r1: "Round of 64", r2: "Round of 32", r3: "Sweet 16", r4: "Elite Eight" };
 const STATUS_OPTIONS = ["pending", "open", "in_progress", "complete"];
 
-function BracketAdminSection({ token }) {
+function BracketAdminSection({ token, onEntriesLoaded }) {
   const [bracket, setBracket] = useState(null);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [entrySearch, setEntrySearch] = useState("");
 
   // Team name editing state: { east_s1: "Duke", ... }
   const [teamNames, setTeamNames] = useState({});
@@ -663,7 +664,9 @@ function BracketAdminSection({ token }) {
       const b = await bRes.json();
       const e = await eRes.json();
       setBracket(b);
-      setEntries(e.entries || []);
+      const loadedEntries = e.entries || [];
+      setEntries(loadedEntries);
+      onEntriesLoaded?.(loadedEntries.length);
       setStatusEdit(b.status || "pending");
       setDeadlineEdit(b.entryDeadline ? new Date(b.entryDeadline).toISOString().slice(0,16) : "");
       setChampWinner(b.championshipScore?.winner ?? "");
@@ -1098,14 +1101,29 @@ function BracketAdminSection({ token }) {
 
       {/* Entry list */}
       <div className="bg-card border border-border p-4 space-y-3">
-        <p className="text-xs text-muted uppercase tracking-widest mb-3">
-          Entries ({entries.length} total)
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-muted uppercase tracking-widest">
+            Entries ({entries.length} total)
+          </p>
+          {entries.length > 0 && (
+            <input
+              type="text"
+              value={entrySearch}
+              onChange={(e) => setEntrySearch(e.target.value)}
+              placeholder="Filter by name or wallet…"
+              className="bg-background border border-border px-3 py-1 text-xs focus:outline-none focus:border-gold w-48"
+            />
+          )}
+        </div>
         {entries.length === 0 ? (
           <p className="text-xs text-muted/60">No entries yet.</p>
         ) : (
           <div className="space-y-1">
-            {entries.map((entry, i) => (
+            {entries.filter((entry) => {
+              if (!entrySearch) return true;
+              const q = entrySearch.toLowerCase();
+              return entry.username?.toLowerCase().includes(q) || entry.walletAddress?.toLowerCase().includes(q);
+            }).map((entry, i) => (
               <div key={entry.id} className="flex items-center gap-2 text-xs py-1 border-b border-border/50 last:border-0">
                 <span className="text-muted w-6 shrink-0">#{i+1}</span>
                 <span className="flex-1 font-medium truncate">{entry.username}</span>
@@ -1131,7 +1149,7 @@ function BracketAdminSection({ token }) {
 
 // ── Auction Status section ────────────────────────────────────────────────────
 
-function AuctionStatusSection() {
+function AuctionStatusSection({ onAuctionsLoaded }) {
   const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -1147,6 +1165,7 @@ function AuctionStatusSection() {
       const active = await fetchActiveAuctions(conn);
       active.sort((a, b) => b.state.auction_id.toNumber() - a.state.auction_id.toNumber());
       setAuctions(active);
+      onAuctionsLoaded?.(active.length);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -1258,7 +1277,28 @@ function AuctionStatusSection() {
 
 // ── Admin panel ───────────────────────────────────────────────────────────────
 
+const TABS = [
+  { key: "bracket",    label: "Bracket" },
+  { key: "auctions",   label: "Auctions" },
+  { key: "bounties",   label: "Bounties" },
+  { key: "governance", label: "Governance" },
+  { key: "discussion", label: "Discussion" },
+];
+
+function Badge({ count, variant = "default" }) {
+  if (!count) return null;
+  const cls = variant === "alert"
+    ? "bg-red-500 text-white"
+    : "bg-gold/20 text-gold border border-gold/30";
+  return (
+    <span className={`ml-1.5 inline-flex items-center justify-center text-[10px] font-bold px-1.5 py-px rounded-full leading-none ${cls}`}>
+      {count}
+    </span>
+  );
+}
+
 export default function AdminPanel({ token }) {
+  const [activeTab, setActiveTab] = useState("bracket");
   const [pending, setPending] = useState([]);
   const [pendingProps, setPendingProps] = useState([]);
   const [activeProps, setActiveProps] = useState([]);
@@ -1267,6 +1307,8 @@ export default function AdminPanel({ token }) {
   const [lastApproved, setLastApproved] = useState(null);
   const [lastApprovedProp, setLastApprovedProp] = useState(null);
   const [finalizedProps, setFinalizedProps] = useState([]);
+  const [bracketEntryCount, setBracketEntryCount] = useState(null);
+  const [auctionCount, setAuctionCount] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1322,16 +1364,61 @@ export default function AdminPanel({ token }) {
     setActiveProps((p) => p.filter((s) => s.id !== id));
   }
 
-  return (
-    <div className="max-w-3xl space-y-16">
-      {/* ── Bracket tournament ── */}
-      <BracketAdminSection token={token} />
+  const govPending = pendingProps.length + activeProps.length;
 
-      {/* ── Auction status ── */}
-      <AuctionStatusSection />
+  return (
+    <div className="max-w-3xl">
+      {/* ── Summary bar ── */}
+      {!loading && (
+        <div className="flex flex-wrap gap-4 mb-6 px-4 py-3 bg-card border border-border rounded text-xs text-muted">
+          <span>Bracket: <span className="text-foreground font-semibold">{bracketEntryCount ?? "…"} entries</span></span>
+          <span>Auctions: <span className="text-foreground font-semibold">{auctionCount ?? "…"} unsettled</span></span>
+          <span>Bounties: <span className={pending.length > 0 ? "text-red-600 font-semibold" : "text-foreground font-semibold"}>{pending.length} pending</span></span>
+          <span>Governance: <span className={govPending > 0 ? "text-red-600 font-semibold" : "text-foreground font-semibold"}>{govPending} pending</span></span>
+        </div>
+      )}
+
+      {/* ── Tab bar ── */}
+      <div className="flex gap-0 border-b border-border mb-8 overflow-x-auto">
+        {TABS.map((tab) => {
+          const badgeCount =
+            tab.key === "bounties" ? pending.length :
+            tab.key === "governance" ? govPending :
+            tab.key === "bracket" ? (bracketEntryCount ?? null) :
+            tab.key === "auctions" ? (auctionCount ?? null) : null;
+          const isAlert = (tab.key === "bounties" && pending.length > 0) || (tab.key === "governance" && govPending > 0);
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2.5 text-sm font-blackletter tracking-wide whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                activeTab === tab.key
+                  ? "border-gold text-gold"
+                  : "border-transparent text-muted hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+              <Badge count={badgeCount} variant={isAlert ? "alert" : "default"} />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Tab content ── */}
+      <div className="space-y-16">
+
+      {/* ── Bracket ── */}
+      {activeTab === "bracket" && (
+        <BracketAdminSection token={token} onEntriesLoaded={setBracketEntryCount} />
+      )}
+
+      {/* ── Auctions ── */}
+      {activeTab === "auctions" && (
+        <AuctionStatusSection onAuctionsLoaded={setAuctionCount} />
+      )}
 
       {/* ── Bounty submissions ── */}
-      <div>
+      {activeTab === "bounties" && <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-blackletter text-3xl text-gold">
             Bounty Submissions
@@ -1377,7 +1464,10 @@ export default function AdminPanel({ token }) {
           </div>
         )}
       </div>
+      </div>}
 
+      {/* ── Governance ── */}
+      {activeTab === "governance" && <div className="space-y-16">
       {/* ── Governance proposals ── */}
       <div>
         <h2 className="font-blackletter text-2xl text-gold mb-6">
@@ -1451,10 +1541,15 @@ export default function AdminPanel({ token }) {
         )}
       </div>
 
-      {/* ── Discussion board moderation ── */}
-      <DiscussionSection token={token} />
+      </div>}
 
-      <p className="text-xs text-muted">
+      {/* ── Discussion ── */}
+      {activeTab === "discussion" && (
+        <DiscussionSection token={token} />
+      )}
+
+      </div>
+      <p className="text-xs text-muted mt-8">
         Approval commits to GitHub → triggers Vercel redeploy → live in ~30s.
         Rejection removes from the queue with no site change.
       </p>
