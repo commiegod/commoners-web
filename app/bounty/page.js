@@ -7,6 +7,9 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import bounties from "../../data/bounties.json";
 import { useAuctionSchedule } from "../../lib/useAuctionSchedule";
 import { getCommonerCount } from "../../lib/commoners";
+import { RPC_URL } from "../../lib/programClient";
+
+const IS_DEVNET = !RPC_URL.includes("mainnet");
 
 const TYPES = ["Human", "AI-assisted"];
 const IMAGE_MODES = ["url", "upload"];
@@ -254,6 +257,13 @@ export default function BountyPage() {
         <h1 className="font-blackletter text-3xl text-gold mb-3">
           Artist Bounty
         </h1>
+        {IS_DEVNET && (
+          <div className="mb-4 max-w-2xl px-4 py-3 border border-amber-300/60 rounded bg-amber-50/60 text-sm text-amber-800 leading-relaxed">
+            <span className="font-semibold">Testing phase.</span> The auction program is currently running on Solana devnet.
+            We&apos;re welcoming artists to submit work and help us test the bounty system —
+            COMMON rewards will be distributed when auctions go live on mainnet.
+          </div>
+        )}
         {todaySlot ? (
           <>
             <p className="text-muted leading-relaxed max-w-2xl">
@@ -493,10 +503,10 @@ export default function BountyPage() {
           <div className="border border-border p-6 max-w-lg text-sm text-muted leading-relaxed">
             <p className="font-medium text-foreground mb-2">No submissions yet.</p>
             <p>
-              The bounty program launches alongside the daily auctions. Once active, artwork
+              The bounty program launches alongside the daily auctions on mainnet. Artwork
               submitted for each auction NFT will appear here — human and AI-generated work
               both welcome. Approved submissions are eligible for COMMON from the auction
-              rewards pool.
+              rewards pool once live.
             </p>
           </div>
         </section>
