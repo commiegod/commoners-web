@@ -19,82 +19,82 @@
         {
           "id": "east_s1",
           "seed": 1,
-          "name": "Duke"
+          "name": ""
         },
         {
           "id": "east_s2",
           "seed": 2,
-          "name": "Mich. St."
+          "name": ""
         },
         {
           "id": "east_s3",
           "seed": 3,
-          "name": "Iowa St."
+          "name": ""
         },
         {
           "id": "east_s4",
           "seed": 4,
-          "name": "Alabama"
+          "name": ""
         },
         {
           "id": "east_s5",
           "seed": 5,
-          "name": "St John's"
+          "name": ""
         },
         {
           "id": "east_s6",
           "seed": 6,
-          "name": "Wisconsin"
+          "name": ""
         },
         {
           "id": "east_s7",
           "seed": 7,
-          "name": "Villanova"
+          "name": ""
         },
         {
           "id": "east_s8",
           "seed": 8,
-          "name": "Utah St."
+          "name": ""
         },
         {
           "id": "east_s9",
           "seed": 9,
-          "name": "Iowa"
+          "name": ""
         },
         {
           "id": "east_s10",
           "seed": 10,
-          "name": "Missouri"
+          "name": ""
         },
         {
           "id": "east_s11",
           "seed": 11,
-          "name": "Santa Clara"
+          "name": ""
         },
         {
           "id": "east_s12",
           "seed": 12,
-          "name": "Yale"
+          "name": ""
         },
         {
           "id": "east_s13",
           "seed": 13,
-          "name": "SF Austin"
+          "name": ""
         },
         {
           "id": "east_s14",
           "seed": 14,
-          "name": "Troy"
+          "name": ""
         },
         {
           "id": "east_s15",
           "seed": 15,
-          "name": "Wright St."
+          "name": ""
         },
         {
           "id": "east_s16",
           "seed": 16,
-          "name": "Tennessee St."
+          "name": ""
         }
       ]
     },
@@ -104,82 +104,82 @@
         {
           "id": "west_s1",
           "seed": 1,
-          "name": "Arizona"
+          "name": ""
         },
         {
           "id": "west_s2",
           "seed": 2,
-          "name": "Illinois"
+          "name": ""
         },
         {
           "id": "west_s3",
           "seed": 3,
-          "name": "Gonzaga"
+          "name": ""
         },
         {
           "id": "west_s4",
           "seed": 4,
-          "name": "Texas Tech"
+          "name": ""
         },
         {
           "id": "west_s5",
           "seed": 5,
-          "name": "Vanderbilt"
+          "name": ""
         },
         {
           "id": "west_s6",
           "seed": 6,
-          "name": "Kentucky"
+          "name": ""
         },
         {
           "id": "west_s7",
           "seed": 7,
-          "name": "BYU"
+          "name": ""
         },
         {
           "id": "west_s8",
           "seed": 8,
-          "name": "Clemson"
+          "name": ""
         },
         {
           "id": "west_s9",
           "seed": 9,
-          "name": "UCLA"
+          "name": ""
         },
         {
           "id": "west_s10",
           "seed": 10,
-          "name": "Texas A&M"
+          "name": ""
         },
         {
           "id": "west_s11",
           "seed": 11,
-          "name": "Miami OH"
+          "name": ""
         },
         {
           "id": "west_s12",
           "seed": 12,
-          "name": "High Point"
+          "name": ""
         },
         {
           "id": "west_s13",
           "seed": 13,
-          "name": "CA Baptist"
+          "name": ""
         },
         {
           "id": "west_s14",
           "seed": 14,
-          "name": "UC Irvine"
+          "name": ""
         },
         {
           "id": "west_s15",
           "seed": 15,
-          "name": "UIC"
+          "name": ""
         },
         {
           "id": "west_s16",
           "seed": 16,
-          "name": "Portland St."
+          "name": ""
         }
       ]
     },
@@ -189,82 +189,82 @@
         {
           "id": "south_s1",
           "seed": 1,
-          "name": "Florida"
+          "name": ""
         },
         {
           "id": "south_s2",
           "seed": 2,
-          "name": "Houston"
+          "name": ""
         },
         {
           "id": "south_s3",
           "seed": 3,
-          "name": "Nebraska"
+          "name": ""
         },
         {
           "id": "south_s4",
           "seed": 4,
-          "name": "Kansas"
+          "name": ""
         },
         {
           "id": "south_s5",
           "seed": 5,
-          "name": "Arkansas"
+          "name": ""
         },
         {
           "id": "south_s6",
           "seed": 6,
-          "name": "Louisville"
+          "name": ""
         },
         {
           "id": "south_s7",
           "seed": 7,
-          "name": "St. Mary's"
+          "name": ""
         },
         {
           "id": "south_s8",
           "seed": 8,
-          "name": "Miami"
+          "name": ""
         },
         {
           "id": "south_s9",
           "seed": 9,
-          "name": "Ohio St."
+          "name": ""
         },
         {
           "id": "south_s10",
           "seed": 10,
-          "name": "Texas"
+          "name": ""
         },
         {
           "id": "south_s11",
           "seed": 11,
-          "name": "UCF"
+          "name": ""
         },
         {
           "id": "south_s12",
           "seed": 12,
-          "name": "South Florida"
+          "name": ""
         },
         {
           "id": "south_s13",
           "seed": 13,
-          "name": "UNC Wilmington"
+          "name": ""
         },
         {
           "id": "south_s14",
           "seed": 14,
-          "name": "ETSU"
+          "name": ""
         },
         {
           "id": "south_s15",
           "seed": 15,
-          "name": "C Arkansas"
+          "name": ""
         },
         {
           "id": "south_s16",
           "seed": 16,
-          "name": "Howard"
+          "name": ""
         }
       ]
     },
@@ -274,82 +274,82 @@
         {
           "id": "midwest_s1",
           "seed": 1,
-          "name": "Michigan"
+          "name": ""
         },
         {
           "id": "midwest_s2",
           "seed": 2,
-          "name": "Uconn"
+          "name": ""
         },
         {
           "id": "midwest_s3",
           "seed": 3,
-          "name": "Purdue"
+          "name": ""
         },
         {
           "id": "midwest_s4",
           "seed": 4,
-          "name": "Virginia"
+          "name": ""
         },
         {
           "id": "midwest_s5",
           "seed": 5,
-          "name": "Tennessee"
+          "name": ""
         },
         {
           "id": "midwest_s6",
           "seed": 6,
-          "name": "North Carolina"
+          "name": ""
         },
         {
           "id": "midwest_s7",
           "seed": 7,
-          "name": "Georgia"
+          "name": ""
         },
         {
           "id": "midwest_s8",
           "seed": 8,
-          "name": "Saint Louis"
+          "name": ""
         },
         {
           "id": "midwest_s9",
           "seed": 9,
-          "name": "TCU"
+          "name": ""
         },
         {
           "id": "midwest_s10",
           "seed": 10,
-          "name": "NC State"
+          "name": ""
         },
         {
           "id": "midwest_s11",
           "seed": 11,
-          "name": "VCU"
+          "name": ""
         },
         {
           "id": "midwest_s12",
           "seed": 12,
-          "name": "Liberty"
+          "name": ""
         },
         {
           "id": "midwest_s13",
           "seed": 13,
-          "name": "N Dakota St."
+          "name": ""
         },
         {
           "id": "midwest_s14",
           "seed": 14,
-          "name": "Navy"
+          "name": ""
         },
         {
           "id": "midwest_s15",
           "seed": 15,
-          "name": "Merrimack"
+          "name": ""
         },
         {
           "id": "midwest_s16",
           "seed": 16,
-          "name": "UMBC"
+          "name": ""
         }
       ]
     }
