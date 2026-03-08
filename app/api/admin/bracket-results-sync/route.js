@@ -124,6 +124,14 @@ export async function POST(request) {
       results[gameId] = teamId;
       updated++;
     }
+
+    // Store championship final scores for tiebreaker
+    if (info.round === "champ") {
+      const loser = competitors.find((c) => !c.winner);
+      if (winner.score > 0 && loser?.score > 0 && !bracket.championshipScore) {
+        bracket.championshipScore = { winner: winner.score, loser: loser.score };
+      }
+    }
   }
 
   bracket.results = results;

@@ -9,7 +9,7 @@ function buildChallengeMessage() {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import BracketView from "../../components/BracketView";
-import { allGameIds, getGameTeams } from "../../../lib/bracket";
+import { allGameIds, getGameTeams, getTeamById } from "../../../lib/bracket";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -91,6 +91,7 @@ export default function EnterBracketPage() {
   const [midEvilCount, setMidEvilCount] = useState(null); // null = loading
   const [picks, setPicks] = useState({});
   const [username, setUsername] = useState("");
+  const [tiebreaker, setTiebreaker] = useState("");
   const [loading, setLoading] = useState(true);
   const [holderLoading, setHolderLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -155,8 +156,13 @@ export default function EnterBracketPage() {
   );
 
   const pickCount = Object.keys(picks).length;
+  const tiebreakerVal = tiebreaker === "" ? null : parseInt(tiebreaker, 10);
+  const tiebreakerValid = tiebreakerVal !== null && Number.isInteger(tiebreakerVal) && tiebreakerVal >= 0;
   const canSubmit =
-    pickCount === 63 && username.trim().length >= 1 && username.trim().length <= 30;
+    pickCount === 63 &&
+    username.trim().length >= 1 &&
+    username.trim().length <= 30 &&
+    tiebreakerValid;
 
   async function handleSubmit() {
     if (!canSubmit || !walletAddress) return;
@@ -181,6 +187,7 @@ export default function EnterBracketPage() {
           walletAddress,
           username: username.trim(),
           picks,
+          tiebreaker: tiebreakerVal,
           signature,
           signedMessage,
         }),
@@ -193,6 +200,7 @@ export default function EnterBracketPage() {
       setSubmitSuccess(data.id);
       setPicks({});
       setUsername("");
+      setTiebreaker("");
       setMyEntries((prev) => [
         ...prev,
         { id: data.id, username: username.trim(), picks, submittedAt: Date.now() },
@@ -408,6 +416,36 @@ export default function EnterBracketPage() {
           mode="pick"
         />
       </div>
+
+      {/* Tiebreaker */}
+      {pickCount === 63 && (() => {
+        const { teamA, teamB } = getGameTeams("champ", bracket, {}, picks);
+        return (
+          <div className="mb-6 max-w-sm border border-gold/30 rounded bg-card px-4 py-4">
+            <p className="text-xs text-gold uppercase tracking-widest mb-1">Tiebreaker</p>
+            <p className="text-sm text-foreground font-medium mb-0.5">
+              {teamA && teamB
+                ? `${teamA.name} vs. ${teamB.name}`
+                : "Championship Game"}
+            </p>
+            <p className="text-xs text-muted mb-3">
+              Predict the combined total score. Used to break ties if two brackets finish with the same points.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={tiebreaker}
+                onChange={(e) => setTiebreaker(e.target.value)}
+                placeholder="e.g. 145"
+                className="w-32 border border-border bg-background text-foreground text-sm px-3 py-2 rounded focus:outline-none focus:border-gold transition-colors"
+              />
+              <span className="text-xs text-muted">total points</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Submit */}
       {submitError && (

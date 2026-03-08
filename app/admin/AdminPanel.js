@@ -640,6 +640,8 @@ function BracketAdminSection({ token }) {
   // Status + deadline
   const [statusEdit, setStatusEdit] = useState("");
   const [deadlineEdit, setDeadlineEdit] = useState("");
+  const [champWinner, setChampWinner] = useState("");
+  const [champLoser, setChampLoser] = useState("");
   // Which region's teams are expanded for editing
   const [expandedRegion, setExpandedRegion] = useState(null);
   // Which round's results are expanded
@@ -663,6 +665,8 @@ function BracketAdminSection({ token }) {
       setEntries(e.entries || []);
       setStatusEdit(b.status || "pending");
       setDeadlineEdit(b.entryDeadline ? new Date(b.entryDeadline).toISOString().slice(0,16) : "");
+      setChampWinner(b.championshipScore?.winner ?? "");
+      setChampLoser(b.championshipScore?.loser ?? "");
       // Pre-fill team names
       const names = {};
       for (const [regionKey, region] of Object.entries(b.regions || {})) {
@@ -705,6 +709,9 @@ function BracketAdminSection({ token }) {
   function saveStatus() {
     const payload = { status: statusEdit };
     if (deadlineEdit) payload.entryDeadline = new Date(deadlineEdit).toISOString();
+    if (champWinner !== "" && champLoser !== "") {
+      payload.championshipScore = { winner: champWinner, loser: champLoser };
+    }
     save(payload);
   }
 
@@ -908,6 +915,28 @@ function BracketAdminSection({ token }) {
               onChange={e => setDeadlineEdit(e.target.value)}
               className="bg-background border border-border px-3 py-1.5 text-sm focus:outline-none focus:border-gold"
             />
+          </div>
+          <div>
+            <label className="text-xs text-muted block mb-1">Championship Final Score (tiebreaker)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                placeholder="Winner"
+                value={champWinner}
+                onChange={e => setChampWinner(e.target.value)}
+                className="bg-background border border-border px-2 py-1.5 text-sm focus:outline-none focus:border-gold w-24"
+              />
+              <span className="text-muted text-sm">–</span>
+              <input
+                type="number"
+                min="0"
+                placeholder="Loser"
+                value={champLoser}
+                onChange={e => setChampLoser(e.target.value)}
+                className="bg-background border border-border px-2 py-1.5 text-sm focus:outline-none focus:border-gold w-24"
+              />
+            </div>
           </div>
           <button
             onClick={saveStatus}

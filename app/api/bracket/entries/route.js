@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../../lib/githubApi";
-import { scoreEntry, maxPossibleScore } from "../../../../lib/bracket";
+import { scoreEntry, maxPossibleScore, tiebreakerDiff } from "../../../../lib/bracket";
 import { getMidEvilCount } from "../../../../lib/midevils";
 import { ed25519 } from "@noble/curves/ed25519";
 import { PublicKey } from "@solana/web3.js";
@@ -22,13 +22,18 @@ function getAllTeamIds(bracket) {
   return ids;
 }
 
-function computeRankedEntries(entries, results) {
+function computeRankedEntries(entries, results, championshipTotal) {
   const scored = entries.map((e) => ({
     ...e,
     score: scoreEntry(e.picks, results),
     maxPossible: maxPossibleScore(e.picks, results),
   }));
-  scored.sort((a, b) => b.score - a.score || b.maxPossible - a.maxPossible);
+  scored.sort((a, b) =>
+    b.score - a.score ||
+    b.maxPossible - a.maxPossible ||
+    tiebreakerDiff(a.tiebreaker ?? null, championshipTotal ?? null) -
+    tiebreakerDiff(b.tiebreaker ?? null, championshipTotal ?? null)
+  );
   return scored.map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
@@ -68,8 +73,11 @@ export async function GET() {
 
     const entries = entriesData?.entries ?? [];
     const results = bracket?.results ?? {};
+    const championshipTotal = bracket?.championshipScore
+      ? bracket.championshipScore.winner + bracket.championshipScore.loser
+      : null;
 
-    const ranked = computeRankedEntries(entries, results);
+    const ranked = computeRankedEntries(entries, results, championshipTotal);
     return NextResponse.json({ entries: ranked });
   } catch (err) {
     console.error("bracket entries GET error:", err);
@@ -80,7 +88,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { walletAddress, username, picks, signature, signedMessage } = body ?? {};
+    const { walletAddress, username, picks, signature, signedMessage, tiebreaker } = body ?? {};
 
     // ── Basic validation ────────────────────────────────────────────────────
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -103,6 +111,12 @@ export async function POST(request) {
     if (Object.keys(picks).length !== 63) {
       return NextResponse.json(
         { error: `picks must have exactly 63 keys, got ${Object.keys(picks).length}` },
+        { status: 400 }
+      );
+    }
+    if (tiebreaker == null || !Number.isInteger(tiebreaker) || tiebreaker < 0) {
+      return NextResponse.json(
+        { error: "Tiebreaker must be a non-negative whole number (predicted combined score of the championship game)" },
         { status: 400 }
       );
     }
@@ -184,6 +198,7 @@ export async function POST(request) {
       walletAddress,
       username: username.trim(),
       picks,
+      tiebreaker,
       submittedAt: Date.now(),
     };
 

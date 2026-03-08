@@ -109,7 +109,7 @@ export default function EntryPage() {
       )}
 
       {/* Score stats */}
-      <div className="flex flex-wrap gap-6 mb-8">
+      <div className="flex flex-wrap gap-6 mb-6">
         <div className="bg-card border border-border rounded px-5 py-3 text-center">
           <p className="text-2xl font-semibold text-foreground">
             {entry.score}
@@ -132,6 +132,13 @@ export default function EntryPage() {
           <p className="text-xs text-muted uppercase tracking-widest mt-0.5">Max Possible</p>
         </div>
       </div>
+
+      {/* Tiebreaker */}
+      {entry.tiebreaker != null && (
+        <div className="mb-6 text-xs text-muted">
+          Tiebreaker: <span className="text-foreground font-medium">{entry.tiebreaker}</span> combined points predicted
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex flex-wrap gap-4 mb-4 text-xs text-muted">

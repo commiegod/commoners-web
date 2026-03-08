@@ -13,7 +13,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { results, status, entryDeadline, teams } = body ?? {};
+    const { results, status, entryDeadline, teams, championshipScore } = body ?? {};
 
     const { content: bracket, sha } = await getFile("data/bracket-2026.json");
     if (!bracket) {
@@ -68,6 +68,15 @@ export async function POST(request) {
             existing.name = teamUpdate.name;
           }
         }
+      }
+    }
+
+    // Update championship score (for tiebreaker)
+    if (championshipScore && typeof championshipScore === "object") {
+      const w = parseInt(championshipScore.winner, 10);
+      const l = parseInt(championshipScore.loser, 10);
+      if (!isNaN(w) && !isNaN(l) && w >= 0 && l >= 0) {
+        bracket.championshipScore = { winner: w, loser: l };
       }
     }
 
