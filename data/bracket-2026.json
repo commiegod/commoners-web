@@ -19,82 +19,82 @@
         {
           "id": "east_s1",
           "seed": 1,
-          "name": "TBD"
+          "name": "Duke"
         },
         {
           "id": "east_s2",
           "seed": 2,
-          "name": "TBD"
+          "name": "Mich. St."
         },
         {
           "id": "east_s3",
           "seed": 3,
-          "name": "TBD"
+          "name": "Iowa St."
         },
         {
           "id": "east_s4",
           "seed": 4,
-          "name": "TBD"
+          "name": "Alabama"
         },
         {
           "id": "east_s5",
           "seed": 5,
-          "name": "TBD"
+          "name": "St John's"
         },
         {
           "id": "east_s6",
           "seed": 6,
-          "name": "TBD"
+          "name": "Wisconsin"
         },
         {
           "id": "east_s7",
           "seed": 7,
-          "name": "TBD"
+          "name": "Villanova"
         },
         {
           "id": "east_s8",
           "seed": 8,
-          "name": "TBD"
+          "name": "Utah St."
         },
         {
           "id": "east_s9",
           "seed": 9,
-          "name": "TBD"
+          "name": "Iowa"
         },
         {
           "id": "east_s10",
           "seed": 10,
-          "name": "TBD"
+          "name": "Missouri"
         },
         {
           "id": "east_s11",
           "seed": 11,
-          "name": "TBD"
+          "name": "Santa Clara"
         },
         {
           "id": "east_s12",
           "seed": 12,
-          "name": "TBD"
+          "name": "Yale"
         },
         {
           "id": "east_s13",
           "seed": 13,
-          "name": "TBD"
+          "name": "SF Austin"
         },
         {
           "id": "east_s14",
           "seed": 14,
-          "name": "TBD"
+          "name": "Troy"
         },
         {
           "id": "east_s15",
           "seed": 15,
-          "name": "TBD"
+          "name": "Wright St."
         },
         {
           "id": "east_s16",
           "seed": 16,
-          "name": "TBD"
+          "name": "Tennessee St."
         }
       ]
     },
