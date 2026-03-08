@@ -164,22 +164,22 @@
         {
           "id": "west_s13",
           "seed": 13,
-          "name": "TBD"
+          "name": "CA Baptist"
         },
         {
           "id": "west_s14",
           "seed": 14,
-          "name": "TBD"
+          "name": "UC Irvine"
         },
         {
           "id": "west_s15",
           "seed": 15,
-          "name": "TBD"
+          "name": "UIC"
         },
         {
           "id": "west_s16",
           "seed": 16,
-          "name": "TBD"
+          "name": "Portland St."
         }
       ]
     },
