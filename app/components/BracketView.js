@@ -1,6 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { getGameTeams, R1_MATCHUPS } from "../../lib/bracket";
+
+const ROUND_LABELS = { 1: "R64", 2: "R32", 3: "S16", 4: "E8" };
+const MOBILE_TABS = [
+  { key: "east",    label: "East" },
+  { key: "west",    label: "West" },
+  { key: "south",   label: "South" },
+  { key: "midwest", label: "Midwest" },
+  { key: "ff",      label: "Final Four" },
+];
 
 // ── Team slot ─────────────────────────────────────────────────────────────────
 
@@ -8,7 +18,7 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
   if (!team) {
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 text-xs border-b border-border last:border-0 text-muted/40">
-        <span className="text-muted/30 w-3 shrink-0"></span>
+        <span className="text-muted/30 w-3 shrink-0" />
         <span className="truncate italic">TBD</span>
       </div>
     );
@@ -31,7 +41,7 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
 
   let bgClass = "";
   if (isWinner || isCorrectPick) bgClass = "bg-gold/10";
-  if (isPicked) bgClass = "bg-card";
+  else if (isPicked) bgClass = "bg-card";
 
   return (
     <div
@@ -50,9 +60,7 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
           : undefined
       }
     >
-      <span className="text-muted/60 w-3 shrink-0 text-right leading-none">
-        {team.seed}
-      </span>
+      <span className="text-muted/60 w-3 shrink-0 text-right leading-none">{team.seed}</span>
       <span className="truncate leading-tight">{team.name || "TBD"}</span>
     </div>
   );
@@ -62,32 +70,17 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode }) {
 
 function Matchup({ gameId, bracket, results, picks, onPickChange, mode }) {
   const { teamA, teamB } = getGameTeams(gameId, bracket, results, picks);
-
   return (
-    <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden rounded-sm">
-      <TeamSlot
-        team={teamA}
-        gameId={gameId}
-        results={results}
-        picks={picks}
-        onPickChange={onPickChange}
-        mode={mode}
-      />
-      <TeamSlot
-        team={teamB}
-        gameId={gameId}
-        results={results}
-        picks={picks}
-        onPickChange={onPickChange}
-        mode={mode}
-      />
+    <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden">
+      <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
+      <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
     </div>
   );
 }
 
-// ── Region column ─────────────────────────────────────────────────────────────
+// ── Single round column ───────────────────────────────────────────────────────
 
-function RegionRound({ region, round, count, bracket, results, picks, onPickChange, mode }) {
+function RegionRound({ region, round, count, label, bracket, results, picks, onPickChange, mode }) {
   const gameIds = [];
   for (let i = 0; i < count; i++) {
     if (round === 1) gameIds.push(`r1_${region}_${i}`);
@@ -97,18 +90,21 @@ function RegionRound({ region, round, count, bracket, results, picks, onPickChan
   }
 
   return (
-    <div className="flex flex-col justify-around h-[416px] gap-1">
-      {gameIds.map((gameId) => (
-        <Matchup
-          key={gameId}
-          gameId={gameId}
-          bracket={bracket}
-          results={results}
-          picks={picks}
-          onPickChange={onPickChange}
-          mode={mode}
-        />
-      ))}
+    <div className="flex flex-col">
+      <p className="text-xs text-muted/50 text-center mb-1 tracking-wide shrink-0">{label}</p>
+      <div className="flex flex-col justify-around h-[416px]">
+        {gameIds.map((gameId) => (
+          <Matchup
+            key={gameId}
+            gameId={gameId}
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -120,18 +116,19 @@ function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, f
   if (!regionData) return null;
 
   const rounds = [
-    { round: 1, count: 8 },
-    { round: 2, count: 4 },
-    { round: 3, count: 2 },
-    { round: 4, count: 1 },
+    { round: 1, count: 8, label: ROUND_LABELS[1] },
+    { round: 2, count: 4, label: ROUND_LABELS[2] },
+    { round: 3, count: 2, label: ROUND_LABELS[3] },
+    { round: 4, count: 1, label: ROUND_LABELS[4] },
   ];
 
-  const cols = rounds.map(({ round, count }) => (
+  const cols = rounds.map(({ round, count, label }) => (
     <RegionRound
       key={round}
       region={regionKey}
       round={round}
       count={count}
+      label={label}
       bracket={bracket}
       results={results}
       picks={picks}
@@ -142,7 +139,7 @@ function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, f
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-xs text-muted uppercase tracking-widest mb-1 text-center">
+      <p className="text-xs text-muted uppercase tracking-widest mb-1 text-center font-medium">
         {regionData.name}
       </p>
       <div className={`flex gap-1 ${flip ? "flex-row-reverse" : "flex-row"}`}>
@@ -158,45 +155,57 @@ function CenterColumn({ bracket, results, picks, onPickChange, mode }) {
   return (
     <div className="flex flex-col items-center justify-center gap-6 px-4 min-w-[160px]">
       <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">
-          Final Four
-        </p>
-        <Matchup
-          gameId="ff_0"
-          bracket={bracket}
-          results={results}
-          picks={picks}
-          onPickChange={onPickChange}
-          mode={mode}
-        />
+        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">Final Four</p>
+        <Matchup gameId="ff_0" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
       </div>
-
       <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-gold tracking-widest uppercase text-center mb-1 font-semibold">
-          Championship
-        </p>
-        <Matchup
-          gameId="champ"
-          bracket={bracket}
-          results={results}
-          picks={picks}
-          onPickChange={onPickChange}
-          mode={mode}
-        />
+        <p className="text-xs text-gold tracking-widest uppercase text-center mb-1 font-semibold">Championship</p>
+        <Matchup gameId="champ" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
       </div>
-
       <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">
-          Final Four
-        </p>
-        <Matchup
-          gameId="ff_1"
-          bracket={bracket}
-          results={results}
-          picks={picks}
-          onPickChange={onPickChange}
-          mode={mode}
-        />
+        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">Final Four</p>
+        <Matchup gameId="ff_1" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
+      </div>
+    </div>
+  );
+}
+
+// ── Mobile single-region view ─────────────────────────────────────────────────
+
+function MobileRegionView({ regionKey, bracket, results, picks, onPickChange, mode }) {
+  if (regionKey === "ff") {
+    return (
+      <div className="overflow-x-auto py-4 px-2">
+        <CenterColumn bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
+      </div>
+    );
+  }
+  const regionData = bracket.regions[regionKey];
+  if (!regionData) return null;
+  // Show region as 4 columns (same as desktop but full-width scrollable)
+  const rounds = [
+    { round: 1, count: 8, label: ROUND_LABELS[1] },
+    { round: 2, count: 4, label: ROUND_LABELS[2] },
+    { round: 3, count: 2, label: ROUND_LABELS[3] },
+    { round: 4, count: 1, label: ROUND_LABELS[4] },
+  ];
+  return (
+    <div className="overflow-x-auto py-4 px-2">
+      <div className="flex gap-1 min-w-max">
+        {rounds.map(({ round, count, label }) => (
+          <RegionRound
+            key={round}
+            region={regionKey}
+            round={round}
+            count={count}
+            label={label}
+            bracket={bracket}
+            results={results}
+            picks={picks}
+            onPickChange={onPickChange}
+            mode={mode}
+          />
+        ))}
       </div>
     </div>
   );
@@ -211,71 +220,60 @@ export default function BracketView({
   onPickChange = null,
   mode = "view",
 }) {
+  const [activeTab, setActiveTab] = useState("east");
+
   if (!bracket) {
-    return (
-      <div className="text-muted text-sm py-8 text-center">
-        Loading bracket...
-      </div>
-    );
+    return <div className="text-muted text-sm py-8 text-center">Loading bracket...</div>;
   }
 
-  // Layout: [East+South left] [Center FF/Champ] [West+Midwest right]
   return (
-    <div className="overflow-x-auto">
-      <div className="flex flex-row gap-2 min-w-max py-4 px-2">
-        {/* Left half: East (top) + South (bottom) */}
-        <div className="flex flex-col gap-4">
-          <RegionBlock
-            regionKey="east"
-            bracket={bracket}
-            results={results}
-            picks={picks}
-            onPickChange={onPickChange}
-            mode={mode}
-            flip={false}
-          />
-          <RegionBlock
-            regionKey="south"
-            bracket={bracket}
-            results={results}
-            picks={picks}
-            onPickChange={onPickChange}
-            mode={mode}
-            flip={false}
-          />
+    <>
+      {/* Mobile: tab navigation */}
+      <div className="sm:hidden">
+        <div className="flex border-b border-border overflow-x-auto">
+          {MOBILE_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`shrink-0 px-4 py-2.5 text-xs font-medium tracking-wide transition-colors cursor-pointer ${
+                activeTab === tab.key
+                  ? "text-gold border-b-2 border-gold -mb-px"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-
-        {/* Center: Final Four + Championship */}
-        <CenterColumn
+        <MobileRegionView
+          regionKey={activeTab}
           bracket={bracket}
           results={results}
           picks={picks}
           onPickChange={onPickChange}
           mode={mode}
         />
+      </div>
 
-        {/* Right half: West (top) + Midwest (bottom) — mirrored */}
-        <div className="flex flex-col gap-4">
-          <RegionBlock
-            regionKey="west"
-            bracket={bracket}
-            results={results}
-            picks={picks}
-            onPickChange={onPickChange}
-            mode={mode}
-            flip={true}
-          />
-          <RegionBlock
-            regionKey="midwest"
-            bracket={bracket}
-            results={results}
-            picks={picks}
-            onPickChange={onPickChange}
-            mode={mode}
-            flip={true}
-          />
+      {/* Desktop: full bracket */}
+      <div className="hidden sm:block overflow-x-auto">
+        <div className="flex flex-row gap-2 min-w-max py-4 px-2">
+          {/* Left half: East (top) + South (bottom) */}
+          <div className="flex flex-col gap-6">
+            <RegionBlock regionKey="east" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={false} />
+            <RegionBlock regionKey="south" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={false} />
+          </div>
+
+          {/* Center */}
+          <CenterColumn bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} />
+
+          {/* Right half: West (top) + Midwest (bottom) — mirrored */}
+          <div className="flex flex-col gap-6">
+            <RegionBlock regionKey="west" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={true} />
+            <RegionBlock regionKey="midwest" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={true} />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

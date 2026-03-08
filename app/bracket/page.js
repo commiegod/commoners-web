@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
 import BracketView from "../components/BracketView";
 import { MAX_SCORE } from "../../lib/bracket";
 
@@ -28,11 +29,17 @@ function SkeletonRow() {
   );
 }
 
+const SHOW_INITIAL = 20;
+
 export default function BracketPage() {
+  const { publicKey } = useWallet();
+  const walletAddress = publicKey?.toBase58() ?? null;
+
   const [bracket, setBracket] = useState(null);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -59,79 +66,65 @@ export default function BracketPage() {
   }, []);
 
   const results = bracket?.results ?? {};
-  const topEntries = entries.slice(0, 10);
   const tournamentStarted =
     bracket?.status === "in_progress" || bracket?.status === "complete";
+  const visibleEntries = showAll ? entries : entries.slice(0, SHOW_INITIAL);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="font-blackletter text-3xl text-gold">
-          MidEvils March Madness 2026
-        </h1>
-      </div>
-
-      {error && (
-        <div className="text-red-500 text-sm mb-6">{error}</div>
-      )}
-
-      {/* Status banner */}
-      {!loading && bracket && (
+    <div className="py-10">
+      {/* Constrained header + status + leaderboard */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Header */}
         <div className="mb-6">
-          {bracket.status === "pending" && (
-            <div className="bg-card border border-border rounded px-4 py-3 text-sm text-muted">
-              Brackets will be available after Selection Sunday. Check back soon.
-            </div>
-          )}
-          {bracket.status === "open" && (
-            <div className="bg-card border border-border rounded px-4 py-3 text-sm flex items-center justify-between gap-4 flex-wrap">
-              <span className="text-foreground">
-                Entries open
-                {bracket.entryDeadline
-                  ? ` — deadline: ${formatDeadline(bracket.entryDeadline)}`
-                  : ""}
-              </span>
-              <Link
-                href="/bracket/enter"
-                className="bg-gold text-card font-semibold text-xs px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                Enter Your Bracket
-              </Link>
-            </div>
-          )}
-          {bracket.status === "in_progress" && (
-            <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
-              Tournament is underway.{" "}
-              <span className="text-muted">{entries.length} entries submitted.</span>
-            </div>
-          )}
-          {bracket.status === "complete" && (
-            <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
-              Tournament complete. Final standings below.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Main layout */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Bracket section (~70%) */}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-sm text-muted uppercase tracking-widest mb-3">
-            Bracket
-          </h2>
-          {loading ? (
-            <div className="animate-pulse bg-card border border-border rounded h-64" />
-          ) : bracket ? (
-            <div className="border border-border rounded overflow-hidden bg-background">
-              <BracketView bracket={bracket} results={results} />
-            </div>
-          ) : null}
+          <h1 className="font-blackletter text-3xl text-gold">
+            MidEvils March Madness 2026
+          </h1>
         </div>
 
-        {/* Leaderboard sidebar (~30%) */}
-        <div className="w-full lg:w-72 shrink-0">
+        {error && (
+          <div className="text-red-500 text-sm mb-6">{error}</div>
+        )}
+
+        {/* Status banner */}
+        {!loading && bracket && (
+          <div className="mb-6">
+            {bracket.status === "pending" && (
+              <div className="bg-card border border-border rounded px-4 py-3 text-sm text-muted">
+                Brackets will be available after Selection Sunday. Check back soon.
+              </div>
+            )}
+            {bracket.status === "open" && (
+              <div className="bg-card border border-border rounded px-4 py-3 text-sm flex items-center justify-between gap-4 flex-wrap">
+                <span className="text-foreground">
+                  Entries open
+                  {bracket.entryDeadline
+                    ? ` — deadline: ${formatDeadline(bracket.entryDeadline)}`
+                    : ""}
+                </span>
+                <Link
+                  href="/bracket/enter"
+                  className="bg-gold text-card font-semibold text-xs px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
+                >
+                  Enter Your Bracket
+                </Link>
+              </div>
+            )}
+            {bracket.status === "in_progress" && (
+              <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
+                Tournament is underway.{" "}
+                <span className="text-muted">{entries.length} entries submitted.</span>
+              </div>
+            )}
+            {bracket.status === "complete" && (
+              <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
+                Tournament complete. Final standings below.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Leaderboard */}
+        <div className="mb-2">
           <h2 className="text-sm text-muted uppercase tracking-widest mb-3">
             Leaderboard
           </h2>
@@ -153,36 +146,65 @@ export default function BracketPage() {
                   Leaderboard unlocks when games begin.
                 </p>
               </div>
-            ) : topEntries.length === 0 ? (
+            ) : entries.length === 0 ? (
               <div className="p-4 text-sm text-muted">No entries yet.</div>
             ) : (
-              <div className="divide-y divide-border">
-                {topEntries.map((entry) => (
-                  <Link
-                    key={entry.id}
-                    href={`/bracket/${entry.id}`}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-card transition-colors"
-                  >
-                    <span className="text-xs text-muted/60 w-5 text-right shrink-0">
-                      {entry.rank}
-                    </span>
-                    <span className="text-sm flex-1 truncate text-foreground">
-                      {entry.username}
-                    </span>
-                    <span className="text-xs text-muted whitespace-nowrap">
-                      {entry.score} / {MAX_SCORE}
-                    </span>
-                  </Link>
-                ))}
-                {entries.length > 10 && (
-                  <div className="px-4 py-2 text-xs text-muted/60">
-                    +{entries.length - 10} more entries
+              <>
+                <div className="divide-y divide-border">
+                  {visibleEntries.map((entry) => {
+                    const isMyEntry = walletAddress && entry.walletAddress === walletAddress;
+                    return (
+                      <Link
+                        key={entry.id}
+                        href={`/bracket/${entry.id}`}
+                        className={`flex items-center gap-3 px-4 py-2.5 hover:bg-card transition-colors ${isMyEntry ? "border-l-2 border-gold" : ""}`}
+                      >
+                        <span className="text-xs text-muted/60 w-5 text-right shrink-0">
+                          {entry.rank}
+                        </span>
+                        <span className={`text-sm flex-1 truncate ${isMyEntry ? "text-gold font-medium" : "text-foreground"}`}>
+                          {entry.username}
+                        </span>
+                        <span className="text-xs text-muted whitespace-nowrap">
+                          {entry.score} / {MAX_SCORE}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {entries.length > SHOW_INITIAL && (
+                  <div className="px-4 py-2.5 border-t border-border">
+                    <button
+                      onClick={() => setShowAll((v) => !v)}
+                      className="text-xs text-gold hover:underline cursor-pointer"
+                    >
+                      {showAll
+                        ? "Show less"
+                        : `Show all ${entries.length} entries`}
+                    </button>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
+      </div>
+
+      {/* Bracket — full-bleed to escape layout container */}
+      <div
+        className="mt-8 px-2 sm:px-4"
+        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+      >
+        <div className="mb-2 px-2 sm:px-2">
+          <h2 className="text-sm text-muted uppercase tracking-widest">Bracket</h2>
+        </div>
+        {loading ? (
+          <div className="animate-pulse bg-card border border-border rounded h-64 mx-2" />
+        ) : bracket ? (
+          <div className="border border-border rounded overflow-hidden bg-background">
+            <BracketView bracket={bracket} results={results} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

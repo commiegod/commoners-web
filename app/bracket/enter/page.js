@@ -353,6 +353,11 @@ export default function EnterBracketPage() {
         <p className="text-xs text-muted/60 mt-1">{username.trim().length} / 30</p>
       </div>
 
+      {/* Instruction banner */}
+      <div className="mb-4 bg-card border border-border rounded px-3 py-2 text-xs text-muted">
+        Click a team name to pick them to advance. Picks cascade automatically — changing an early round clears later picks that are no longer reachable.
+      </div>
+
       {/* Pick progress */}
       <div className="mb-4 flex items-center gap-4">
         <div className="text-sm text-muted">
@@ -402,6 +407,26 @@ export default function EnterBracketPage() {
         <p className="text-xs text-muted mt-2">
           Complete all 63 picks to submit.
         </p>
+      )}
+
+      {/* Previous entries */}
+      {myEntries.length > 0 && (
+        <div className="mt-8 pt-6 border-t border-border">
+          <h2 className="text-xs text-muted uppercase tracking-widest mb-2">
+            Your Entries
+          </h2>
+          <div className="flex flex-col gap-2">
+            {myEntries.map((e) => (
+              <Link
+                key={e.id}
+                href={`/bracket/${e.id}`}
+                className="text-sm text-gold hover:underline"
+              >
+                {e.username}
+              </Link>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

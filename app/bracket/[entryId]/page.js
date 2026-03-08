@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import BracketView from "../../components/BracketView";
-import { MAX_SCORE } from "../../../lib/bracket";
+import { MAX_SCORE, getTeamById } from "../../../lib/bracket";
 
 function shortenAddress(addr) {
   if (!addr || addr.length < 12) return addr;
@@ -79,6 +79,7 @@ export default function EntryPage() {
   if (!entry || !bracket) return null;
 
   const results = bracket.results ?? {};
+  const champTeam = entry.picks?.champ ? getTeamById(bracket, entry.picks.champ) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -97,6 +98,15 @@ export default function EntryPage() {
           {entry.submittedAt ? ` — submitted ${formatDate(entry.submittedAt)}` : ""}
         </p>
       </div>
+
+      {/* Champion callout */}
+      {champTeam && (
+        <div className="mb-6 bg-gold/10 border border-gold/30 rounded px-5 py-4 text-center inline-block min-w-[180px]">
+          <p className="text-xs text-muted uppercase tracking-widest mb-1">Picks to win it all</p>
+          <p className="font-blackletter text-2xl text-gold">{champTeam.name}</p>
+          <p className="text-xs text-muted mt-0.5">#{champTeam.seed} seed</p>
+        </div>
+      )}
 
       {/* Score stats */}
       <div className="flex flex-wrap gap-6 mb-8">
