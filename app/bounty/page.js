@@ -260,8 +260,8 @@ export default function BountyPage() {
         {IS_DEVNET && (
           <div className="mb-4 max-w-2xl px-4 py-3 border border-amber-300/60 rounded bg-amber-50/60 text-sm text-amber-800 leading-relaxed">
             <span className="font-semibold">Testing phase.</span> The auction program is currently running on Solana devnet.
-            We&apos;re welcoming artists to submit work and help us test the bounty system —
-            COMMON rewards will be distributed when auctions go live on mainnet.
+            We&apos;re welcoming artists to submit work and help us test the bounty system.
+            COMMON rewards and bounty payouts begin at mainnet launch — devnet submissions are not eligible for retroactive rewards.
           </div>
         )}
         {todaySlot ? (
