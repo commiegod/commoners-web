@@ -18,7 +18,6 @@ const links = [
   { href: "/governance", label: "Governance" },
   { href: "/discussion", label: "The Board" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/bracket", label: "Bracket" },
 ];
 
 export default function Nav() {
@@ -35,6 +34,22 @@ export default function Nav() {
 
         {/* Desktop links + wallet */}
         <div className="hidden sm:flex items-center gap-6">
+          {/* Bracket — temporary featured link */}
+          <Link
+            href="/bracket"
+            className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+              pathname === "/bracket"
+                ? "bg-gold text-card border-gold"
+                : "bg-gold/10 text-gold border-gold/40 hover:bg-gold/20"
+            }`}
+          >
+            <span>🏀</span>
+            <span className="font-blackletter tracking-wide">Mid March Madness</span>
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide">
+              New
+            </span>
+          </Link>
+
           {links.map((link) => (
             <Link
               key={link.href}
@@ -105,6 +120,21 @@ export default function Nav() {
 
         {/* Links — large, centered */}
         <div className="flex-1 flex flex-col justify-center px-8 overflow-y-auto">
+          {/* Bracket — featured */}
+          <Link
+            href="/bracket"
+            onClick={() => setOpen(false)}
+            className={`flex items-center gap-2 py-4 font-blackletter text-3xl border-b border-border/40 transition-colors ${
+              pathname === "/bracket" ? "text-gold" : "text-foreground hover:text-gold"
+            }`}
+          >
+            <span>🏀</span>
+            <span>Mid March Madness</span>
+            <span className="ml-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide self-center">
+              New
+            </span>
+          </Link>
+
           {links.map((link) => (
             <Link
               key={link.href}
