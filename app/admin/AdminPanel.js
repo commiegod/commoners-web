@@ -617,6 +617,367 @@ function DiscussionSection({ token }) {
   );
 }
 
+// ── Bracket admin section ─────────────────────────────────────────────────────
+
+const REGIONS = ["east", "west", "south", "midwest"];
+const REGION_LABELS = { east: "East", west: "West", south: "South", midwest: "Midwest" };
+const R1_MATCHUPS = [[1,16],[8,9],[5,12],[4,13],[6,11],[3,14],[7,10],[2,15]];
+const ROUND_LABELS = { r1: "Round of 64", r2: "Round of 32", r3: "Sweet 16", r4: "Elite Eight" };
+const STATUS_OPTIONS = ["pending", "open", "in_progress", "complete"];
+
+function BracketAdminSection({ token }) {
+  const [bracket, setBracket] = useState(null);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  // Team name editing state: { east_s1: "Duke", ... }
+  const [teamNames, setTeamNames] = useState({});
+  // Results editing: { r1_east_0: "east_s1", ... }
+  const [resultsEdits, setResultsEdits] = useState({});
+  // Status + deadline
+  const [statusEdit, setStatusEdit] = useState("");
+  const [deadlineEdit, setDeadlineEdit] = useState("");
+  // Which region's teams are expanded for editing
+  const [expandedRegion, setExpandedRegion] = useState(null);
+  // Which round's results are expanded
+  const [expandedResults, setExpandedResults] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [bRes, eRes] = await Promise.all([
+        fetch("/api/bracket"),
+        fetch("/api/bracket/entries"),
+      ]);
+      const b = await bRes.json();
+      const e = await eRes.json();
+      setBracket(b);
+      setEntries(e.entries || []);
+      setStatusEdit(b.status || "pending");
+      setDeadlineEdit(b.entryDeadline ? new Date(b.entryDeadline).toISOString().slice(0,16) : "");
+      // Pre-fill team names
+      const names = {};
+      for (const [regionKey, region] of Object.entries(b.regions || {})) {
+        for (const t of region.teams) {
+          names[t.id] = t.name === "TBD" ? "" : t.name;
+        }
+      }
+      setTeamNames(names);
+      setResultsEdits({ ...b.results });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function save(payload) {
+    setSaving(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const res = await fetch("/api/admin/bracket-results", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Save failed");
+      setSuccessMsg("Saved.");
+      await load();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function saveStatus() {
+    const payload = { status: statusEdit };
+    if (deadlineEdit) payload.entryDeadline = new Date(deadlineEdit).toISOString();
+    save(payload);
+  }
+
+  function saveTeams() {
+    // Build teams object: { east: [{id, seed, name}, ...], ... }
+    if (!bracket) return;
+    const teams = {};
+    for (const [regionKey, region] of Object.entries(bracket.regions)) {
+      teams[regionKey] = region.teams.map(t => ({
+        ...t,
+        name: teamNames[t.id]?.trim() || "TBD",
+      }));
+    }
+    save({ teams });
+  }
+
+  function saveResults() {
+    save({ results: resultsEdits });
+  }
+
+  // Get all teams for a game's two slots (from edited teamNames)
+  function getGameTeamOptions(gameId) {
+    if (!bracket) return [];
+    const all = [];
+    for (const [regionKey, region] of Object.entries(bracket.regions)) {
+      for (const t of region.teams) {
+        all.push({ id: t.id, name: teamNames[t.id]?.trim() || t.name, seed: t.seed, region: regionKey });
+      }
+    }
+    return all;
+  }
+
+  // Generate game list for a region + round
+  function getRegionRoundGames(regionKey, round) {
+    if (!bracket) return [];
+    const region = bracket.regions[regionKey];
+    if (!region) return [];
+    const teamBySeed = {};
+    for (const t of region.teams) teamBySeed[t.seed] = t;
+
+    if (round === "r1") {
+      return R1_MATCHUPS.map(([ sa, sb ], i) => ({
+        id: `r1_${regionKey}_${i}`,
+        labelA: `${sa} ${teamNames[`${regionKey}_s${sa}`] || "TBD"}`,
+        labelB: `${sb} ${teamNames[`${regionKey}_s${sb}`] || "TBD"}`,
+        teamAId: `${regionKey}_s${sa}`,
+        teamBId: `${regionKey}_s${sb}`,
+      }));
+    }
+    if (round === "r2") {
+      return Array.from({length:4},(_,i) => {
+        const g1 = `r1_${regionKey}_${2*i}`, g2 = `r1_${regionKey}_${2*i+1}`;
+        const w1 = resultsEdits[g1], w2 = resultsEdits[g2];
+        return { id: `r2_${regionKey}_${i}`, teamAId: w1||null, teamBId: w2||null,
+          labelA: w1 ? (teamNames[w1]||w1) : "Winner TBD", labelB: w2 ? (teamNames[w2]||w2) : "Winner TBD" };
+      });
+    }
+    if (round === "r3") {
+      return Array.from({length:2},(_,i) => {
+        const g1 = `r2_${regionKey}_${2*i}`, g2 = `r2_${regionKey}_${2*i+1}`;
+        const w1 = resultsEdits[g1], w2 = resultsEdits[g2];
+        return { id: `r3_${regionKey}_${i}`, teamAId: w1||null, teamBId: w2||null,
+          labelA: w1 ? (teamNames[w1]||w1) : "Winner TBD", labelB: w2 ? (teamNames[w2]||w2) : "Winner TBD" };
+      });
+    }
+    if (round === "r4") {
+      const g1 = `r3_${regionKey}_0`, g2 = `r3_${regionKey}_1`;
+      const w1 = resultsEdits[g1], w2 = resultsEdits[g2];
+      return [{ id: `r4_${regionKey}`, teamAId: w1||null, teamBId: w2||null,
+        labelA: w1 ? (teamNames[w1]||w1) : "Winner TBD", labelB: w2 ? (teamNames[w2]||w2) : "Winner TBD" }];
+    }
+    return [];
+  }
+
+  function getFinalFourGames() {
+    if (!bracket) return [];
+    const pairings = bracket.ffPairings || [["east","west"],["south","midwest"]];
+    return pairings.map(([r1, r2], i) => {
+      const g1 = `r4_${r1}`, g2 = `r4_${r2}`;
+      const w1 = resultsEdits[g1], w2 = resultsEdits[g2];
+      return { id: `ff_${i}`, teamAId: w1||null, teamBId: w2||null,
+        labelA: w1 ? (teamNames[w1]||w1) : `${REGION_LABELS[r1]} winner`, labelB: w2 ? (teamNames[w2]||w2) : `${REGION_LABELS[r2]} winner` };
+    });
+  }
+
+  function getChampGame() {
+    const w1 = resultsEdits["ff_0"], w2 = resultsEdits["ff_1"];
+    return { id: "champ", teamAId: w1||null, teamBId: w2||null,
+      labelA: w1 ? (teamNames[w1]||w1) : "FF1 winner", labelB: w2 ? (teamNames[w2]||w2) : "FF2 winner" };
+  }
+
+  function ResultGameRow({ game }) {
+    const winner = resultsEdits[game.id] || "";
+    const options = [
+      ...(game.teamAId ? [{ id: game.teamAId, label: game.labelA }] : []),
+      ...(game.teamBId ? [{ id: game.teamBId, label: game.labelB }] : []),
+    ];
+    return (
+      <div className="flex items-center gap-3 py-1.5 border-b border-border/50 last:border-0 text-xs">
+        <div className="flex-1 text-muted">{game.labelA} <span className="text-muted/40">vs</span> {game.labelB}</div>
+        <select
+          value={winner}
+          onChange={e => setResultsEdits(prev => ({ ...prev, [game.id]: e.target.value || undefined }))}
+          className="bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-gold"
+        >
+          <option value="">— No result —</option>
+          {options.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+        </select>
+      </div>
+    );
+  }
+
+  if (loading) return <p className="text-muted text-sm">Loading bracket data…</p>;
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-blackletter text-2xl text-gold">
+          Bracket — March Madness 2026
+          {!loading && (
+            <span className="ml-3 text-lg font-sans text-muted font-normal">
+              ({entries.length} {entries.length === 1 ? "entry" : "entries"})
+            </span>
+          )}
+        </h2>
+        <div className="flex items-center gap-3">
+          {successMsg && <span className="text-xs text-green-700">{successMsg}</span>}
+          {error && <span className="text-xs text-red-600">{error}</span>}
+          <button onClick={load} className="text-xs text-muted hover:text-foreground border border-border px-3 py-1.5 cursor-pointer">Refresh</button>
+          <a href="/bracket" target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-foreground border border-border px-3 py-1.5">View page ↗</a>
+        </div>
+      </div>
+
+      {/* Status + deadline */}
+      <div className="bg-card border border-border p-4 space-y-4">
+        <p className="text-xs text-muted uppercase tracking-widest">Tournament Status</p>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="text-xs text-muted block mb-1">Status</label>
+            <select
+              value={statusEdit}
+              onChange={e => setStatusEdit(e.target.value)}
+              className="bg-background border border-border px-3 py-1.5 text-sm focus:outline-none focus:border-gold"
+            >
+              {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted block mb-1">Entry Deadline (local time)</label>
+            <input
+              type="datetime-local"
+              value={deadlineEdit}
+              onChange={e => setDeadlineEdit(e.target.value)}
+              className="bg-background border border-border px-3 py-1.5 text-sm focus:outline-none focus:border-gold"
+            />
+          </div>
+          <button
+            onClick={saveStatus}
+            disabled={saving}
+            className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+          >
+            {saving ? "Saving…" : "Save Status"}
+          </button>
+        </div>
+      </div>
+
+      {/* Team names */}
+      <div className="bg-card border border-border p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted uppercase tracking-widest">Team Names (after Selection Sunday)</p>
+          <button
+            onClick={saveTeams}
+            disabled={saving}
+            className="px-4 py-1.5 bg-gold text-card text-xs font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+          >
+            {saving ? "Saving…" : "Save Teams"}
+          </button>
+        </div>
+        <div className="space-y-2">
+          {REGIONS.map(regionKey => (
+            <div key={regionKey} className="border border-border">
+              <button
+                onClick={() => setExpandedRegion(expandedRegion === regionKey ? null : regionKey)}
+                className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium hover:bg-background/50 cursor-pointer"
+              >
+                <span>{REGION_LABELS[regionKey]} Region</span>
+                <span className="text-muted text-xs">{expandedRegion === regionKey ? "▲ collapse" : "▼ expand"}</span>
+              </button>
+              {expandedRegion === regionKey && (
+                <div className="border-t border-border p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {(bracket?.regions[regionKey]?.teams || []).map(t => (
+                    <div key={t.id}>
+                      <label className="text-xs text-muted block mb-1">Seed {t.seed}</label>
+                      <input
+                        type="text"
+                        maxLength={30}
+                        placeholder="Team name"
+                        value={teamNames[t.id] || ""}
+                        onChange={e => setTeamNames(prev => ({ ...prev, [t.id]: e.target.value }))}
+                        className="w-full bg-background border border-border px-2 py-1 text-xs focus:outline-none focus:border-gold"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Results input */}
+      <div className="bg-card border border-border p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted uppercase tracking-widest">Game Results</p>
+          <button
+            onClick={saveResults}
+            disabled={saving}
+            className="px-4 py-1.5 bg-gold text-card text-xs font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+          >
+            {saving ? "Saving…" : "Save Results"}
+          </button>
+        </div>
+
+        {/* Regional rounds */}
+        {REGIONS.map(regionKey => (
+          <div key={regionKey} className="border border-border">
+            <button
+              onClick={() => setExpandedResults(expandedResults === regionKey ? null : regionKey)}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium hover:bg-background/50 cursor-pointer"
+            >
+              <span>{REGION_LABELS[regionKey]} Region</span>
+              <span className="text-muted text-xs">{expandedResults === regionKey ? "▲ collapse" : "▼ expand"}</span>
+            </button>
+            {expandedResults === regionKey && (
+              <div className="border-t border-border p-4 space-y-4">
+                {["r1","r2","r3","r4"].map(round => (
+                  <div key={round}>
+                    <p className="text-xs text-muted uppercase tracking-wider mb-2">{ROUND_LABELS[round]}</p>
+                    {getRegionRoundGames(regionKey, round).map(g => <ResultGameRow key={g.id} game={g} />)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Final Four + Championship */}
+        <div className="border border-border p-4 space-y-4">
+          <p className="text-xs text-muted uppercase tracking-wider">Final Four</p>
+          {getFinalFourGames().map(g => <ResultGameRow key={g.id} game={g} />)}
+          <p className="text-xs text-muted uppercase tracking-wider pt-2">Championship</p>
+          <ResultGameRow game={getChampGame()} />
+        </div>
+      </div>
+
+      {/* Entry summary */}
+      {entries.length > 0 && (
+        <div className="bg-card border border-border p-4 space-y-3">
+          <p className="text-xs text-muted uppercase tracking-widest mb-3">Top Entries ({entries.length} total)</p>
+          <div className="space-y-1">
+            {entries.slice(0, 10).map((entry, i) => (
+              <div key={entry.id} className="flex items-center justify-between text-xs py-1 border-b border-border/50 last:border-0">
+                <span className="text-muted w-6">#{i+1}</span>
+                <span className="flex-1 font-medium truncate">{entry.username}</span>
+                <span className="font-mono text-muted">{entry.walletAddress?.slice(0,4)}…{entry.walletAddress?.slice(-4)}</span>
+                <span className="ml-4 font-semibold text-gold">{entry.score ?? 0} pts</span>
+                <a href={`/bracket/${entry.id}`} target="_blank" rel="noreferrer" className="ml-3 text-muted hover:text-foreground">↗</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Auction Status section ────────────────────────────────────────────────────
 
 function AuctionStatusSection() {
@@ -812,6 +1173,9 @@ export default function AdminPanel({ token }) {
 
   return (
     <div className="max-w-3xl space-y-16">
+      {/* ── Bracket tournament ── */}
+      <BracketAdminSection token={token} />
+
       {/* ── Auction status ── */}
       <AuctionStatusSection />
 
