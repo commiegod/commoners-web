@@ -298,8 +298,16 @@ export default function EnterBracketPage() {
         <div className="bg-card border border-border rounded px-4 py-4 text-sm text-muted">
           You must hold a MidEvils NFT to enter. This wallet holds no MidEvils.
         </div>
-        <div className="mt-4">
-          <Link href="/bracket" className="text-sm text-gold hover:underline">
+        <div className="mt-4 flex flex-col gap-2">
+          <a
+            href="https://magiceden.io/marketplace/midevils"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gold hover:underline"
+          >
+            Browse MidEvils on Magic Eden ↗
+          </a>
+          <Link href="/bracket" className="text-sm text-muted hover:text-foreground">
             Back to bracket
           </Link>
         </div>

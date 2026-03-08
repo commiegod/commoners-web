@@ -50,6 +50,11 @@ export default function LandingAccordion() {
         </AccordionItem>
 
         <AccordionItem title="Daily Auctions">
+          <div className="mb-4 px-3 py-2 border border-border/60 rounded text-xs text-muted bg-card">
+            The auction system is currently running on Solana devnet for testing.
+            Mainnet launch is the next milestone — auctions will go live once the
+            program is deployed and the first seller is onboarded.
+          </div>
           <ul className="text-muted leading-relaxed space-y-2 list-disc list-inside">
             <li>Any MidEvil NFT (not just Commoners) can be listed for auction.</li>
             <li>Each auction runs for 24 hours starting at midnight UTC.</li>
