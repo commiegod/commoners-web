@@ -251,7 +251,21 @@ export default function BountyPage() {
     .filter((g) => g.allSubmissions.length > 0);
 
   return (
-    <div className="space-y-16">
+    <div>
+      {/* Hero banner — full-bleed */}
+      <div
+        style={{
+          width: "100vw",
+          marginLeft: "calc(50% - 50vw)",
+          height: "220px",
+          backgroundImage: "url('/banner-bounty.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 20%",
+        }}
+        className="mb-8"
+      />
+
+      <div className="space-y-16">
       {/* ── Section 1: Header ── */}
       <section>
         <h1 className="font-blackletter text-3xl text-gold mb-3">
@@ -690,6 +704,7 @@ export default function BountyPage() {
           onClose={() => setLightbox(null)}
         />
       )}
+      </div>
     </div>
   );
 }
