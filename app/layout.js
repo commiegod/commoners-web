@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
                 </a>
                 {/* Magic Eden */}
                 <a href="https://magiceden.io/marketplace/midevils" target="_blank" rel="noopener noreferrer" aria-label="Magic Eden" className="transition-opacity hover:opacity-80">
-                  <img src="/me-logo.webp" alt="" width={22} height={13} className="rounded-sm" aria-hidden="true" />
+                  <img src="/me-logo.webp" alt="" width={20} height={20} aria-hidden="true" />
                 </a>
               </div>
               <div className="flex items-center gap-5 text-xs text-muted">
