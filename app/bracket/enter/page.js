@@ -3,6 +3,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
+function formatDeadline(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
 function buildChallengeMessage() {
   return `Submit bracket entry for MidEvils March Madness 2026.\nTimestamp: ${Date.now()}`;
 }
@@ -83,7 +95,7 @@ function cascadePicks(oldPicks, changedGameId, newTeamId, bracket) {
 }
 
 export default function EnterBracketPage() {
-  const { publicKey, signMessage } = useWallet();
+  const { publicKey, signMessage, disconnect } = useWallet();
   const walletAddress = publicKey?.toBase58() ?? null;
 
   const [bracket, setBracket] = useState(null);
@@ -241,10 +253,13 @@ export default function EnterBracketPage() {
           MidEvils March Madness 2026
         </h1>
         <div className="bg-card border border-border rounded px-4 py-4 text-sm text-muted">
-          {bracket.status === "pending"
-            ? "Entry is not open yet. Check back after Selection Sunday."
-            : bracket.status === "in_progress" || bracket.status === "complete"
-            ? "Entry period has closed."
+          {bracket.status === "pending" ? (
+            <>
+              <p className="font-medium text-foreground mb-1">Entries open after Selection Sunday</p>
+              <p>The field isn&apos;t set yet. Come back once the bracket is announced — picks release on Selection Sunday and entries open shortly after.</p>
+            </>
+          ) : bracket.status === "in_progress" || bracket.status === "complete"
+            ? "Entry period has closed. The tournament is underway."
             : "Entry is not currently open."}
         </div>
         <div className="mt-4">
@@ -296,14 +311,20 @@ export default function EnterBracketPage() {
           Enter Your Bracket
         </h1>
         <div className="bg-card border border-border rounded px-4 py-4 text-sm text-muted">
-          You must hold a MidEvils NFT to enter. This wallet holds no MidEvils.
+          No MidEvils found in this wallet. You must hold at least one to enter.
         </div>
         <div className="mt-4 flex flex-col gap-2">
+          <button
+            onClick={disconnect}
+            className="text-sm text-gold hover:underline text-left cursor-pointer"
+          >
+            Try a different wallet ↩
+          </button>
           <a
             href="https://magiceden.io/marketplace/midevils"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-gold hover:underline"
+            className="text-sm text-muted hover:text-foreground transition-colors"
           >
             Browse MidEvils on Magic Eden ↗
           </a>
@@ -374,6 +395,21 @@ export default function EnterBracketPage() {
           {midEvilCount !== 1 ? "s" : ""} held
         </p>
       </div>
+
+      {/* Deadline callout */}
+      {bracket.entryDeadline && (() => {
+        const deadline = formatDeadline(bracket.entryDeadline);
+        const isPast = Date.now() > new Date(bracket.entryDeadline).getTime();
+        return deadline && !isPast ? (
+          <div className="mb-6 border border-amber-300/60 bg-amber-50/60 rounded px-4 py-3 flex items-center gap-3">
+            <span className="text-amber-600 text-base leading-none">⏰</span>
+            <div>
+              <p className="text-xs text-amber-700 uppercase tracking-widest font-semibold mb-0.5">Entry Deadline</p>
+              <p className="text-sm text-amber-900 font-medium">{deadline}</p>
+            </div>
+          </div>
+        ) : null;
+      })()}
 
       {/* Bracket name input */}
       <div className="mb-6 max-w-sm">

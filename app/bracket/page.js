@@ -3,9 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import BracketView from "../components/BracketView";
 import { MAX_SCORE } from "../../lib/bracket";
+
+const WalletMultiButton = dynamic(
+  () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
+  { ssr: false }
+);
 
 function formatDeadline(iso) {
   if (!iso) return "";
@@ -203,8 +209,30 @@ export default function BracketPage() {
             </div>
           )}
 
-          {/* Your entries (wallet connected) */}
-          {walletAddress && !loading && (() => {
+          {/* Your entries */}
+          {!loading && (() => {
+            if (!walletAddress) {
+              return (
+                <div className="mb-6">
+                  <h2 className="text-sm text-muted uppercase tracking-widest mb-3">Your Entries</h2>
+                  <div className="border border-border rounded bg-background px-4 py-3 flex items-center gap-3 flex-wrap">
+                    <p className="text-sm text-muted">Connect your wallet to see your entries.</p>
+                    <WalletMultiButton
+                      style={{
+                        backgroundColor: "transparent",
+                        border: "1px solid #1a1a1a",
+                        color: "#1a1a1a",
+                        fontSize: "0.75rem",
+                        borderRadius: "9999px",
+                        height: "auto",
+                        padding: "0.25rem 0.75rem",
+                        lineHeight: 1.5,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            }
             const mine = entries.filter((e) => e.walletAddress === walletAddress);
             if (mine.length === 0) return null;
             return (
