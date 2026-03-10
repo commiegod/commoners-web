@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { getGameTeams, R1_MATCHUPS } from "../../lib/bracket";
 
 const ROUND_LABELS = { 1: "R64", 2: "R32", 3: "S16", 4: "E8" };
@@ -222,8 +222,31 @@ export default function BracketView({
   picks = {},
   onPickChange = null,
   mode = "view",
+  fit = false,
 }) {
   const [activeTab, setActiveTab] = useState("east");
+  const containerRef = useRef(null);
+  const innerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+  const [innerHeight, setInnerHeight] = useState(null);
+
+  const measure = useCallback(() => {
+    if (!containerRef.current || !innerRef.current) return;
+    const cw = containerRef.current.offsetWidth;
+    const iw = innerRef.current.scrollWidth;
+    const ih = innerRef.current.scrollHeight;
+    const s = Math.min(1, cw / iw);
+    setScale(s);
+    setInnerHeight(ih);
+  }, []);
+
+  useEffect(() => {
+    if (!fit || !containerRef.current) return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(containerRef.current);
+    measure();
+    return () => ro.disconnect();
+  }, [fit, measure]);
 
   if (!bracket) {
     return <div className="text-muted text-sm py-8 text-center">Loading bracket...</div>;
@@ -259,8 +282,16 @@ export default function BracketView({
       </div>
 
       {/* Desktop: full bracket */}
-      <div className="hidden sm:block overflow-x-auto">
-        <div className="flex flex-row gap-2 min-w-max py-4 px-2">
+      <div
+        ref={fit ? containerRef : undefined}
+        className="hidden sm:block"
+        style={fit && innerHeight ? { height: innerHeight * scale, overflow: "hidden" } : { overflowX: "auto" }}
+      >
+        <div
+          ref={fit ? innerRef : undefined}
+          className="flex flex-row gap-2 min-w-max py-4 px-2"
+          style={fit && scale < 1 ? { transformOrigin: "top left", transform: `scale(${scale})` } : undefined}
+        >
           {/* Left half: East (top) + South (bottom) */}
           <div className="flex flex-col gap-6">
             <RegionBlock regionKey="east" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={false} />

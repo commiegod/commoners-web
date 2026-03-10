@@ -352,7 +352,7 @@ export default function BracketPage() {
             <div className="animate-pulse bg-card border border-border rounded h-64 mx-2" />
           ) : bracket ? (
             <div className="border border-border rounded overflow-hidden bg-background">
-              <BracketView bracket={bracket} results={results} />
+              <BracketView bracket={bracket} results={results} fit />
             </div>
           ) : null}
         </div>
