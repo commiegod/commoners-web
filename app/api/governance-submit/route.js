@@ -13,6 +13,12 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+    if (title.trim().length > 200) {
+      return NextResponse.json({ error: "Title too long (max 200 characters)." }, { status: 400 });
+    }
+    if (description.trim().length > 5000) {
+      return NextResponse.json({ error: "Description too long (max 5000 characters)." }, { status: 400 });
+    }
 
     // Must hold a Commoner NFT to submit a proposal
     const commonerCount = await getCommonerCount(walletAddress);
@@ -25,6 +31,9 @@ export async function POST(request) {
 
     const id = `prop-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const solAmount = parseFloat(treasurySol) || 0;
+    if (!isFinite(solAmount) || solAmount < 0) {
+      return NextResponse.json({ error: "Invalid treasury amount." }, { status: 400 });
+    }
     const proposal = {
       id,
       type,

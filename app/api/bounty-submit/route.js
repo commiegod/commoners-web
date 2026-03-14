@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../lib/githubApi";
+import { PublicKey } from "@solana/web3.js";
 
 export async function POST(request) {
   try {
@@ -11,6 +12,25 @@ export async function POST(request) {
         { error: "Missing required fields: date, imageUrl, artistName, type, solanaAddress" },
         { status: 400 }
       );
+    }
+
+    // Validate date format (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(Date.parse(date))) {
+      return NextResponse.json({ error: "Invalid date format. Use YYYY-MM-DD." }, { status: 400 });
+    }
+
+    // Validate imageUrl is a real URL
+    try {
+      new URL(imageUrl);
+    } catch {
+      return NextResponse.json({ error: "Invalid image URL." }, { status: 400 });
+    }
+
+    // Validate Solana address
+    try {
+      new PublicKey(solanaAddress);
+    } catch {
+      return NextResponse.json({ error: "Invalid Solana wallet address." }, { status: 400 });
     }
 
     // ── Turnstile verification (skipped if secret not configured) ─────────────

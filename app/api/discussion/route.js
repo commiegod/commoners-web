@@ -10,12 +10,21 @@ function makeId() {
   return crypto.randomUUID();
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
+
     const { content } = await getFile(FILE);
-    return NextResponse.json(content || { threads: [] });
+    const allThreads = content?.threads ?? [];
+    const total = allThreads.length;
+    const pages = Math.max(1, Math.ceil(total / limit));
+    const threads = allThreads.slice((page - 1) * limit, page * limit);
+
+    return NextResponse.json({ threads, total, page, pages });
   } catch {
-    return NextResponse.json({ threads: [] });
+    return NextResponse.json({ threads: [], total: 0, page: 1, pages: 1 });
   }
 }
 

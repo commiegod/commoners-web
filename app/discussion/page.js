@@ -32,6 +32,9 @@ export default function DiscussionPage() {
   const walletAddress = publicKey?.toBase58() ?? null;
 
   const [threads, setThreads] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [commonerCount, setCommonerCount] = useState(0);
   const [checkingHolder, setCheckingHolder] = useState(false);
@@ -44,14 +47,31 @@ export default function DiscussionPage() {
 
   const loadThreads = useCallback(async () => {
     try {
-      const res = await fetch("/api/discussion");
+      const res = await fetch("/api/discussion?page=1&limit=20");
       if (res.ok) {
         const data = await res.json();
-        setThreads(data.threads || []);
+        setThreads(data.threads ?? []);
+        setPage(1);
+        setTotalPages(data.pages ?? 1);
       }
     } catch {}
     setLoading(false);
   }, []);
+
+  async function loadMore() {
+    const next = page + 1;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/discussion?page=${next}&limit=20`);
+      if (res.ok) {
+        const data = await res.json();
+        setThreads((prev) => [...prev, ...(data.threads ?? [])]);
+        setPage(next);
+        setTotalPages(data.pages ?? 1);
+      }
+    } catch {}
+    setLoadingMore(false);
+  }
 
   useEffect(() => {
     loadThreads();
@@ -275,6 +295,19 @@ export default function DiscussionPage() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Load more */}
+      {!loading && page < totalPages && (
+        <div className="mt-3 text-center">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="text-sm text-gold hover:underline disabled:opacity-50 cursor-pointer"
+          >
+            {loadingMore ? "Loading…" : "Load more"}
+          </button>
         </div>
       )}
 

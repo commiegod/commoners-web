@@ -44,10 +44,20 @@ export default function ThreadPage({ params }) {
 
   const loadThread = useCallback(async () => {
     try {
-      const res = await fetch("/api/discussion");
+      // Fetch all threads (no limit) to find this specific one by ID.
+      // Once a dedicated /api/discussion/[id] endpoint exists this can be simplified.
+      const res = await fetch("/api/discussion?limit=50&page=1");
       if (res.ok) {
         const data = await res.json();
-        const found = (data.threads || []).find((t) => t.id === id);
+        let found = (data.threads ?? []).find((t) => t.id === id);
+        // If not on first page, fetch remaining pages
+        for (let p = 2; !found && p <= (data.pages ?? 1); p++) {
+          const r2 = await fetch(`/api/discussion?limit=50&page=${p}`);
+          if (r2.ok) {
+            const d2 = await r2.json();
+            found = (d2.threads ?? []).find((t) => t.id === id);
+          }
+        }
         if (found) setThread(found);
         else setNotFound(true);
       }
