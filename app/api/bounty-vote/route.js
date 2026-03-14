@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../lib/githubApi";
-import { getCommonerCount } from "../../../lib/commoners";
+import { getCommonerCount } from "../../../lib/serverChecks";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

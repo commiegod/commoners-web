@@ -7,7 +7,7 @@ import {
   Keypair,
   SystemProgram,
 } from "@solana/web3.js";
-import { getCommonerCount } from "../../../lib/commoners";
+import { getCommonerCount } from "../../../lib/serverChecks";
 import {
   PROGRAM_ID,
   RPC_URL,

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../../lib/githubApi";
 import { scoreEntry, maxPossibleScore, tiebreakerDiff } from "../../../../lib/bracket";
-import { getMidEvilCount } from "../../../../lib/midevils";
+import { getMidEvilCount } from "../../../../lib/serverChecks";
 import { verifyWalletSignature } from "../../../../lib/verifyWalletSignature";
 
 const ENTRY_LIMIT = 5;
 
 function makeId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  return crypto.randomUUID();
 }
 
 // Substring match against lowercased username — extend as needed

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../lib/githubApi";
-import { getCommonerCount } from "../../../lib/commoners";
+import { getCommonerCount } from "../../../lib/serverChecks";
 import { verifyWalletSignature } from "../../../lib/verifyWalletSignature";
 
 const FILE = "data/discussion.json";
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
 function makeId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return crypto.randomUUID();
 }
 
 export async function GET() {
