@@ -22,6 +22,13 @@ export async function POST(request) {
     return NextResponse.json({ error: "Bracket not found" }, { status: 404 });
   }
 
+  if (bracket.status && bracket.status !== "pending") {
+    return NextResponse.json(
+      { error: `Cannot reset teams while bracket is ${bracket.status}. Set status to pending first.` },
+      { status: 409 }
+    );
+  }
+
   let cleared = 0;
   for (const region of Object.values(bracket.regions)) {
     for (const team of region.teams) {

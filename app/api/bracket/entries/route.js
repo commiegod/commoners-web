@@ -10,6 +10,18 @@ function makeId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+// Substring match against lowercased username — extend as needed
+const BLOCKED_TERMS = [
+  "nigger","nigga","faggot","faget","fagot","chink","spic","spick","kike","wetback",
+  "gook","tranny","retard","cunt","whore","slut","bitch","bastard","asshole","shithead",
+  "motherfucker","cocksucker","fuckyou","fuckoff","dipshit","dumbass","jackass",
+];
+
+function isBlockedUsername(username) {
+  const lower = username.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return BLOCKED_TERMS.some((term) => lower.includes(term));
+}
+
 function getAllTeamIds(bracket) {
   const ids = new Set();
   for (const region of Object.values(bracket.regions)) {
@@ -74,6 +86,12 @@ export async function POST(request) {
     ) {
       return NextResponse.json(
         { error: "username must be 1–30 characters" },
+        { status: 400 }
+      );
+    }
+    if (isBlockedUsername(username.trim())) {
+      return NextResponse.json(
+        { error: "That username is not allowed." },
         { status: 400 }
       );
     }
@@ -174,15 +192,37 @@ export async function POST(request) {
       submittedAt: Date.now(),
     };
 
-    const updatedEntries = { entries: [...entries, entry] };
-    await putFile(
-      "data/bracket-entries.json",
-      updatedEntries,
-      entriesSha,
-      `bracket: new entry from ${username.trim()} (${walletAddress.slice(0, 8)})`
-    );
-
-    return NextResponse.json({ ok: true, id: entry.id });
+    // Retry on SHA conflict from concurrent submissions
+    let currentEntries = entries;
+    let currentSha = entriesSha;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        // Re-fetch after conflict; re-check entry count with fresh data
+        const fresh = await getFile("data/bracket-entries.json");
+        currentEntries = fresh.content?.entries ?? [];
+        currentSha = fresh.sha;
+        const freshWalletEntries = currentEntries.filter((e) => e.walletAddress === walletAddress);
+        if (freshWalletEntries.length >= maxEntries) {
+          return NextResponse.json(
+            { error: `You have used all ${maxEntries} ${maxEntries === 1 ? "entry" : "entries"} allowed for your ${midEvilCount} MidEvil${midEvilCount !== 1 ? "s" : ""}` },
+            { status: 403 }
+          );
+        }
+      }
+      try {
+        await putFile(
+          "data/bracket-entries.json",
+          { entries: [...currentEntries, entry] },
+          currentSha,
+          `bracket: new entry from ${username.trim()} (${walletAddress.slice(0, 8)})`
+        );
+        return NextResponse.json({ ok: true, id: entry.id });
+      } catch (writeErr) {
+        if (!writeErr.message.includes(": 409")) throw writeErr;
+        // SHA conflict — retry with fresh data
+      }
+    }
+    return NextResponse.json({ error: "Submission conflict — please try again" }, { status: 409 });
   } catch (err) {
     console.error("bracket entries POST error:", err);
     return NextResponse.json({ error: "Failed to submit entry" }, { status: 500 });
