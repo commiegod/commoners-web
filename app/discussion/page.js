@@ -28,7 +28,7 @@ function shortAddr(addr) {
 }
 
 export default function DiscussionPage() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, signMessage } = useWallet();
   const walletAddress = publicKey?.toBase58() ?? null;
 
   const [threads, setThreads] = useState([]);
@@ -75,10 +75,20 @@ export default function DiscussionPage() {
     setSubmitting(true);
     setError("");
     try {
+      if (!signMessage) {
+        setError("Your wallet does not support message signing. Please use Phantom or Backpack.");
+        setSubmitting(false);
+        return;
+      }
+      const signedMessage = `Post to The Board — Commoners DAO.\nTimestamp: ${Date.now()}`;
+      const msgBytes = new TextEncoder().encode(signedMessage);
+      const signatureBytes = await signMessage(msgBytes);
+      const signature = Buffer.from(signatureBytes).toString("base64");
+
       const res = await fetch("/api/discussion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, body, walletAddress }),
+        body: JSON.stringify({ subject, body, walletAddress, signature, signedMessage }),
       });
       const json = await res.json();
       if (json.ok) {

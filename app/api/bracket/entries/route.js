@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../../lib/githubApi";
 import { scoreEntry, maxPossibleScore, tiebreakerDiff } from "../../../../lib/bracket";
 import { getMidEvilCount } from "../../../../lib/midevils";
-import { ed25519 } from "@noble/curves/ed25519";
-import { PublicKey } from "@solana/web3.js";
+import { verifyWalletSignature } from "../../../../lib/verifyWalletSignature";
 
-const SIGNATURE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
 const ENTRY_LIMIT = 5;
 
 function makeId() {
@@ -37,32 +35,6 @@ function computeRankedEntries(entries, results, championshipTotal) {
   return scored.map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
-/**
- * Verify the signed challenge message.
- * Returns { ok: true } or { ok: false, reason: string }.
- */
-function verifySignature(walletAddress, signedMessage, signature) {
-  try {
-    // Parse timestamp from message: last line "Timestamp: <ms>"
-    const match = signedMessage.match(/Timestamp:\s*(\d+)/);
-    if (!match) return { ok: false, reason: "Invalid challenge message format" };
-    const ts = parseInt(match[1], 10);
-    if (isNaN(ts)) return { ok: false, reason: "Invalid timestamp in challenge" };
-    if (Date.now() - ts > SIGNATURE_MAX_AGE_MS) {
-      return { ok: false, reason: "Challenge message expired — please try again" };
-    }
-
-    const msgBytes = new TextEncoder().encode(signedMessage);
-    const sigBytes = Buffer.from(signature, "base64");
-    const pubKeyBytes = new PublicKey(walletAddress).toBytes();
-
-    const valid = ed25519.verify(sigBytes, msgBytes, pubKeyBytes);
-    if (!valid) return { ok: false, reason: "Signature verification failed" };
-    return { ok: true };
-  } catch {
-    return { ok: false, reason: "Signature verification error" };
-  }
-}
 
 export async function GET() {
   try {
@@ -128,7 +100,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    const sigResult = verifySignature(walletAddress, signedMessage, signature);
+    const sigResult = verifyWalletSignature(walletAddress, signedMessage, signature);
     if (!sigResult.ok) {
       return NextResponse.json({ error: sigResult.reason }, { status: 403 });
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getFile, putFile } from "../../../../lib/githubApi";
 import { getCommonerCount } from "../../../../lib/commoners";
+import { verifyWalletSignature } from "../../../../lib/verifyWalletSignature";
 
 const FILE = "data/discussion.json";
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -11,13 +12,21 @@ function makeId() {
 
 export async function POST(request) {
   try {
-    const { threadId, body, walletAddress } = await request.json();
+    const { threadId, body, walletAddress, signature, signedMessage } = await request.json();
 
     if (!threadId || !body?.trim() || !walletAddress) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
     if (body.trim().length > 2000) {
       return NextResponse.json({ error: "Reply too long (max 2000 chars)." }, { status: 400 });
+    }
+
+    if (!signature || !signedMessage) {
+      return NextResponse.json({ error: "Wallet signature required." }, { status: 400 });
+    }
+    const sigResult = verifyWalletSignature(walletAddress, signedMessage, signature);
+    if (!sigResult.ok) {
+      return NextResponse.json({ error: sigResult.reason }, { status: 403 });
     }
 
     const count = await getCommonerCount(walletAddress);
