@@ -54,6 +54,9 @@ export async function POST(request) {
 
     thread.replies.push(reply);
 
+    // Bump thread to top on new reply
+    data.threads = [thread, ...data.threads.filter((t) => t.id !== threadId)];
+
     await putFile(
       FILE,
       data,
