@@ -180,7 +180,7 @@
         {
           "id": "west_s11",
           "seed": 11,
-          "name": ""
+          "name": "Texas / NC State"
         },
         {
           "id": "west_s12",
@@ -310,7 +310,7 @@
         {
           "id": "south_s16",
           "seed": 16,
-          "name": ""
+          "name": "Prairie View A&M / Lehigh"
         }
       ]
     },
@@ -380,7 +380,7 @@
         {
           "id": "midwest_s11",
           "seed": 11,
-          "name": ""
+          "name": "Miami (OH) / SMU"
         },
         {
           "id": "midwest_s12",
@@ -409,7 +409,7 @@
         {
           "id": "midwest_s16",
           "seed": 16,
-          "name": ""
+          "name": "UMBC / Howard"
         }
       ]
     }
