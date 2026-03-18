@@ -99,5 +99,19 @@
         "website": ""
       }
     ]
+  },
+  "2026-03-19": {
+    "human": [],
+    "ai": [
+      {
+        "id": "1773873794045-lb6g",
+        "imageUrl": "https://kh8ams9ixladhx4o.public.blob.vercel-storage.com/bounty/1773873792203.jpg",
+        "artistName": "MJ Gaming",
+        "solanaAddress": "13SL6GULz6SnjAjzRdaArGrcHX4TWd4v66EKtWbYZi7r",
+        "twitter": "@xMJ_GAMINGx",
+        "instagram": "",
+        "website": ""
+      }
+    ]
   }
 }
