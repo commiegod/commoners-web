@@ -311,7 +311,8 @@
         {
           "id": "south_s16",
           "seed": 16,
-          "name": "Prairie View A&M / Lehigh"
+          "name": "Prairie View A&M Panthers",
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2504.png"
         }
       ]
     },
@@ -381,7 +382,8 @@
         {
           "id": "midwest_s11",
           "seed": 11,
-          "name": "Miami (OH) / SMU"
+          "name": "Miami (OH) RedHawks",
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/193.png"
         },
         {
           "id": "midwest_s12",
