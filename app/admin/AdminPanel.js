@@ -617,6 +617,11 @@ function DiscussionSection({ token }) {
   );
 }
 
+function toLocalDatetimeInput(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 // ── Bracket admin section ─────────────────────────────────────────────────────
 
 const REGIONS = ["east", "west", "south", "midwest"];
@@ -668,7 +673,7 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
       setEntries(loadedEntries);
       onEntriesLoaded?.(loadedEntries.length);
       setStatusEdit(b.status || "pending");
-      setDeadlineEdit(b.entryDeadline ? new Date(b.entryDeadline).toISOString().slice(0,16) : "");
+      setDeadlineEdit(b.entryDeadline ? toLocalDatetimeInput(new Date(b.entryDeadline)) : "");
       setChampWinner(b.championshipScore?.winner ?? "");
       setChampLoser(b.championshipScore?.loser ?? "");
       // Pre-fill team names
