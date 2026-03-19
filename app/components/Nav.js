@@ -46,7 +46,7 @@ export default function Nav() {
             <span>🏀</span>
             <span className="font-blackletter tracking-wide">Mid March Madness</span>
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide">
-              New
+              Live
             </span>
           </Link>
 
@@ -131,7 +131,7 @@ export default function Nav() {
             <span>🏀</span>
             <span>Mid March Madness</span>
             <span className="ml-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide self-center">
-              New
+              Live
             </span>
           </Link>
 

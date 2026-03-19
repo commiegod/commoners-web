@@ -89,6 +89,20 @@ export default function BracketPage() {
     bracket?.status === "in_progress" || bracket?.status === "complete";
   const visibleEntries = showAll ? entries : entries.slice(0, SHOW_INITIAL);
 
+  const pickDistribution = (() => {
+    if (!entries.length || !bracket) return null;
+    const dist = {};
+    for (const entry of entries) {
+      if (!entry.picks) continue;
+      for (const [gameId, teamId] of Object.entries(entry.picks)) {
+        if (!dist[gameId]) dist[gameId] = { total: 0 };
+        dist[gameId][teamId] = (dist[gameId][teamId] || 0) + 1;
+        dist[gameId].total++;
+      }
+    }
+    return dist;
+  })();
+
   return (
     <div>
       {/* Hero banner — The Shoot — full-bleed */}
@@ -273,7 +287,7 @@ export default function BracketPage() {
             <div className="flex-1">
               <div className="flex items-baseline gap-2 mb-3">
                 <h2 className="text-sm text-muted uppercase tracking-widest">Leaderboard</h2>
-                <span className="text-xs text-muted/50">(Final Four picks in parentheses)</span>
+                <span className="text-xs text-muted/50 hidden sm:inline">(Final Four picks · champion in gold)</span>
               </div>
               <div className="border border-border rounded bg-background">
                 {loading ? (
@@ -310,7 +324,7 @@ export default function BracketPage() {
                             <span className="text-xs text-muted/60 w-5 text-right shrink-0">
                               {entry.rank}
                             </span>
-                            <span className={`text-sm flex-1 truncate ${isMyEntry ? "text-gold font-medium" : "text-foreground"}`}>
+                            <span className={`text-sm flex-1 truncate min-w-0 ${isMyEntry ? "text-gold font-medium" : "text-foreground"}`}>
                               {entry.username}
                               {(() => {
                                 const ff = getFinalFourNames(entry, bracket);
@@ -321,7 +335,17 @@ export default function BracketPage() {
                                 ) : null;
                               })()}
                             </span>
-                            <span className="text-xs text-muted whitespace-nowrap">
+                            {(() => {
+                              const champ = entry.picks?.champ
+                                ? getTeamById(bracket, entry.picks.champ)
+                                : null;
+                              return champ ? (
+                                <span className="text-xs text-gold/70 whitespace-nowrap shrink-0 hidden sm:block">
+                                  {champ.shortName ?? champ.name}
+                                </span>
+                              ) : null;
+                            })()}
+                            <span className="text-xs text-muted whitespace-nowrap shrink-0">
                               {entry.score} / {MAX_SCORE}
                             </span>
                           </Link>
@@ -371,7 +395,7 @@ export default function BracketPage() {
             <div className="animate-pulse bg-card border border-border rounded h-64 mx-2" />
           ) : bracket ? (
             <div className="border border-border rounded overflow-hidden bg-background">
-              <BracketView bracket={bracket} results={results} fit />
+              <BracketView bracket={bracket} results={results} fit pickDistribution={pickDistribution} />
             </div>
           ) : null}
         </div>
