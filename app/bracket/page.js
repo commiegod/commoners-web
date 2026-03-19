@@ -18,7 +18,10 @@ const FF_REGIONS = ["east", "west", "south", "midwest"];
 function getFinalFourNames(entry, bracket) {
   if (!entry?.picks || !bracket) return [];
   return FF_REGIONS
-    .map((r) => getTeamById(bracket, entry.picks[`r4_${r}`])?.name)
+    .map((r) => {
+      const t = getTeamById(bracket, entry.picks[`r4_${r}`]);
+      return t ? (t.shortName ?? t.name) : null;
+    })
     .filter(Boolean);
 }
 
@@ -268,9 +271,10 @@ export default function BracketPage() {
           {/* Leaderboard + dribble image */}
           <div className="mb-2 flex gap-4 items-start">
             <div className="flex-1">
-              <h2 className="text-sm text-muted uppercase tracking-widest mb-3">
-                Leaderboard
-              </h2>
+              <div className="flex items-baseline gap-2 mb-3">
+                <h2 className="text-sm text-muted uppercase tracking-widest">Leaderboard</h2>
+                <span className="text-xs text-muted/50">(Final Four picks in parentheses)</span>
+              </div>
               <div className="border border-border rounded bg-background">
                 {loading ? (
                   <div className="p-4">

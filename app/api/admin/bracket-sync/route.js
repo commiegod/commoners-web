@@ -41,7 +41,7 @@ export async function POST(request) {
 
     for (const c of competitors) {
       if (c.seed >= 1 && c.seed <= 16) {
-        regionSeeds[info.region][c.seed] = { name: c.name, logo: c.logo };
+        regionSeeds[info.region][c.seed] = { name: c.name, shortName: c.shortName, logo: c.logo };
       }
     }
   }
@@ -67,13 +67,15 @@ export async function POST(request) {
   let updated = 0;
   for (const [regionKey, seedMap] of Object.entries(regionSeeds)) {
     if (!bracket.regions[regionKey]) continue;
-    for (const [seedStr, { name, logo }] of Object.entries(seedMap)) {
+    for (const [seedStr, { name, shortName, logo }] of Object.entries(seedMap)) {
       const seed = parseInt(seedStr, 10);
       const team = bracket.regions[regionKey].teams.find((t) => t.seed === seed);
-      if (team && team.name !== name) {
-        team.name = name;
+      if (team) {
+        const changed = team.name !== name;
+        if (changed) team.name = name;
+        if (shortName) team.shortName = shortName;
         if (logo) team.logoUrl = logo;
-        updated++;
+        if (changed) updated++;
       }
     }
   }
