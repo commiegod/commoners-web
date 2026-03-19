@@ -6,12 +6,21 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import BracketView from "../components/BracketView";
-import { MAX_SCORE } from "../../lib/bracket";
+import { MAX_SCORE, getTeamById } from "../../lib/bracket";
 
 const WalletMultiButton = dynamic(
   () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
   { ssr: false }
 );
+
+const FF_REGIONS = ["east", "west", "south", "midwest"];
+
+function getFinalFourNames(entry, bracket) {
+  if (!entry?.picks || !bracket) return [];
+  return FF_REGIONS
+    .map((r) => getTeamById(bracket, entry.picks[`r4_${r}`])?.name)
+    .filter(Boolean);
+}
 
 function formatDeadline(iso) {
   if (!iso) return "";
@@ -297,10 +306,16 @@ export default function BracketPage() {
                             <span className="text-xs text-muted/60 w-5 text-right shrink-0">
                               {entry.rank}
                             </span>
-                            <span
-                              className={`text-sm flex-1 truncate ${isMyEntry ? "text-gold font-medium" : "text-foreground"}`}
-                            >
+                            <span className={`text-sm flex-1 truncate ${isMyEntry ? "text-gold font-medium" : "text-foreground"}`}>
                               {entry.username}
+                              {(() => {
+                                const ff = getFinalFourNames(entry, bracket);
+                                return ff.length > 0 ? (
+                                  <span className="text-xs text-muted font-normal ml-1">
+                                    ({ff.join(", ")})
+                                  </span>
+                                ) : null;
+                              })()}
                             </span>
                             <span className="text-xs text-muted whitespace-nowrap">
                               {entry.score} / {MAX_SCORE}
