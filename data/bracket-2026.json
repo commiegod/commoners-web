@@ -20,97 +20,113 @@
           "id": "east_s1",
           "seed": 1,
           "name": "Duke Blue Devils",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/150.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/150.png",
+          "shortName": "Duke"
         },
         {
           "id": "east_s2",
           "seed": 2,
           "name": "UConn Huskies",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/41.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/41.png",
+          "shortName": "UConn"
         },
         {
           "id": "east_s3",
           "seed": 3,
           "name": "Michigan State Spartans",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/127.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/127.png",
+          "shortName": "Michigan St"
         },
         {
           "id": "east_s4",
           "seed": 4,
           "name": "Kansas Jayhawks",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2305.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2305.png",
+          "shortName": "Kansas"
         },
         {
           "id": "east_s5",
           "seed": 5,
           "name": "St. John's Red Storm",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2599.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2599.png",
+          "shortName": "St John's"
         },
         {
           "id": "east_s6",
           "seed": 6,
           "name": "Louisville Cardinals",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/97.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/97.png",
+          "shortName": "Louisville"
         },
         {
           "id": "east_s7",
           "seed": 7,
           "name": "UCLA Bruins",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/26.png",
+          "shortName": "UCLA"
         },
         {
           "id": "east_s8",
           "seed": 8,
           "name": "Ohio State Buckeyes",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/194.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/194.png",
+          "shortName": "Ohio State"
         },
         {
           "id": "east_s9",
           "seed": 9,
           "name": "TCU Horned Frogs",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2628.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2628.png",
+          "shortName": "TCU"
         },
         {
           "id": "east_s10",
           "seed": 10,
           "name": "UCF Knights",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2116.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2116.png",
+          "shortName": "UCF"
         },
         {
           "id": "east_s11",
           "seed": 11,
           "name": "South Florida Bulls",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/58.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/58.png",
+          "shortName": "South Florida"
         },
         {
           "id": "east_s12",
           "seed": 12,
           "name": "Northern Iowa Panthers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2460.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2460.png",
+          "shortName": "Northern Iowa"
         },
         {
           "id": "east_s13",
           "seed": 13,
           "name": "California Baptist Lancers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2856.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2856.png",
+          "shortName": "CA Baptist"
         },
         {
           "id": "east_s14",
           "seed": 14,
           "name": "North Dakota State Bison",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2449.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2449.png",
+          "shortName": "N Dakota St"
         },
         {
           "id": "east_s15",
           "seed": 15,
           "name": "Furman Paladins",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/231.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/231.png",
+          "shortName": "Furman"
         },
         {
           "id": "east_s16",
           "seed": 16,
           "name": "Siena Saints",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2561.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2561.png",
+          "shortName": "Siena"
         }
       ]
     },
@@ -121,97 +137,113 @@
           "id": "west_s1",
           "seed": 1,
           "name": "Arizona Wildcats",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/12.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/12.png",
+          "shortName": "Arizona"
         },
         {
           "id": "west_s2",
           "seed": 2,
           "name": "Purdue Boilermakers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png",
+          "shortName": "Purdue"
         },
         {
           "id": "west_s3",
           "seed": 3,
           "name": "Gonzaga Bulldogs",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2250.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2250.png",
+          "shortName": "Gonzaga"
         },
         {
           "id": "west_s4",
           "seed": 4,
           "name": "Arkansas Razorbacks",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/8.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/8.png",
+          "shortName": "Arkansas"
         },
         {
           "id": "west_s5",
           "seed": 5,
           "name": "Wisconsin Badgers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/275.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/275.png",
+          "shortName": "Wisconsin"
         },
         {
           "id": "west_s6",
           "seed": 6,
           "name": "BYU Cougars",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/252.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/252.png",
+          "shortName": "BYU"
         },
         {
           "id": "west_s7",
           "seed": 7,
           "name": "Miami Hurricanes",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2390.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2390.png",
+          "shortName": "Miami"
         },
         {
           "id": "west_s8",
           "seed": 8,
           "name": "Villanova Wildcats",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/222.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/222.png",
+          "shortName": "Villanova"
         },
         {
           "id": "west_s9",
           "seed": 9,
           "name": "Utah State Aggies",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/328.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/328.png",
+          "shortName": "Utah State"
         },
         {
           "id": "west_s10",
           "seed": 10,
           "name": "Missouri Tigers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/142.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/142.png",
+          "shortName": "Missouri"
         },
         {
           "id": "west_s11",
           "seed": 11,
           "name": "Texas Longhorns",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/251.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/251.png",
+          "shortName": "Texas"
         },
         {
           "id": "west_s12",
           "seed": 12,
           "name": "High Point Panthers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2272.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2272.png",
+          "shortName": "High Point"
         },
         {
           "id": "west_s13",
           "seed": 13,
           "name": "Hawai'i Rainbow Warriors",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/62.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/62.png",
+          "shortName": "Hawai'i"
         },
         {
           "id": "west_s14",
           "seed": 14,
           "name": "Kennesaw State Owls",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/338.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/338.png",
+          "shortName": "Kennesaw St"
         },
         {
           "id": "west_s15",
           "seed": 15,
           "name": "Queens University Royals",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2511.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2511.png",
+          "shortName": "Queens"
         },
         {
           "id": "west_s16",
           "seed": 16,
           "name": "Long Island University Sharks",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/112358.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/112358.png",
+          "shortName": "Long Island"
         }
       ]
     },
@@ -222,97 +254,113 @@
           "id": "south_s1",
           "seed": 1,
           "name": "Florida Gators",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/57.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/57.png",
+          "shortName": "Florida"
         },
         {
           "id": "south_s2",
           "seed": 2,
           "name": "Houston Cougars",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/248.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/248.png",
+          "shortName": "Houston"
         },
         {
           "id": "south_s3",
           "seed": 3,
           "name": "Illinois Fighting Illini",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/356.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/356.png",
+          "shortName": "Illinois"
         },
         {
           "id": "south_s4",
           "seed": 4,
           "name": "Nebraska Cornhuskers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/158.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/158.png",
+          "shortName": "Nebraska"
         },
         {
           "id": "south_s5",
           "seed": 5,
           "name": "Vanderbilt Commodores",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/238.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/238.png",
+          "shortName": "Vanderbilt"
         },
         {
           "id": "south_s6",
           "seed": 6,
           "name": "North Carolina Tar Heels",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/153.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/153.png",
+          "shortName": "North Carolina"
         },
         {
           "id": "south_s7",
           "seed": 7,
           "name": "Saint Mary's Gaels",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2608.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2608.png",
+          "shortName": "Saint Mary's"
         },
         {
           "id": "south_s8",
           "seed": 8,
           "name": "Clemson Tigers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/228.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/228.png",
+          "shortName": "Clemson"
         },
         {
           "id": "south_s9",
           "seed": 9,
           "name": "Iowa Hawkeyes",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2294.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2294.png",
+          "shortName": "Iowa"
         },
         {
           "id": "south_s10",
           "seed": 10,
           "name": "Texas A&M Aggies",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/245.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/245.png",
+          "shortName": "Texas A&M"
         },
         {
           "id": "south_s11",
           "seed": 11,
           "name": "VCU Rams",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2670.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2670.png",
+          "shortName": "VCU"
         },
         {
           "id": "south_s12",
           "seed": 12,
           "name": "McNeese Cowboys",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2377.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2377.png",
+          "shortName": "McNeese"
         },
         {
           "id": "south_s13",
           "seed": 13,
           "name": "Troy Trojans",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2653.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2653.png",
+          "shortName": "Troy"
         },
         {
           "id": "south_s14",
           "seed": 14,
           "name": "Pennsylvania Quakers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/219.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/219.png",
+          "shortName": "Penn"
         },
         {
           "id": "south_s15",
           "seed": 15,
           "name": "Idaho Vandals",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/70.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/70.png",
+          "shortName": "Idaho"
         },
         {
           "id": "south_s16",
           "seed": 16,
           "name": "Prairie View A&M Panthers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2504.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2504.png",
+          "shortName": "Prairie View"
         }
       ]
     },
@@ -323,97 +371,113 @@
           "id": "midwest_s1",
           "seed": 1,
           "name": "Michigan Wolverines",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/130.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/130.png",
+          "shortName": "Michigan"
         },
         {
           "id": "midwest_s2",
           "seed": 2,
           "name": "Iowa State Cyclones",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/66.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/66.png",
+          "shortName": "Iowa State"
         },
         {
           "id": "midwest_s3",
           "seed": 3,
           "name": "Virginia Cavaliers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/258.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/258.png",
+          "shortName": "Virginia"
         },
         {
           "id": "midwest_s4",
           "seed": 4,
           "name": "Alabama Crimson Tide",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png",
+          "shortName": "Alabama"
         },
         {
           "id": "midwest_s5",
           "seed": 5,
           "name": "Texas Tech Red Raiders",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2641.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2641.png",
+          "shortName": "Texas Tech"
         },
         {
           "id": "midwest_s6",
           "seed": 6,
           "name": "Tennessee Volunteers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2633.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2633.png",
+          "shortName": "Tennessee"
         },
         {
           "id": "midwest_s7",
           "seed": 7,
           "name": "Kentucky Wildcats",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/96.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/96.png",
+          "shortName": "Kentucky"
         },
         {
           "id": "midwest_s8",
           "seed": 8,
           "name": "Georgia Bulldogs",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png",
+          "shortName": "Georgia"
         },
         {
           "id": "midwest_s9",
           "seed": 9,
           "name": "Saint Louis Billikens",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/139.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/139.png",
+          "shortName": "Saint Louis"
         },
         {
           "id": "midwest_s10",
           "seed": 10,
           "name": "Santa Clara Broncos",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2541.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2541.png",
+          "shortName": "Santa Clara"
         },
         {
           "id": "midwest_s11",
           "seed": 11,
           "name": "Miami (OH) RedHawks",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/193.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/193.png",
+          "shortName": "Miami OH"
         },
         {
           "id": "midwest_s12",
           "seed": 12,
           "name": "Akron Zips",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2006.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2006.png",
+          "shortName": "Akron"
         },
         {
           "id": "midwest_s13",
           "seed": 13,
           "name": "Hofstra Pride",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2275.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2275.png",
+          "shortName": "Hofstra"
         },
         {
           "id": "midwest_s14",
           "seed": 14,
           "name": "Wright State Raiders",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2750.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2750.png",
+          "shortName": "Wright St"
         },
         {
           "id": "midwest_s15",
           "seed": 15,
           "name": "Tennessee State Tigers",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2634.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2634.png",
+          "shortName": "Tennessee St"
         },
         {
           "id": "midwest_s16",
           "seed": 16,
           "name": "Howard Bison",
-          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/47.png"
+          "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/47.png",
+          "shortName": "Howard"
         }
       ]
     }
