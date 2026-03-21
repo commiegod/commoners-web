@@ -506,6 +506,14 @@
     "r1_midwest_5": "midwest_s3",
     "r1_midwest_3": "midwest_s4",
     "r1_midwest_4": "midwest_s6",
-    "r1_west_1": "west_s9"
+    "r1_west_1": "west_s9",
+    "r1_south_0": "south_s1",
+    "r1_west_7": "west_s2",
+    "r1_east_7": "east_s2",
+    "r1_east_3": "east_s4",
+    "r1_east_2": "east_s5",
+    "r1_east_6": "east_s7",
+    "r1_west_6": "west_s7",
+    "r1_south_1": "south_s9"
   }
 }
