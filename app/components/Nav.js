@@ -18,6 +18,7 @@ const links = [
   { href: "/governance", label: "Governance" },
   { href: "/discussion", label: "The Board" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/midevils", label: "Scrolls" },
 ];
 
 export default function Nav() {
