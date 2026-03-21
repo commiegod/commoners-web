@@ -115,7 +115,9 @@ function buildData() {
     const wk = weekKey(dt);
     if (!commByWeek.has(wk)) commByWeek.set(wk, []);
     commByWeek.get(wk).push({
-      file:      `by-month/${ct.month}/${ct.filename}`,
+      // Use the original pbs.twimg.com URL directly — no storage needed
+      file:      ct.img_url ?? `by-month/${ct.month}/${ct.filename}`,
+      direct:    !!ct.img_url,
       username:  ct.username,
       tweetUrl:  ct.tweet_url ?? "",
       date:      ct.date,
@@ -163,13 +165,19 @@ function buildData() {
     const dt = parseDate(ts);
     if (!dt) continue;
 
+    // Skip placeholder (expired Discord CDN) files
+    if (fn.includes("be6cfc6c")) continue;
+
     const wk     = weekKey(dt);
     const bucket = ensureWeek(wk, dt);
     bucket.count++;
     bucket.channels[ch] = (bucket.channels[ch] ?? 0) + 1;
     if (bucket.images.length < 12) {
+      // Prefer direct Twitter URL for embed-type entries (no storage needed)
+      const twitterUrl = m.type === "embed" && m.url?.includes("twimg.com") ? m.url : null;
       bucket.images.push({
-        file:    `by-month/discord/${m.month}/${ch}/${fn}`,
+        file:    twitterUrl ?? `by-month/discord/${m.month}/${ch}/${fn}`,
+        direct:  !!twitterUrl,
         channel: ch,
         author:  m.author ?? "",
         ts:      ts.slice(0, 10),

@@ -11,14 +11,15 @@ const IMAGE_BASE =
 
 function imgUrl(path) {
   if (!path) return "";
-  // Encode each path segment individually (preserves directory structure).
-  // In CDN mode, also sanitize colons which aren't valid in Blob/R2 keys.
+  // Direct URLs (pbs.twimg.com etc.) — pass straight through, no proxying needed.
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  // CDN/Blob mode: sanitize colons, encode each segment.
   if (IMAGE_BASE) {
     const safePath = path.replace(/:/g, "_");
     const encoded  = safePath.split("/").map(encodeURIComponent).join("/");
     return `${IMAGE_BASE}/${encoded}`;
   }
-  // Local dev: serve via Next.js API route — colons are fine in the filesystem.
+  // Local dev: serve via Next.js API route.
   const encoded = path.split("/").map(encodeURIComponent).join("/");
   return `/api/midevils/img/${encoded}`;
 }

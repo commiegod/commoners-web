@@ -1,13 +1,16 @@
 /**
  * upload-midevils-to-blob.mjs
  *
- * Uploads the MidEvils image archive to Vercel Blob, preserving the
- * directory structure used by the timeline API.
+ * Uploads ONLY real Discord attachment images to Vercel Blob.
+ *
+ * Twitter/embed images (pbs.twimg.com) are served directly from Twitter's CDN
+ * and do NOT need to be uploaded. This script only handles the ~1,009 Discord
+ * attachment files (~600 MB) that can't be served from an external source.
  *
  * Usage:
  *   node scripts/upload-midevils-to-blob.mjs
  *
- * Required env vars (pick them up from .env.local automatically, or export them):
+ * Required env vars (picked up from .env.local automatically, or export them):
  *   BLOB_READ_WRITE_TOKEN   — your Vercel Blob token
  *   MIDEVILS_ARCHIVE_PATH   — absolute path to the archive folder
  *
@@ -68,19 +71,22 @@ function blobKey(archivePath) {
   return archivePath.replace(/:/g, "_");
 }
 
-// ── Collect all images to upload ──────────────────────────────────────────────
+// ── Collect only Discord attachment images (everything else is served directly) ─
 function collectFiles() {
   const files = []; // { localPath, blobPath }
 
   const discordReg = join(ARCHIVE, "discord_registry.json");
-  const memeReg    = join(ARCHIVE, "meme_registry.json");
   const tweetReg   = join(ARCHIVE, "top_tweets", "top_tweets_registry.json");
 
-  // Discord images
+  // Discord ATTACHMENT images only.
+  // Embed-type entries have a pbs.twimg.com URL and are served directly — skip them.
+  // Also skip the be6cfc6c expired-CDN placeholder hash.
   if (existsSync(discordReg)) {
     const discord = JSON.parse(readFileSync(discordReg, "utf8"));
     for (const m of discord) {
       if (!m.downloaded || !m.filename_local || !m.month || !m.channel) continue;
+      if (m.type !== "attachment") continue;                         // skip Twitter embeds
+      if (m.filename_local.includes("be6cfc6c")) continue;          // skip placeholders
       const relPath   = `by-month/discord/${m.month}/${m.channel}/${m.filename_local}`;
       const localPath = join(ARCHIVE, relPath);
       const ext = extname(m.filename_local).toLowerCase();
@@ -90,21 +96,7 @@ function collectFiles() {
     }
   }
 
-  // Community tweet images (meme_registry)
-  if (existsSync(memeReg)) {
-    const memes = JSON.parse(readFileSync(memeReg, "utf8"));
-    for (const m of memes) {
-      if (!m.downloaded || !m.filename || !m.month) continue;
-      const relPath   = `by-month/${m.month}/${m.filename}`;
-      const localPath = join(ARCHIVE, relPath);
-      const ext = extname(m.filename).toLowerCase();
-      if (!ALLOWED_EXTS.has(ext)) continue;
-      if (!existsSync(localPath)) continue;
-      files.push({ localPath, blobPath: blobKey(relPath) });
-    }
-  }
-
-  // Top tweet screenshots
+  // Top tweet screenshots (manually captured PNGs, if any exist)
   if (existsSync(tweetReg)) {
     const tweets = JSON.parse(readFileSync(tweetReg, "utf8"));
     for (const t of tweets) {
@@ -117,6 +109,9 @@ function collectFiles() {
       files.push({ localPath, blobPath: blobKey(relPath) });
     }
   }
+
+  // NOTE: meme_registry images are NOT uploaded — they all have pbs.twimg.com
+  // img_url fields and are served directly from Twitter's CDN.
 
   return files;
 }
@@ -191,14 +186,6 @@ async function runPool(tasks, concurrency, worker) {
     while (idx < tasks.length) {
       const i = idx++;
       const task = tasks[i];
-      // Skip Discord placeholder images
-      const basename = task.localPath.split("/").pop().replace(/\.[^.]+$/, "");
-      const hash = basename.split("_").pop();
-      if (SKIP_HASHES.has(hash)) {
-        done++;
-        continue;
-      }
-
       process.stdout.write(`\r  [${done + 1}/${total}] ${task.blobPath.slice(-60).padEnd(60)}`);
       try {
         await worker(task);
