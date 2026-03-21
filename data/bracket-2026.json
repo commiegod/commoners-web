@@ -515,6 +515,7 @@
     "r1_east_6": "east_s7",
     "r1_west_6": "west_s7",
     "r1_south_1": "south_s9",
-    "r2_midwest_0": "midwest_s1"
+    "r2_midwest_0": "midwest_s1",
+    "r2_east_2": "east_s3"
   }
 }
