@@ -54,16 +54,13 @@ const milestoneIds = new Set([
   ...highlights.map(extractId),
 ].filter(Boolean));
 
-// Also determine next available index for screenshot filenames
-const allScreenshots = [
-  ...topTweets.map(t => t.screenshot),
-  ...highlights.map(t => t.screenshot),
-].filter(Boolean);
-
+// Next available index for community highlight screenshot filenames
+// (based on highest numbered filename in highlights registry)
+const allScreenshots = highlights.map(t => t.screenshot).filter(Boolean);
 const maxIdx = allScreenshots.reduce((max, name) => {
   const m = name.match(/^(\d+)_/);
   return m ? Math.max(max, parseInt(m[1])) : max;
-}, 0);
+}, 22); // default floor of 22 (current highest)
 const nextIdx = maxIdx + 1;
 
 console.log(`📋  ${milestoneIds.size} milestone IDs to exclude`);

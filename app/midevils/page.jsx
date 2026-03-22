@@ -278,15 +278,34 @@ export default function MidevilsChronicle() {
   const [lightboxSrc,    setLightboxSrc]    = useState(null);
   const [highlightedWk,  setHighlightedWk]  = useState(null);
 
-  // Load Twitter embed widget script once
+  // Load Twitter embed widget script once, then re-process embeds whenever
+  // data loads (blockquotes only exist in the DOM after the data fetch).
   useEffect(() => {
-    if (document.querySelector('script[src*="platform.twitter.com"]')) return;
+    const existing = document.querySelector('script[src*="platform.twitter.com"]');
+    if (existing) return;
     const s = document.createElement("script");
     s.src = "https://platform.twitter.com/widgets.js";
     s.async = true;
     s.charset = "utf-8";
+    // When the script finishes loading, process any blockquotes already in DOM
+    s.onload = () => window.twttr?.widgets.load();
     document.body.appendChild(s);
   }, []);
+
+  // Re-process embeds after data loads (script may already be ready by then)
+  useEffect(() => {
+    if (!data) return;
+    const tryLoad = () => {
+      if (window.twttr?.widgets) {
+        window.twttr.widgets.load();
+      } else {
+        // Script not ready yet — retry shortly
+        setTimeout(tryLoad, 300);
+      }
+    };
+    // Small delay to let React commit the blockquotes to the DOM first
+    setTimeout(tryLoad, 200);
+  }, [data]);
 
   // Fetch timeline data
   useEffect(() => {
