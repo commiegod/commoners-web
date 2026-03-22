@@ -5,28 +5,46 @@ import styles from "./midevils.module.css";
 
 // ── Twitter embed helper ───────────────────────────────────────────────────────
 // Renders a native X/Twitter embed card using twttr.widgets.createTweet().
-// The blockquote + widgets.load() approach extracts but silently skips iframe
-// creation; createTweet() is the reliable programmatic alternative.
+// Uses IntersectionObserver so embeds only load when the card is near the
+// viewport — avoids firing 100+ simultaneous Twitter API requests on mount.
 function TweetEmbed({ url }) {
-  const ref = useRef(null);
-  const tweetId = (url ?? "").match(/\/status\/(\d+)/)?.[1];
+  const ref       = useRef(null);
+  const loadedRef = useRef(false);
+  const tweetId   = (url ?? "").match(/\/status\/(\d+)/)?.[1];
 
   useEffect(() => {
     if (!ref.current || !tweetId) return;
     const container = ref.current;
 
-    const tryCreate = () => {
-      if (window.twttr?.widgets?.createTweet) {
-        container.innerHTML = "";
-        window.twttr.widgets.createTweet(tweetId, container, {
-          theme: "dark",
-          dnt:   true,
-        });
-      } else {
-        setTimeout(tryCreate, 300);
-      }
+    const doCreate = () => {
+      if (loadedRef.current) return;
+      loadedRef.current = true;
+      const tryCreate = () => {
+        if (window.twttr?.widgets?.createTweet) {
+          container.innerHTML = "";
+          window.twttr.widgets.createTweet(tweetId, container, {
+            theme: "dark",
+            dnt:   true,
+          });
+        } else {
+          setTimeout(tryCreate, 300);
+        }
+      };
+      tryCreate();
     };
-    setTimeout(tryCreate, 100);
+
+    // Only create the embed once the card is within 400px of the viewport.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect();
+          doCreate();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
   }, [tweetId]);
 
   return <div ref={ref} />;
@@ -414,8 +432,38 @@ export default function MidevilsChronicle() {
 
         {/* Loading / error states */}
         {loading && (
-          <div style={{ padding: "80px 36px", textAlign: "center", color: "#6868a0" }}>
-            Loading chronicle…
+          <div style={{ padding: "0 36px 60px" }}>
+            {/* Skeleton pulse bar */}
+            <div style={{
+              height: 80, borderRadius: 8, background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
+              backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
+              margin: "32px 0 40px",
+            }} />
+            {/* Skeleton week cards */}
+            {[1,2,3].map(i => (
+              <div key={i} style={{ marginBottom: 28 }}>
+                <div style={{
+                  height: 18, width: "12%", borderRadius: 4, marginBottom: 16,
+                  background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
+                  backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
+                }} />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 8 }}>
+                  {Array.from({ length: 8 + i * 2 }).map((_, j) => (
+                    <div key={j} style={{
+                      height: 160, borderRadius: 6,
+                      background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
+                      backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
+                    }} />
+                  ))}
+                </div>
+              </div>
+            ))}
+            <style>{`
+              @keyframes skeletonShimmer {
+                0%   { background-position: 200% 0 }
+                100% { background-position: -200% 0 }
+              }
+            `}</style>
           </div>
         )}
         {error && (

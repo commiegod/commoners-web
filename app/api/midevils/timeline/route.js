@@ -23,7 +23,7 @@ const DATA_DIR = process.env.MIDEVILS_ARCHIVE_PATH
 // ── Caching ───────────────────────────────────────────────────────────────────
 let _cache = null;
 let _cacheTime = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 60 * 60 * 1000; // 60 minutes
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
 function parseDate(s) {
