@@ -520,6 +520,8 @@
     "r2_east_0": "east_s1",
     "r2_south_3": "south_s2",
     "r2_west_2": "west_s11",
-    "r2_south_2": "south_s3"
+    "r2_south_2": "south_s3",
+    "r2_south_1": "south_s4",
+    "r2_west_1": "west_s4"
   }
 }
