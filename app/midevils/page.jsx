@@ -214,8 +214,9 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
               >
                 <img
                   src={imgUrl(img.file)}
-                  alt={img.file}
+                  alt=""
                   loading="lazy"
+                  onError={(e) => { e.currentTarget.closest(`.${styles.imgCard}`).style.display = "none"; }}
                 />
                 <span className={styles.chDot} style={{ background: col }} />
               </div>
