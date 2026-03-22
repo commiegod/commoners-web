@@ -310,7 +310,7 @@ function buildData() {
     totalImages:    sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
     channelColors:  CHANNEL_COLORS,
     totalMilestones: milestones.length,
-    totalArtist:     artistTwts.length,
+    totalArtist:     [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
   };
 }
 
