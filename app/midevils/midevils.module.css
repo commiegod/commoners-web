@@ -408,7 +408,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: none;
 }
+.commUsername:hover { background: rgba(29,155,240,0.75); }
 
 .showMore {
   text-align: center;

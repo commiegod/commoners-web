@@ -240,7 +240,10 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
                     loading="lazy"
                   />
                   <span className={styles.chDot} style={{ background: "#1d9bf0" }} />
-                  <span className={styles.commUsername}>@{ct.username}</span>
+                  {ct.tweetUrl
+                    ? <a className={styles.commUsername} href={ct.tweetUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>@{ct.username}</a>
+                    : <span className={styles.commUsername}>@{ct.username}</span>
+                  }
                 </div>
               ))}
             </div>
