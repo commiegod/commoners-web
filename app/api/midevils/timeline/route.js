@@ -114,11 +114,20 @@ function buildData() {
     });
   }
 
+  // Derive timeline start from the earliest Discord entry so artist tweets
+  // (which go back to 2022) are clamped to the same window.
+  const timelineStart = discord.reduce((min, m) => {
+    if (!m.downloaded || !m.timestamp) return min;
+    const dt = parseDate(m.timestamp);
+    return dt && (!min || dt < min) ? dt : min;
+  }, null);
+
   // ── Index artist tweets (@sircandyapple, @jonnydegods) by week ────────────
   const artistByWeek = new Map();
   for (const a of artistTwts) {
     const dt = parseDate(a.date);
     if (!dt) continue;
+    if (timelineStart && dt < timelineStart) continue; // skip pre-timeline entries
     const wk = weekKey(dt);
     if (!artistByWeek.has(wk)) artistByWeek.set(wk, []);
     artistByWeek.get(wk).push({
@@ -237,6 +246,21 @@ function buildData() {
     bucket.count       += cts.length;
     bucket.channels["twitter"] = (bucket.channels["twitter"] ?? 0) + cts.length;
     bucket.commTweets   = cts;
+  }
+
+  // Ensure weeks exist for curated tweet types even when they have no Discord
+  // or community tweet data — otherwise their weeks are silently dropped.
+  for (const [wk, items] of tweetByWeek) {
+    const dt = parseDate(items[0].date);
+    if (dt) ensureWeek(wk, dt);
+  }
+  for (const [wk, items] of artistByWeek) {
+    const dt = parseDate(items[0].date);
+    if (dt) ensureWeek(wk, dt);
+  }
+  for (const [wk, items] of highlightByWeek) {
+    const dt = parseDate(items[0].date);
+    if (dt) ensureWeek(wk, dt);
   }
 
   // ── Sort weeks, compute scores ────────────────────────────────────────────
