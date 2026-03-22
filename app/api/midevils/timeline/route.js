@@ -172,17 +172,15 @@ function buildData() {
     const bucket = ensureWeek(wk, dt);
     bucket.count++;
     bucket.channels[ch] = (bucket.channels[ch] ?? 0) + 1;
-    if (bucket.images.length < 12) {
-      // Prefer direct Twitter URL for embed-type entries (no storage needed)
-      const twitterUrl = m.type === "embed" && m.url?.includes("twimg.com") ? m.url : null;
-      bucket.images.push({
-        file:    twitterUrl ?? `by-month/discord/${m.month}/${ch}/${fn}`,
-        direct:  !!twitterUrl,
-        channel: ch,
-        author:  m.author ?? "",
-        ts:      ts.slice(0, 10),
-      });
-    }
+    // Prefer direct Twitter URL for embed-type entries (no storage needed)
+    const twitterUrl = m.type === "embed" && m.url?.includes("twimg.com") ? m.url : null;
+    bucket.images.push({
+      file:    twitterUrl ?? `by-month/discord/${m.month}/${ch}/${fn}`,
+      direct:  !!twitterUrl,
+      channel: ch,
+      author:  m.author ?? "",
+      ts:      ts.slice(0, 10),
+    });
   }
 
   // Community tweets
