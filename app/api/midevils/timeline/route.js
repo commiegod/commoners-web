@@ -84,9 +84,10 @@ function readJSON(relPath) {
 }
 
 function buildData() {
-  const discord = readJSON("discord_registry.json");
-  const tweets  = readJSON("top_tweets/top_tweets_registry.json");
-  const memes   = readJSON("meme_registry.json");
+  const discord     = readJSON("discord_registry.json");
+  const tweets      = readJSON("top_tweets/top_tweets_registry.json");
+  const highlights  = readJSON("top_tweets/community_highlights_registry.json");
+  const memes       = readJSON("meme_registry.json");
 
   // ── Index top tweets by week ───────────────────────────────────────────────
   const tweetByWeek = new Map();
@@ -103,6 +104,25 @@ function buildData() {
       reposts:    t.reposts ?? 0,
       url:        t.url,
       screenshot: t.screenshot ? `top_tweets/${t.screenshot}` : "",
+    });
+  }
+
+  // ── Index community highlights by week ───────────────────────────────────
+  const highlightByWeek = new Map();
+  for (const h of highlights) {
+    const dt = parseDate(h.date);
+    if (!dt) continue;
+    const wk = weekKey(dt);
+    if (!highlightByWeek.has(wk)) highlightByWeek.set(wk, []);
+    highlightByWeek.get(wk).push({
+      username:   h.username,
+      text:       h.text,
+      date:       h.date.slice(0, 10),
+      likes:      h.likes,
+      views:      h.views,
+      reposts:    h.reposts ?? 0,
+      url:        h.url,
+      screenshot: h.screenshot ? `top_tweets/${h.screenshot}` : "",
     });
   }
 
@@ -213,7 +233,8 @@ function buildData() {
       channels:   data.channels,
       images:     data.images,
       commTweets: comm,
-      milestones: tweetByWeek.get(wk) ?? [],
+      milestones:  tweetByWeek.get(wk) ?? [],
+      highlights:  highlightByWeek.get(wk) ?? [],
     };
   });
 

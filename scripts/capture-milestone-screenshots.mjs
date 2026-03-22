@@ -17,7 +17,7 @@
  */
 
 import { chromium } from "playwright";
-import { readFileSync, mkdirSync } from "fs";
+import { readFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -29,8 +29,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ── Config ───────────────────────────────────────────────────────────────────
 
-const ARCHIVE_DIR   = resolve(os.homedir(), "midevils/archive/top_tweets");
-const REGISTRY_PATH = resolve(ARCHIVE_DIR, "top_tweets_registry.json");
+const ARCHIVE_DIR         = resolve(os.homedir(), "midevils/archive/top_tweets");
+const REGISTRY_PATH       = resolve(ARCHIVE_DIR, "top_tweets_registry.json");
+const HIGHLIGHTS_PATH     = resolve(ARCHIVE_DIR, "community_highlights_registry.json");
 const CHROME_DEFAULT = resolve(
   os.homedir(),
   "Library/Application Support/Google/Chrome/Default"
@@ -40,8 +41,15 @@ const RENDER_WAIT = 3500; // ms to wait after page load
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-const registry = JSON.parse(readFileSync(REGISTRY_PATH, "utf8"));
-const tweets   = Array.isArray(registry) ? registry : registry.tweets ?? [];
+const registry   = JSON.parse(readFileSync(REGISTRY_PATH, "utf8"));
+const milestones = Array.isArray(registry) ? registry : registry.tweets ?? [];
+
+const hlRegistry  = existsSync(HIGHLIGHTS_PATH)
+  ? JSON.parse(readFileSync(HIGHLIGHTS_PATH, "utf8"))
+  : [];
+
+// Combine both registries — script captures whichever PNGs don't exist yet
+const tweets = [...milestones, ...hlRegistry];
 mkdirSync(ARCHIVE_DIR, { recursive: true });
 
 // Copy your Chrome Default profile to a temp dir so it can run alongside

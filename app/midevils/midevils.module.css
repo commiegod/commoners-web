@@ -307,6 +307,41 @@
 .milestoneLink  { font-size: 0.72rem; color: var(--chr-purple); text-decoration: none; }
 .milestoneLink:hover { text-decoration: underline; }
 
+/* ── Community highlights section ───────────────────────────────────────── */
+.highlightsSection { margin-bottom: 18px; }
+
+.highlightsLabel {
+  font-size: 0.7rem;
+  color: #e8a020;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.highlightStar { font-size: 0.75rem; }
+
+.highlight {
+  background: #fff;
+  border: 1px solid #f0e8d0;
+  border-left: 3px solid #e8a020;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.highlightHandle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e8a020;
+  margin-bottom: 5px;
+}
+
 /* ── Community tweet section ─────────────────────────────────────────────── */
 .commLabel {
   font-size: 0.7rem;
@@ -440,4 +475,5 @@
   .imgGrid       { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .milestone     { flex-direction: column; }
   .milestoneImg  { width: 100%; }
+  .highlight     { flex-direction: column; }
 }

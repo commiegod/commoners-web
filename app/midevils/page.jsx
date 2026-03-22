@@ -175,6 +175,51 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
           </div>
         ))}
 
+        {/* Community highlights */}
+        {week.highlights?.length > 0 && (
+          <div className={styles.highlightsSection}>
+            <div className={styles.highlightsLabel}>
+              <span className={styles.highlightStar}>★</span> community highlights
+            </div>
+            {week.highlights.map((h, i) => (
+              <div key={i} className={styles.highlight}>
+                {h.screenshot && (
+                  <div
+                    className={styles.milestoneImg}
+                    onClick={() => onImageClick(imgUrl(h.screenshot))}
+                  >
+                    <img
+                      src={imgUrl(h.screenshot)}
+                      alt="tweet screenshot"
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.closest(`.${styles.milestoneImg}`).style.display = "none"; }}
+                    />
+                  </div>
+                )}
+                <div className={styles.milestoneBody}>
+                  {h.username && <div className={styles.highlightHandle}>@{h.username}</div>}
+                  {h.text && <div className={styles.milestoneText}>&ldquo;{h.text}&rdquo;</div>}
+                  <div className={styles.milestoneMeta}>
+                    <span>♥ {h.likes.toLocaleString()}</span>
+                    <span>👁 {h.views.toLocaleString()}</span>
+                    <span>🔁 {h.reposts}</span>
+                    <span>{h.date}</span>
+                  </div>
+                  <a
+                    className={styles.milestoneLink}
+                    href={h.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    View on X →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Community tweets */}
         {week.commTweets?.length > 0 && (
           <div style={{ marginBottom: 14 }}>
@@ -311,7 +356,7 @@ export default function MidevilsChronicle() {
           );
           return { ...week, images: imgs };
         })
-        .filter((w) => w.images.length > 0 || w.milestones.length > 0),
+        .filter((w) => w.images.length > 0 || w.milestones.length > 0 || w.highlights?.length > 0),
     })).filter((m) => m.weeks.length > 0);
   }, [data, searchQ, activeChannels]);
 
