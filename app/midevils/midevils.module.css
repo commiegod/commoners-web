@@ -272,74 +272,41 @@
   white-space: nowrap;
 }
 
-.milestoneStar { color: var(--chr-purple); font-size: 0.75rem; }
+.milestoneStar { color: var(--chr-purple); font-size: 0.75rem; white-space: nowrap; }
+.artistStar    { color: #14b8a6;          font-size: 0.75rem; white-space: nowrap; }
 
 /* ── Week body ───────────────────────────────────────────────────────────── */
 .weekBody          { padding: 0 18px 18px; }
 .weekBody.collapsed { display: none; }
 
-/* ── Milestone tweet ─────────────────────────────────────────────────────── */
-.milestone {
-  background: #fff;
-  border: 1px solid #e0d8f0;
-  border-left: 3px solid var(--chr-purple);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
+/* ── Curated tweet sections (milestones / artist / highlights) ───────────── */
+.tweetSection {
+  margin-bottom: 20px;
 }
 
-.milestoneImg {
-  width: 120px;
-  flex-shrink: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.milestoneImg img { width: 100%; display: block; }
-
-.milestoneBody  { flex: 1; min-width: 0; }
-.milestoneText  { font-size: 0.88rem; color: var(--chr-text); line-height: 1.5; margin-bottom: 8px; }
-.milestoneMeta  { display: flex; gap: 14px; font-size: 0.72rem; color: var(--chr-muted); flex-wrap: wrap; }
-.milestoneLink  { font-size: 0.72rem; color: var(--chr-purple); text-decoration: none; }
-.milestoneLink:hover { text-decoration: underline; }
-
-/* ── Community highlights section ───────────────────────────────────────── */
-.highlightsSection { margin-bottom: 18px; }
-
-.highlightsLabel {
-  font-size: 0.7rem;
-  color: #e8a020;
+.tweetSectionLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.highlightStar { font-size: 0.75rem; }
-
-.highlight {
-  background: #fff;
-  border: 1px solid #f0e8d0;
-  border-left: 3px solid #e8a020;
-  border-radius: 8px;
-  padding: 14px 16px;
+  letter-spacing: 0.1em;
   margin-bottom: 10px;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
 }
 
-.highlightHandle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #e8a020;
-  margin-bottom: 5px;
+.labelMilestone { color: #7c5cfc; }
+.labelArtist    { color: #14b8a6; }
+.labelHighlight { color: #e8a020; }
+
+/* Embed grid — up to 2 columns on wide screens, stacked on mobile */
+.embedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+/* Constrain embed width so iframes don't overflow */
+.embedGrid > blockquote {
+  margin: 0 !important;
+  max-width: 100%;
 }
 
 /* ── Community tweet section ─────────────────────────────────────────────── */
@@ -475,7 +442,5 @@
   .timeline      { padding: 0 16px 40px; }
   .statsRow      { gap: 20px; }
   .imgGrid       { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-  .milestone     { flex-direction: column; }
-  .milestoneImg  { width: 100%; }
-  .highlight     { flex-direction: column; }
+  .embedGrid     { grid-template-columns: 1fr; }
 }

@@ -3,6 +3,17 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import styles from "./midevils.module.css";
 
+// ── Twitter embed helper ───────────────────────────────────────────────────────
+// Renders a native X/Twitter embed card. The platform widget script transforms
+// the <blockquote> into a full iframe card (avatar, text, images, stats).
+function TweetEmbed({ url }) {
+  return (
+    <blockquote className="twitter-tweet" data-dnt="true" data-theme="dark">
+      <a href={url}></a>
+    </blockquote>
+  );
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 // Image base URL: in production set NEXT_PUBLIC_MIDEVILS_IMAGE_BASE_URL to
 // your Vercel Blob / CDN prefix. Falls back to the local API route for dev.
@@ -102,6 +113,17 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
+  const hasMilestones = week.milestones?.length > 0;
+  const hasArtist     = week.artistTweets?.length > 0;
+  const hasHighlights = week.highlights?.length > 0;
+
+  // Re-process any new tweet embeds whenever the card expands
+  useEffect(() => {
+    if (!collapsed) {
+      window.twttr?.widgets.load();
+    }
+  }, [collapsed]);
+
   return (
     <div
       id={`wk-${week.week}`}
@@ -131,96 +153,56 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
             );
           })}
         </div>
-        {week.milestones.length > 0 && (
-          <span className={styles.milestoneStar}>★ milestone</span>
-        )}
+        {hasMilestones && <span className={styles.milestoneStar}>★ milestone</span>}
+        {hasArtist     && <span className={styles.artistStar}>🎨 artist</span>}
       </div>
 
       {/* Body */}
       <div className={`${styles.weekBody}${collapsed ? " " + styles.collapsed : ""}`}>
-        {/* Milestone tweets */}
-        {week.milestones.map((m, i) => (
-          <div key={i} className={styles.milestone}>
-            {m.screenshot && (
-              <div
-                className={styles.milestoneImg}
-                onClick={() => onImageClick(imgUrl(m.screenshot))}
-              >
-                <img
-                  src={imgUrl(m.screenshot)}
-                  alt="tweet screenshot"
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.closest(`.${styles.milestoneImg}`).style.display = "none"; }}
-                />
-              </div>
-            )}
-            <div className={styles.milestoneBody}>
-              {m.text && <div className={styles.milestoneText}>&ldquo;{m.text}&rdquo;</div>}
-              <div className={styles.milestoneMeta}>
-                <span>♥ {m.likes.toLocaleString()}</span>
-                <span>👁 {m.views.toLocaleString()}</span>
-                <span>🔁 {m.reposts}</span>
-                <span>{m.date}</span>
-              </div>
-              <a
-                className={styles.milestoneLink}
-                href={m.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View on X →
-              </a>
-            </div>
-          </div>
-        ))}
 
-        {/* Community highlights */}
-        {week.highlights?.length > 0 && (
-          <div className={styles.highlightsSection}>
-            <div className={styles.highlightsLabel}>
-              <span className={styles.highlightStar}>★</span> community highlights
+        {/* ── Official milestones (@MidEvilsNFT) ──────────────────────────── */}
+        {hasMilestones && (
+          <div className={styles.tweetSection}>
+            <div className={`${styles.tweetSectionLabel} ${styles.labelMilestone}`}>
+              ★ official milestone
             </div>
-            {week.highlights.map((h, i) => (
-              <div key={i} className={styles.highlight}>
-                {h.screenshot && (
-                  <div
-                    className={styles.milestoneImg}
-                    onClick={() => onImageClick(imgUrl(h.screenshot))}
-                  >
-                    <img
-                      src={imgUrl(h.screenshot)}
-                      alt="tweet screenshot"
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.closest(`.${styles.milestoneImg}`).style.display = "none"; }}
-                    />
-                  </div>
-                )}
-                <div className={styles.milestoneBody}>
-                  {h.username && <div className={styles.highlightHandle}>@{h.username}</div>}
-                  {h.text && <div className={styles.milestoneText}>&ldquo;{h.text}&rdquo;</div>}
-                  <div className={styles.milestoneMeta}>
-                    <span>♥ {h.likes.toLocaleString()}</span>
-                    <span>👁 {h.views.toLocaleString()}</span>
-                    <span>🔁 {h.reposts}</span>
-                    <span>{h.date}</span>
-                  </div>
-                  <a
-                    className={styles.milestoneLink}
-                    href={h.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    View on X →
-                  </a>
-                </div>
-              </div>
-            ))}
+            <div className={styles.embedGrid}>
+              {week.milestones.map((m, i) => (
+                <TweetEmbed key={i} url={m.url} />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Community tweets */}
+        {/* ── Artist work (@sircandyapple, @jonnydegods) ──────────────────── */}
+        {hasArtist && (
+          <div className={styles.tweetSection}>
+            <div className={`${styles.tweetSectionLabel} ${styles.labelArtist}`}>
+              🎨 artist work
+            </div>
+            <div className={styles.embedGrid}>
+              {week.artistTweets.map((a, i) => (
+                <TweetEmbed key={i} url={a.url} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Community highlights ─────────────────────────────────────────── */}
+        {hasHighlights && (
+          <div className={styles.tweetSection}>
+            <div className={`${styles.tweetSectionLabel} ${styles.labelHighlight}`}>
+              ★ community highlight
+            </div>
+            <div className={styles.embedGrid}>
+              {week.highlights.map((h, i) => (
+                <TweetEmbed key={i} url={h.url} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Community tweet image grid (meme_registry) ───────────────────── */}
         {week.commTweets?.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div className={styles.commLabel}>
@@ -250,7 +232,7 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
           </div>
         )}
 
-        {/* Discord image grid */}
+        {/* ── Discord image grid ───────────────────────────────────────────── */}
         <div className={styles.imgGrid}>
           {visibleImgs.map((img, i) => {
             const col = channelColors[img.channel] || "#888";
@@ -295,6 +277,16 @@ export default function MidevilsChronicle() {
   const [highlightIdx,   setHighlightIdx]   = useState(-1);
   const [lightboxSrc,    setLightboxSrc]    = useState(null);
   const [highlightedWk,  setHighlightedWk]  = useState(null);
+
+  // Load Twitter embed widget script once
+  useEffect(() => {
+    if (document.querySelector('script[src*="platform.twitter.com"]')) return;
+    const s = document.createElement("script");
+    s.src = "https://platform.twitter.com/widgets.js";
+    s.async = true;
+    s.charset = "utf-8";
+    document.body.appendChild(s);
+  }, []);
 
   // Fetch timeline data
   useEffect(() => {
@@ -361,7 +353,7 @@ export default function MidevilsChronicle() {
           );
           return { ...week, images: imgs };
         })
-        .filter((w) => w.images.length > 0 || w.milestones.length > 0 || w.highlights?.length > 0),
+        .filter((w) => w.images.length > 0 || w.milestones.length > 0 || w.artistTweets?.length > 0 || w.highlights?.length > 0),
     })).filter((m) => m.weeks.length > 0);
   }, [data, searchQ, activeChannels]);
 
@@ -396,8 +388,12 @@ export default function MidevilsChronicle() {
                 <div className={styles.statL}>Active Weeks</div>
               </div>
               <div className={styles.stat}>
-                <div className={styles.statN}>{data.tweets.length}</div>
+                <div className={styles.statN}>{data.totalMilestones ?? 0}</div>
                 <div className={styles.statL}>Milestone Tweets</div>
+              </div>
+              <div className={styles.stat}>
+                <div className={styles.statN}>{data.totalArtist ?? 0}</div>
+                <div className={styles.statL}>Artist Posts</div>
               </div>
             </div>
           )}

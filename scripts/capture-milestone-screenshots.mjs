@@ -37,7 +37,7 @@ const CHROME_DEFAULT = resolve(
   "Library/Application Support/Google/Chrome/Default"
 );
 const VIEWPORT    = { width: 680, height: 900 };
-const RENDER_WAIT = 3500; // ms to wait after page load
+const RENDER_WAIT = 6000; // ms to wait after page load
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 

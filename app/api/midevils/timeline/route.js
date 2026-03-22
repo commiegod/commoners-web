@@ -83,27 +83,53 @@ function readJSON(relPath) {
   }
 }
 
+/** Extract tweet ID from a twitter/x URL */
+function tweetIdFromUrl(url) {
+  return (url ?? "").match(/\/status\/(\d+)/)?.[1] ?? "";
+}
+
 function buildData() {
   const discord     = readJSON("discord_registry.json");
-  const tweets      = readJSON("top_tweets/top_tweets_registry.json");
+  const milestones  = readJSON("top_tweets/top_tweets_registry.json");
+  const artistTwts  = readJSON("top_tweets/artist_tweets_registry.json");
   const highlights  = readJSON("top_tweets/community_highlights_registry.json");
   const memes       = readJSON("meme_registry.json");
 
-  // ── Index top tweets by week ───────────────────────────────────────────────
+  // ── Index milestone tweets (@MidEvilsNFT) by week ─────────────────────────
   const tweetByWeek = new Map();
-  for (const t of tweets) {
+  for (const t of milestones) {
     const dt = parseDate(t.date);
     if (!dt) continue;
     const wk = weekKey(dt);
     if (!tweetByWeek.has(wk)) tweetByWeek.set(wk, []);
     tweetByWeek.get(wk).push({
-      text:       t.text,
-      date:       t.date.slice(0, 10),
-      likes:      t.likes,
-      views:      t.views,
-      reposts:    t.reposts ?? 0,
       url:        t.url,
-      screenshot: t.screenshot ? `top_tweets/${t.screenshot}` : "",
+      tweet_id:   tweetIdFromUrl(t.url),
+      username:   t.username ?? "MidEvilsNFT",
+      text:       t.text ?? "",
+      date:       t.date.slice(0, 10),
+      likes:      t.likes   ?? 0,
+      views:      t.views   ?? 0,
+      reposts:    t.reposts ?? 0,
+    });
+  }
+
+  // ── Index artist tweets (@sircandyapple, @jonnydegods) by week ────────────
+  const artistByWeek = new Map();
+  for (const a of artistTwts) {
+    const dt = parseDate(a.date);
+    if (!dt) continue;
+    const wk = weekKey(dt);
+    if (!artistByWeek.has(wk)) artistByWeek.set(wk, []);
+    artistByWeek.get(wk).push({
+      url:        a.url,
+      tweet_id:   a.tweet_id ?? tweetIdFromUrl(a.url),
+      username:   a.username ?? "",
+      text:       a.text ?? "",
+      date:       a.date.slice(0, 10),
+      likes:      a.likes   ?? 0,
+      views:      a.views   ?? 0,
+      reposts:    a.reposts ?? 0,
     });
   }
 
@@ -115,14 +141,14 @@ function buildData() {
     const wk = weekKey(dt);
     if (!highlightByWeek.has(wk)) highlightByWeek.set(wk, []);
     highlightByWeek.get(wk).push({
-      username:   h.username,
-      text:       h.text,
-      date:       h.date.slice(0, 10),
-      likes:      h.likes,
-      views:      h.views,
-      reposts:    h.reposts ?? 0,
       url:        h.url,
-      screenshot: h.screenshot ? `top_tweets/${h.screenshot}` : "",
+      tweet_id:   h.tweet_id ?? tweetIdFromUrl(h.url),
+      username:   h.username ?? "",
+      text:       h.text ?? "",
+      date:       h.date.slice(0, 10),
+      likes:      h.likes   ?? 0,
+      views:      h.views   ?? 0,
+      reposts:    h.reposts ?? 0,
     });
   }
 
@@ -233,8 +259,9 @@ function buildData() {
       channels:   data.channels,
       images:     data.images,
       commTweets: comm,
-      milestones:  tweetByWeek.get(wk) ?? [],
-      highlights:  highlightByWeek.get(wk) ?? [],
+      milestones:    tweetByWeek.get(wk)    ?? [],
+      artistTweets:  artistByWeek.get(wk)   ?? [],
+      highlights:    highlightByWeek.get(wk) ?? [],
     };
   });
 
@@ -256,9 +283,10 @@ function buildData() {
     months,
     maxCount,
     maxScore,
-    totalImages:   sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
-    channelColors: CHANNEL_COLORS,
-    tweets,
+    totalImages:    sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
+    channelColors:  CHANNEL_COLORS,
+    totalMilestones: milestones.length,
+    totalArtist:     artistTwts.length,
   };
 }
 
