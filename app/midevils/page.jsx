@@ -333,7 +333,7 @@ export default function MidevilsChronicle() {
           <h1 className={styles.headerTitle}>Midevils Scrolls</h1>
           <p className={styles.headerSub}>
             They&rsquo;re only half evil.<br />
-            This is everything the MidEvils community made happen — every image, every tweet, every milestone.
+            The MidEvils community pulse — memes shared, tweets that hit, weeks that went off.
           </p>
           {data && (
             <div className={styles.statsRow}>
