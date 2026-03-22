@@ -155,7 +155,7 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
               </div>
             )}
             <div className={styles.milestoneBody}>
-              <div className={styles.milestoneText}>&ldquo;{m.text}&rdquo;</div>
+              {m.text && <div className={styles.milestoneText}>&ldquo;{m.text}&rdquo;</div>}
               <div className={styles.milestoneMeta}>
                 <span>♥ {m.likes.toLocaleString()}</span>
                 <span>👁 {m.views.toLocaleString()}</span>
