@@ -78,8 +78,9 @@ const s3 = new S3Client({
 // ── Collect files ─────────────────────────────────────────────────────────────
 function collectFiles() {
   const files = [];
-  const discordReg = join(ARCHIVE, "discord_registry.json");
-  const tweetReg   = join(ARCHIVE, "top_tweets", "top_tweets_registry.json");
+  const discordReg    = join(ARCHIVE, "discord_registry.json");
+  const tweetReg      = join(ARCHIVE, "top_tweets", "top_tweets_registry.json");
+  const highlightsReg = join(ARCHIVE, "top_tweets", "community_highlights_registry.json");
 
   // Discord ATTACHMENT images only (embed type = direct Twitter URL, skip)
   if (existsSync(discordReg)) {
@@ -105,6 +106,20 @@ function collectFiles() {
       const relPath   = `top_tweets/${t.screenshot}`;
       const localPath = join(ARCHIVE, relPath);
       const ext = extname(t.screenshot).toLowerCase();
+      if (!ALLOWED_EXTS.has(ext)) continue;
+      if (!existsSync(localPath)) continue;
+      files.push({ localPath, key: relPath });
+    }
+  }
+
+  // Community highlight screenshots
+  if (existsSync(highlightsReg)) {
+    const highlights = JSON.parse(readFileSync(highlightsReg, "utf8"));
+    for (const h of highlights) {
+      if (!h.screenshot) continue;
+      const relPath   = `top_tweets/${h.screenshot}`;
+      const localPath = join(ARCHIVE, relPath);
+      const ext = extname(h.screenshot).toLowerCase();
       if (!ALLOWED_EXTS.has(ext)) continue;
       if (!existsSync(localPath)) continue;
       files.push({ localPath, key: relPath });

@@ -355,7 +355,9 @@ export default function MidevilsChronicle() {
               activeChannels.has(img.channel) &&
               (!q ||
                 img.file.toLowerCase().includes(q) ||
-                img.channel.includes(q))
+                img.channel.toLowerCase().includes(q) ||
+                (img.username ?? "").toLowerCase().includes(q) ||
+                (img.author ?? "").toLowerCase().includes(q))
           );
           return { ...week, images: imgs };
         })
