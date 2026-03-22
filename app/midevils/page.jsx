@@ -4,14 +4,32 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import styles from "./midevils.module.css";
 
 // ── Twitter embed helper ───────────────────────────────────────────────────────
-// Renders a native X/Twitter embed card. The platform widget script transforms
-// the <blockquote> into a full iframe card (avatar, text, images, stats).
+// Renders a native X/Twitter embed card using twttr.widgets.createTweet().
+// The blockquote + widgets.load() approach extracts but silently skips iframe
+// creation; createTweet() is the reliable programmatic alternative.
 function TweetEmbed({ url }) {
-  return (
-    <blockquote className="twitter-tweet" data-dnt="true" data-theme="dark">
-      <a href={url}></a>
-    </blockquote>
-  );
+  const ref = useRef(null);
+  const tweetId = (url ?? "").match(/\/status\/(\d+)/)?.[1];
+
+  useEffect(() => {
+    if (!ref.current || !tweetId) return;
+    const container = ref.current;
+
+    const tryCreate = () => {
+      if (window.twttr?.widgets?.createTweet) {
+        container.innerHTML = "";
+        window.twttr.widgets.createTweet(tweetId, container, {
+          theme: "dark",
+          dnt:   true,
+        });
+      } else {
+        setTimeout(tryCreate, 300);
+      }
+    };
+    setTimeout(tryCreate, 100);
+  }, [tweetId]);
+
+  return <div ref={ref} />;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -117,12 +135,6 @@ function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }
   const hasArtist     = week.artistTweets?.length > 0;
   const hasHighlights = week.highlights?.length > 0;
 
-  // Re-process any new tweet embeds whenever the card expands
-  useEffect(() => {
-    if (!collapsed) {
-      window.twttr?.widgets.load();
-    }
-  }, [collapsed]);
 
   return (
     <div
@@ -278,34 +290,16 @@ export default function MidevilsChronicle() {
   const [lightboxSrc,    setLightboxSrc]    = useState(null);
   const [highlightedWk,  setHighlightedWk]  = useState(null);
 
-  // Load Twitter embed widget script once, then re-process embeds whenever
-  // data loads (blockquotes only exist in the DOM after the data fetch).
+  // Load Twitter widget script once. TweetEmbed components call createTweet()
+  // individually — no need for a global widgets.load() call.
   useEffect(() => {
-    const existing = document.querySelector('script[src*="platform.twitter.com"]');
-    if (existing) return;
+    if (document.querySelector('script[src*="platform.twitter.com"]')) return;
     const s = document.createElement("script");
-    s.src = "https://platform.twitter.com/widgets.js";
-    s.async = true;
+    s.src     = "https://platform.twitter.com/widgets.js";
+    s.async   = true;
     s.charset = "utf-8";
-    // When the script finishes loading, process any blockquotes already in DOM
-    s.onload = () => window.twttr?.widgets.load();
     document.body.appendChild(s);
   }, []);
-
-  // Re-process embeds after data loads (script may already be ready by then)
-  useEffect(() => {
-    if (!data) return;
-    const tryLoad = () => {
-      if (window.twttr?.widgets) {
-        window.twttr.widgets.load();
-      } else {
-        // Script not ready yet — retry shortly
-        setTimeout(tryLoad, 300);
-      }
-    };
-    // Small delay to let React commit the blockquotes to the DOM first
-    setTimeout(tryLoad, 200);
-  }, [data]);
 
   // Fetch timeline data
   useEffect(() => {
