@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated at build time by scripts/build-timeline.mjs — do not commit
+data/midevils/timeline-prebuilt.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

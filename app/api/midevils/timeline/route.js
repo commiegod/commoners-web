@@ -20,7 +20,10 @@ const DATA_DIR = process.env.MIDEVILS_ARCHIVE_PATH
   ? resolve(process.env.MIDEVILS_ARCHIVE_PATH)
   : resolve(process.cwd(), "data/midevils");
 
-// ── Caching ───────────────────────────────────────────────────────────────────
+// ── Pre-built static file (written by scripts/build-timeline.mjs at deploy) ──
+const PREBUILT_PATH = resolve(process.cwd(), "data/midevils/timeline-prebuilt.json");
+
+// ── Runtime in-memory cache (fallback for local dev without a prebuild run) ──
 let _cache = null;
 let _cacheTime = 0;
 const CACHE_TTL = 60 * 60 * 1000; // 60 minutes
@@ -317,13 +320,29 @@ function buildData() {
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function GET() {
   try {
+    // Fast path: serve the file pre-built at deploy time by build-timeline.mjs.
+    // Falls back to runtime computation when running `next dev` without a prior
+    // build (the prebuilt file won't exist in that case).
+    if (existsSync(PREBUILT_PATH)) {
+      const payload = readFileSync(PREBUILT_PATH, "utf8");
+      return new Response(payload, {
+        headers: {
+          "Content-Type": "application/json",
+          // CDN/browser: serve from cache for 1 h; allow stale up to 24 h while
+          // revalidating in background. Refreshes automatically on next deploy.
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        },
+      });
+    }
+
+    // Fallback: compute at runtime (local dev or missing prebuild).
     const now = Date.now();
     if (!_cache || now - _cacheTime > CACHE_TTL) {
       _cache     = buildData();
       _cacheTime = now;
     }
     return NextResponse.json(_cache, {
-      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60" },
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
     });
   } catch (err) {
     console.error("[midevils/timeline]", err);
