@@ -525,6 +525,11 @@
     "r2_west_1": "west_s4",
     "r2_west_3": "west_s2",
     "r2_midwest_3": "midwest_s2",
-    "r2_east_1": "east_s5"
+    "r2_east_1": "east_s5",
+    "r2_south_0": "south_s9",
+    "r2_west_0": "west_s1",
+    "r2_east_3": "east_s2",
+    "r2_midwest_2": "midwest_s6",
+    "r2_midwest_1": "midwest_s4"
   }
 }
