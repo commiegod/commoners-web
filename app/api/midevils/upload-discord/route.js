@@ -104,6 +104,18 @@ async function uploadOne(s3, { url, key }) {
   return { key: safeKey, ok: true, r2Url: `${PUBLIC_BASE}/${safeKey}` };
 }
 
+// ── CORS headers (allow calls from any browser tab, including blank tabs used
+//    by the automated crawl session which can't use bash for outbound HTTP) ───
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin":  "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Admin-Secret",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(request) {
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -158,6 +170,6 @@ export async function POST(request) {
   const failed   = results.filter(r => !r.ok).length;
 
   return NextResponse.json({ uploaded, skipped, failed, results }, {
-    headers: { "Cache-Control": "no-store" },
+    headers: { "Cache-Control": "no-store", ...CORS_HEADERS },
   });
 }
