@@ -20,7 +20,9 @@ const DATA_DIR = process.env.MIDEVILS_ARCHIVE_PATH
   ? resolve(process.env.MIDEVILS_ARCHIVE_PATH)
   : resolve(process.cwd(), "data/midevils");
 
-// ── Pre-built static file (written by scripts/build-timeline.mjs at deploy) ──
+// ── Pre-built static files (written by scripts/build-timeline.mjs at deploy) ──
+// Prefer the lightweight summary; fall back to full prebuilt for local dev / old deploys.
+const SUMMARY_PATH  = resolve(process.cwd(), "data/midevils/timeline-summary.json");
 const PREBUILT_PATH = resolve(process.cwd(), "data/midevils/timeline-prebuilt.json");
 
 // ── Runtime in-memory cache (fallback for local dev without a prebuild run) ──
@@ -320,11 +322,13 @@ function buildData() {
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function GET() {
   try {
-    // Fast path: serve the file pre-built at deploy time by build-timeline.mjs.
-    // Falls back to runtime computation when running `next dev` without a prior
-    // build (the prebuilt file won't exist in that case).
-    if (existsSync(PREBUILT_PATH)) {
-      const payload = readFileSync(PREBUILT_PATH, "utf8");
+    // Fast path: serve the lightweight summary built at deploy time.
+    // Falls back to full prebuilt, then runtime computation.
+    const staticPath = existsSync(SUMMARY_PATH)  ? SUMMARY_PATH
+                     : existsSync(PREBUILT_PATH) ? PREBUILT_PATH
+                     : null;
+    if (staticPath) {
+      const payload = readFileSync(staticPath, "utf8");
       return new Response(payload, {
         headers: {
           "Content-Type": "application/json",
