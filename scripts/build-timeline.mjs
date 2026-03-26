@@ -9,7 +9,7 @@
  * Output: data/midevils/timeline-prebuilt.json
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join, resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -31,7 +31,9 @@ const DATA_DIR = process.env.MIDEVILS_ARCHIVE_PATH
   ? resolve(process.env.MIDEVILS_ARCHIVE_PATH)
   : resolve(PROJECT_ROOT, "data/midevils");
 
-const OUT_PATH = join(PROJECT_ROOT, "data/midevils/timeline-prebuilt.json");
+const OUT_PATH         = join(PROJECT_ROOT, "data/midevils/timeline-prebuilt.json");
+const SUMMARY_PATH     = join(PROJECT_ROOT, "data/midevils/timeline-summary.json");
+const WEEKS_DIR        = join(PROJECT_ROOT, "data/midevils/weeks");
 
 // ── Helpers (identical to route.js) ──────────────────────────────────────────
 
@@ -231,6 +233,38 @@ function build() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, wks]) => ({ key, label: monthLabel(key), weeks: wks }));
 
+  const IMAGE_BASE = process.env.NEXT_PUBLIC_MIDEVILS_IMAGE_BASE_URL ?? "";
+
+  // Build summary weeks (no images/tweets arrays — just pulse metadata + 3 preview URLs)
+  const summaryWeeks = resultWeeks.map((w) => {
+    // Collect candidate preview images: Discord R2 images first, then Twitter embeds
+    const r2Images  = w.images.filter((im) => !im.direct);
+    const twImages  = w.images.filter((im) =>  im.direct);
+    const commTw    = w.commTweets.filter((ct) => ct.direct);
+    const candidates = [...r2Images, ...twImages, ...commTw];
+
+    const previews = candidates.slice(0, 3).map((im) => {
+      const path = im.file ?? "";
+      return (path.startsWith("http") || !IMAGE_BASE)
+        ? path
+        : `${IMAGE_BASE}/${path}`;
+    });
+
+    return {
+      week:           w.week,
+      start:          w.start,
+      month:          w.month,
+      weekLabel:      w.weekLabel,
+      count:          w.count,
+      score:          w.score,
+      channels:       w.channels,
+      previews,
+      hasMilestones:  w.milestones.length  > 0,
+      hasArtist:      w.artistTweets.length > 0,
+      hasHighlights:  w.highlights.length  > 0,
+    };
+  });
+
   return {
     weeks: resultWeeks, months, maxCount, maxScore,
     totalImages:     sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
@@ -238,6 +272,9 @@ function build() {
     totalMilestones: milestones.length,
     totalArtist:     [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
     builtAt:         new Date().toISOString(),
+    // Extras used by split-output phase below
+    _summaryWeeks:   summaryWeeks,
+    _months:         months,
   };
 }
 
@@ -245,8 +282,38 @@ function build() {
 
 const t0 = Date.now();
 const result = build();
-writeFileSync(OUT_PATH, JSON.stringify(result));
+
+// 1. Full prebuilt (backward compat)
+const { _summaryWeeks, _months, ...prebuilt } = result;
+writeFileSync(OUT_PATH, JSON.stringify(prebuilt));
+console.log(`  written: ${OUT_PATH}`);
+
+// 2. Per-week files
+mkdirSync(WEEKS_DIR, { recursive: true });
+for (const w of result.weeks) {
+  const weekFile = join(WEEKS_DIR, `${w.week}.json`);
+  writeFileSync(weekFile, JSON.stringify(w));
+}
+console.log(`  written: ${WEEKS_DIR}/ (${result.weeks.length} files)`);
+
+// 3. Summary (lightweight pulse — no images/tweets arrays)
+const summary = {
+  weeks:          _summaryWeeks,
+  months:         _months.map(({ key, label, weeks }) => ({
+    key, label,
+    weeks: weeks.map((w) => w.week),   // just week keys — no full data
+  })),
+  maxCount:       result.maxCount,
+  maxScore:       result.maxScore,
+  totalImages:    result.totalImages,
+  channelColors:  result.channelColors,
+  totalMilestones: result.totalMilestones,
+  totalArtist:    result.totalArtist,
+  builtAt:        result.builtAt,
+};
+writeFileSync(SUMMARY_PATH, JSON.stringify(summary));
+console.log(`  written: ${SUMMARY_PATH}`);
+
 const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
 console.log(`  weeks=${result.weeks.length} months=${result.months.length} images=${result.totalImages}`);
-console.log(`  written: ${OUT_PATH}`);
 console.log(`  done in ${elapsed}s`);
