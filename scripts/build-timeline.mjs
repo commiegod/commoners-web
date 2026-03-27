@@ -95,16 +95,15 @@ function build() {
   console.log("Building timeline…");
   console.log(`  data dir: ${DATA_DIR}`);
 
-  const discord    = readJSON("discord_registry.json");
-  const milestones = readJSON("top_tweets/top_tweets_registry.json");
-  const artistTwts = readJSON("top_tweets/artist_tweets_registry.json");
-  const highlights = readJSON("top_tweets/community_highlights_registry.json");
-  const memes      = readJSON("meme_registry.json");
+  const discord        = readJSON("discord_registry.json");
+  const officialTweets = readJSON("top_tweets/top_tweets_registry.json");
+  const artistTwts     = readJSON("top_tweets/artist_tweets_registry.json");
+  const memes          = readJSON("meme_registry.json");
 
-  console.log(`  loaded: discord=${discord.length} milestones=${milestones.length} artist=${artistTwts.length} highlights=${highlights.length} memes=${memes.length}`);
+  console.log(`  loaded: discord=${discord.length} officialTweets=${officialTweets.length} artist=${artistTwts.length} memes=${memes.length}`);
 
   const tweetByWeek = new Map();
-  for (const t of milestones) {
+  for (const t of officialTweets) {
     const dt = parseDate(t.date); if (!dt) continue;
     const wk = weekKey(dt);
     if (!tweetByWeek.has(wk)) tweetByWeek.set(wk, []);
@@ -131,18 +130,6 @@ function build() {
       url: a.url, tweet_id: a.tweet_id ?? tweetIdFromUrl(a.url),
       username: a.username ?? "", text: a.text ?? "",
       date: a.date.slice(0, 10), likes: a.likes ?? 0, views: a.views ?? 0, reposts: a.reposts ?? 0,
-    });
-  }
-
-  const highlightByWeek = new Map();
-  for (const h of highlights) {
-    const dt = parseDate(h.date); if (!dt) continue;
-    const wk = weekKey(dt);
-    if (!highlightByWeek.has(wk)) highlightByWeek.set(wk, []);
-    highlightByWeek.get(wk).push({
-      url: h.url, tweet_id: h.tweet_id ?? tweetIdFromUrl(h.url),
-      username: h.username ?? "", text: h.text ?? "",
-      date: h.date.slice(0, 10), likes: h.likes ?? 0, views: h.views ?? 0, reposts: h.reposts ?? 0,
     });
   }
 
@@ -200,9 +187,8 @@ function build() {
     bucket.commTweets = cts;
   }
 
-  for (const [wk, items] of tweetByWeek)     { const dt = parseDate(items[0].date); if (dt) ensureWeek(wk, dt); }
-  for (const [wk, items] of artistByWeek)    { const dt = parseDate(items[0].date); if (dt) ensureWeek(wk, dt); }
-  for (const [wk, items] of highlightByWeek) { const dt = parseDate(items[0].date); if (dt) ensureWeek(wk, dt); }
+  for (const [wk, items] of tweetByWeek)  { const dt = parseDate(items[0].date); if (dt) ensureWeek(wk, dt); }
+  for (const [wk, items] of artistByWeek) { const dt = parseDate(items[0].date); if (dt) ensureWeek(wk, dt); }
 
   const sortedWeeks = [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b));
   const maxCount    = sortedWeeks.reduce((m, [, v]) => Math.max(m, v.count), 1);
@@ -215,9 +201,8 @@ function build() {
       week: wk, start: data.start, month: data.month, weekLabel: data.weekLabel,
       count: data.count, score: Math.round(weekScore * 10) / 10,
       channels: data.channels, images: data.images, commTweets: comm,
-      milestones:   tweetByWeek.get(wk)    ?? [],
-      artistTweets: artistByWeek.get(wk)   ?? [],
-      highlights:   highlightByWeek.get(wk) ?? [],
+      officialTweets: tweetByWeek.get(wk)  ?? [],
+      artistTweets:   artistByWeek.get(wk) ?? [],
     };
   });
 
@@ -259,18 +244,17 @@ function build() {
       score:          w.score,
       channels:       w.channels,
       previews,
-      hasMilestones:  w.milestones.length  > 0,
-      hasArtist:      w.artistTweets.length > 0,
-      hasHighlights:  w.highlights.length  > 0,
+      hasOfficialTweets: w.officialTweets.length > 0,
+      hasArtist:         w.artistTweets.length   > 0,
     };
   });
 
   return {
     weeks: resultWeeks, months, maxCount, maxScore,
-    totalImages:     sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
-    channelColors:   CHANNEL_COLORS,
-    totalMilestones: milestones.length,
-    totalArtist:     [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
+    totalImages:          sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
+    channelColors:        CHANNEL_COLORS,
+    totalOfficialTweets:  officialTweets.length,
+    totalArtist:          [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
     builtAt:         new Date().toISOString(),
     // Extras used by split-output phase below
     _summaryWeeks:   summaryWeeks,
@@ -307,8 +291,8 @@ const summary = {
   maxScore:       result.maxScore,
   totalImages:    result.totalImages,
   channelColors:  result.channelColors,
-  totalMilestones: result.totalMilestones,
-  totalArtist:    result.totalArtist,
+  totalOfficialTweets: result.totalOfficialTweets,
+  totalArtist:         result.totalArtist,
   builtAt:        result.builtAt,
 };
 writeFileSync(SUMMARY_PATH, JSON.stringify(summary));
