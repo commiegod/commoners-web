@@ -403,7 +403,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  z-index: 999;
+  x-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,14 +433,251 @@
   object-fit: contain;
 }
 
+/* ── Two-column split layout ─────────────────────────────────────────────── */
+.splitLayout {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(100vh - 300px);
+}
+
+/* Left panel — fixed-width, sticky */
+.weekListPanel {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 160px;       /* below sticky pulse section */
+  max-height: calc(100vh - 170px);
+  overflow-y: auto;
+  border-right: 1px solid var(--chr-border);
+  background: var(--chr-surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--chr-border) transparent;
+}
+
+.weekListPanel::-webkit-scrollbar { width: 5px; }
+.weekListPanel::-webkit-scrollbar-track { background: transparent; }
+.weekListPanel::-webkit-scrollbar-thumb { background: var(--chr-border); border-radius: 3px; }
+
+.weekListInner {
+  padding: 12px 0 40px;
+}
+
+.weekListMonth {
+  margin-bottom: 4px;
+}
+
+.weekListMonthLabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--chr-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 10px 16px 6px;
+  position: sticky;
+  top: 0;
+  background: var(--chr-surface);
+  z-index: 2;
+}
+
+/* Week row button */
+.weekRow {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--chr-border);
+  padding: 10px 16px 10px;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: inherit;
+}
+
+.weekRow:hover         { background: var(--chr-card); }
+.weekRowSelected       { background: var(--chr-card) !important; border-left: 3px solid var(--chr-gold) !important; padding-left: 13px !important; }
+
+.weekRowMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+.weekRowLabel  { font-size: 0.8rem; font-weight: 600; color: var(--chr-text); }
+.weekRowCount  { font-size: 0.68rem; color: var(--chr-muted); }
+
+.weekRowBarWrap {
+  height: 3px;
+  background: var(--chr-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.weekRowBar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.weekRowTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 7px;
+}
+
+.weekRowChip {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.badgeMilestone { font-size: 0.65rem; color: #7c5cfc; }
+.badgeArtist    { font-size: 0.65rem; }
+.badgeHighlight { font-size: 0.65rem; }
+
+.weekRowPreviews {
+  display: flex;
+  gap: 4px;
+}
+
+.weekRowThumb {
+  width: 48px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--chr-border);
+  flex-shrink: 0;
+}
+
+/* Right content panel */
+.contentPanel {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.contentEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--chr-muted);
+  font-size: 0.9rem;
+}
+
+/* Week content */
+.weekContent {
+  padding: 24px 32px 60px;
+}
+
+.weekContentHeader {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--chr-border);
+}
+
+.weekContentTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--chr-text);
+  margin: 0 0 4px;
+}
+
+.weekContentMeta {
+  font-size: 0.8rem;
+  color: var(--chr-muted);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.weekContentChips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.weekContentChip {
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Loading / error states */
+.weekContentLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 200px;
+  color: var(--chr-muted);
+  font-size: 0.88rem;
+}
+
+.weekContentSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--chr-border);
+  border-top-color: var(--chr-gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.weekContentError {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #fc5c5c;
+  font-size: 0.88rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .splitLayout {
+    flex-direction: column;
+  }
+
+  .weekListPanel {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--chr-border);
+    /* Compact horizontal scroll on mobile isn't needed — just show full list */
+  }
+
+  .weekListInner {
+    padding: 8px 0 16px;
+  }
+
+  .contentPanel {
+    width: 100%;
+  }
+
+  .weekContent {
+    padding: 20px 16px 40px;
+  }
+}
+
 @media (max-width: 640px) {
   .header        { padding: 24px 16px 16px; }
   .headerTitle   { font-size: 1.5rem; }
   .pulseSection  { padding: 14px 16px 0; }
-  .toolbar       { padding: 10px 16px; }
-  .timeline      { padding: 0 16px 40px; }
   .statsRow      { gap: 20px; }
   .imgGrid       { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .embedGrid     { grid-template-columns: 1fr; }
+  .weekRowThumb  { width: 40px; height: 30px; }
 }
