@@ -94,15 +94,14 @@ function tweetIdFromUrl(url) {
 }
 
 function buildData() {
-  const discord     = readJSON("discord_registry.json");
-  const milestones  = readJSON("top_tweets/top_tweets_registry.json");
-  const artistTwts  = readJSON("top_tweets/artist_tweets_registry.json");
-  const highlights  = readJSON("top_tweets/community_highlights_registry.json");
-  const memes       = readJSON("meme_registry.json");
+  const discord        = readJSON("discord_registry.json");
+  const officialTweets = readJSON("top_tweets/top_tweets_registry.json");
+  const artistTwts     = readJSON("top_tweets/artist_tweets_registry.json");
+  const memes          = readJSON("meme_registry.json");
 
-  // ── Index milestone tweets (@MidEvilsNFT) by week ─────────────────────────
+  // ── Index official tweets (@MidEvilsNFT) by week ──────────────────────────
   const tweetByWeek = new Map();
-  for (const t of milestones) {
+  for (const t of officialTweets) {
     const dt = parseDate(t.date);
     if (!dt) continue;
     const wk = weekKey(dt);
@@ -144,25 +143,6 @@ function buildData() {
       likes:      a.likes   ?? 0,
       views:      a.views   ?? 0,
       reposts:    a.reposts ?? 0,
-    });
-  }
-
-  // ── Index community highlights by week ───────────────────────────────────
-  const highlightByWeek = new Map();
-  for (const h of highlights) {
-    const dt = parseDate(h.date);
-    if (!dt) continue;
-    const wk = weekKey(dt);
-    if (!highlightByWeek.has(wk)) highlightByWeek.set(wk, []);
-    highlightByWeek.get(wk).push({
-      url:        h.url,
-      tweet_id:   h.tweet_id ?? tweetIdFromUrl(h.url),
-      username:   h.username ?? "",
-      text:       h.text ?? "",
-      date:       h.date.slice(0, 10),
-      likes:      h.likes   ?? 0,
-      views:      h.views   ?? 0,
-      reposts:    h.reposts ?? 0,
     });
   }
 
@@ -263,10 +243,6 @@ function buildData() {
     const dt = parseDate(items[0].date);
     if (dt) ensureWeek(wk, dt);
   }
-  for (const [wk, items] of highlightByWeek) {
-    const dt = parseDate(items[0].date);
-    if (dt) ensureWeek(wk, dt);
-  }
 
   // ── Sort weeks, compute scores ────────────────────────────────────────────
   const sortedWeeks = [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b));
@@ -288,9 +264,8 @@ function buildData() {
       channels:   data.channels,
       images:     data.images,
       commTweets: comm,
-      milestones:    tweetByWeek.get(wk)    ?? [],
-      artistTweets:  artistByWeek.get(wk)   ?? [],
-      highlights:    highlightByWeek.get(wk) ?? [],
+      officialTweets: tweetByWeek.get(wk)  ?? [],
+      artistTweets:   artistByWeek.get(wk) ?? [],
     };
   });
 
@@ -312,10 +287,10 @@ function buildData() {
     months,
     maxCount,
     maxScore,
-    totalImages:    sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
-    channelColors:  CHANNEL_COLORS,
-    totalMilestones: milestones.length,
-    totalArtist:     [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
+    totalImages:         sortedWeeks.reduce((s, [, v]) => s + v.count, 0),
+    channelColors:       CHANNEL_COLORS,
+    totalOfficialTweets: officialTweets.length,
+    totalArtist:         [...artistByWeek.values()].reduce((s, v) => s + v.length, 0),
   };
 }
 
