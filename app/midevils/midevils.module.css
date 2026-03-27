@@ -160,7 +160,8 @@
 .weekNav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 16px;
   padding: 16px 36px;
   background: var(--chr-surface);
   border-bottom: 1px solid var(--chr-border);
@@ -168,17 +169,17 @@
 
 .weekNavArrow {
   background: none;
-  border: 1px solid var(--chr-border);
-  border-radius: 8px;
-  width: 48px;
-  height: 48px;
-  font-size: 1.4rem;
+  border: 2px solid var(--chr-border);
+  border-radius: 10px;
+  width: 52px;
+  height: 52px;
+  font-size: 1.5rem;
   cursor: pointer;
-  color: var(--chr-text);
+  color: var(--chr-muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s, transform 0.1s;
   font-family: inherit;
   flex-shrink: 0;
   line-height: 1;
@@ -187,10 +188,18 @@
 .weekNavArrow:hover:not(:disabled) {
   background: var(--chr-card);
   border-color: var(--chr-gold);
+  color: var(--chr-gold);
+}
+
+.weekNavArrow:active:not(:disabled) {
+  background: var(--chr-border);
+  border-color: var(--chr-gold);
+  color: var(--chr-gold);
+  transform: scale(0.9);
 }
 
 .weekNavArrow:disabled {
-  opacity: 0.2;
+  opacity: 0.18;
   cursor: default;
 }
 
@@ -199,8 +208,8 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  flex: 1;
-  padding: 0 20px;
+  min-width: 220px;
+  padding: 0 8px;
 }
 
 .weekNavLabel {
