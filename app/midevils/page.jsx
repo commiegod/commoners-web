@@ -174,7 +174,6 @@ function WeekContent({ weekKey, channelColors, onImageClick }) {
     <div className={styles.weekContent}>
       {/* Week heading */}
       <div className={styles.weekContentHeader}>
-        <h2 className={styles.weekContentTitle}>{weekData.weekLabel}</h2>
         <span className={styles.weekContentMeta}>
           {weekData.count} images across{" "}
           {Object.keys(weekData.channels ?? {}).length} channel
