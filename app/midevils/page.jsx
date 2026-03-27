@@ -4,9 +4,6 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import styles from "./midevils.module.css";
 
 // ── Twitter embed helper ───────────────────────────────────────────────────────
-// Renders a native X/Twitter embed card using twttr.widgets.createTweet().
-// Uses IntersectionObserver so embeds only load when the card is near the
-// viewport — avoids firing 100+ simultaneous Twitter API requests on mount.
 function TweetEmbed({ url }) {
   const ref       = useRef(null);
   const loadedRef = useRef(false);
@@ -15,6 +12,7 @@ function TweetEmbed({ url }) {
   useEffect(() => {
     if (!ref.current || !tweetId) return;
     const container = ref.current;
+    loadedRef.current = false; // reset on url change
 
     const doCreate = () => {
       if (loadedRef.current) return;
@@ -22,10 +20,7 @@ function TweetEmbed({ url }) {
       const tryCreate = () => {
         if (window.twttr?.widgets?.createTweet) {
           container.innerHTML = "";
-          window.twttr.widgets.createTweet(tweetId, container, {
-            theme: "dark",
-            dnt:   true,
-          });
+          window.twttr.widgets.createTweet(tweetId, container, { theme: "light", dnt: true });
         } else {
           setTimeout(tryCreate, 300);
         }
@@ -33,14 +28,8 @@ function TweetEmbed({ url }) {
       tryCreate();
     };
 
-    // Only create the embed once the card is within 400px of the viewport.
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect();
-          doCreate();
-        }
-      },
+      (entries) => { if (entries[0].isIntersecting) { observer.disconnect(); doCreate(); } },
       { rootMargin: "400px" }
     );
     observer.observe(container);
@@ -50,29 +39,24 @@ function TweetEmbed({ url }) {
   return <div ref={ref} />;
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-// Image base URL: in production set NEXT_PUBLIC_MIDEVILS_IMAGE_BASE_URL to
-// your Vercel Blob / CDN prefix. Falls back to the local API route for dev.
+// ── Image URL helper ───────────────────────────────────────────────────────────
 const IMAGE_BASE =
   process.env.NEXT_PUBLIC_MIDEVILS_IMAGE_BASE_URL?.replace(/\/$/, "") ?? "";
 
 function imgUrl(path) {
   if (!path) return "";
-  // Direct URLs (pbs.twimg.com etc.) — pass straight through, no proxying needed.
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  // CDN/Blob mode: sanitize colons, encode each segment.
   if (IMAGE_BASE) {
     const safePath = path.replace(/:/g, "_");
     const encoded  = safePath.split("/").map(encodeURIComponent).join("/");
     return `${IMAGE_BASE}/${encoded}`;
   }
-  // Local dev: serve via Next.js API route.
   const encoded = path.split("/").map(encodeURIComponent).join("/");
   return `/api/midevils/img/${encoded}`;
 }
 
 // ── Pulse canvas component ────────────────────────────────────────────────────
-function PulseGraph({ weeks, maxScore, highlightIdx, onBarClick }) {
+function PulseGraph({ weeks, maxScore, selectedIdx, onBarClick }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -80,8 +64,8 @@ function PulseGraph({ weeks, maxScore, highlightIdx, onBarClick }) {
     if (!canvas || !weeks.length) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const W = canvas.offsetWidth;
-    const H = 72;
+    const W   = canvas.offsetWidth;
+    const H   = 88;
     canvas.width  = W * dpr;
     canvas.height = H * dpr;
     const ctx = canvas.getContext("2d");
@@ -89,32 +73,40 @@ function PulseGraph({ weeks, maxScore, highlightIdx, onBarClick }) {
 
     const n    = weeks.length;
     const pad  = 4;
-    const barW = Math.max(4, (W - pad * 2) / n - 2);
+    const gap  = 2;
+    const barW = Math.max(3, (W - pad * 2) / n - gap);
     const maxS = maxScore || 1;
 
     weeks.forEach((w, i) => {
       const x   = pad + i * ((W - pad * 2) / n);
-      const val = w.score ?? w.count;
-      const h   = Math.max(3, (val / maxS) * (H - 14));
+      const val = w.score ?? w.count ?? 0;
+      const h   = Math.max(3, (val / maxS) * (H - 16));
       const y   = H - h - 4;
 
+      const isSelected = i === selectedIdx;
+
       let colour;
-      if (i === highlightIdx)             colour = "#111111";
-      else if (w.milestones?.length)      colour = "#7c5cfc";
-      else if (val > maxS * 0.3)          colour = "#c8832a";
-      else if (val > maxS * 0.1)          colour = "#aaaaaa";
-      else                                colour = "#d0d0d0";
+      if (isSelected)              colour = "#111111";
+      else if (w.hasMilestones)    colour = "#7c5cfc";
+      else if (val > maxS * 0.35)  colour = "#c8832a";
+      else if (val > maxS * 0.12)  colour = "#999999";
+      else                         colour = "#d0d0d0";
 
       ctx.fillStyle = colour;
       ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(x, y, barW, h, 3);
-      } else {
-        ctx.rect(x, y, barW, h);
-      }
+      if (ctx.roundRect) ctx.roundRect(x, y, barW, h, 3);
+      else               ctx.rect(x, y, barW, h);
       ctx.fill();
+
+      // Tick mark for selected bar
+      if (isSelected) {
+        ctx.fillStyle = "#111111";
+        ctx.beginPath();
+        ctx.arc(x + barW / 2, H - 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     });
-  }, [weeks, maxScore, highlightIdx]);
+  }, [weeks, maxScore, selectedIdx]);
 
   const handleClick = useCallback((e) => {
     const canvas = canvasRef.current;
@@ -134,192 +126,271 @@ function PulseGraph({ weeks, maxScore, highlightIdx, onBarClick }) {
   );
 }
 
-// ── Week card ─────────────────────────────────────────────────────────────────
-function WeekCard({ week, maxCount, channelColors, isHighlighted, onImageClick }) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [showAll,   setShowAll]   = useState(false);
-
-  const BATCH = 12;
-  const visibleImgs = showAll ? week.images : week.images.slice(0, BATCH);
-  const hiddenCount = week.images.length - BATCH;
-
-  const pct = Math.round((week.count / Math.max(maxCount, 1)) * 100);
-
-  const topChannels = Object.entries(week.channels)
+// ── Week row in the left panel ────────────────────────────────────────────────
+function WeekRow({ week, maxScore, channelColors, isSelected, onClick }) {
+  const pct = Math.round(((week.score ?? week.count ?? 0) / Math.max(maxScore, 1)) * 100);
+  const topChannels = Object.entries(week.channels ?? {})
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  const hasMilestones = week.milestones?.length > 0;
-  const hasArtist     = week.artistTweets?.length > 0;
-  const hasHighlights = week.highlights?.length > 0;
-
+    .slice(0, 3);
 
   return (
-    <div
-      id={`wk-${week.week}`}
-      className={`${styles.weekCard}${isHighlighted ? " " + styles.highlighted : ""}`}
+    <button
+      className={`${styles.weekRow}${isSelected ? " " + styles.weekRowSelected : ""}`}
+      onClick={onClick}
     >
-      {/* Header */}
-      <div
-        className={styles.weekHeader}
-        onClick={() => setCollapsed((c) => !c)}
-      >
-        <span className={styles.weekLabelText}>{week.weekLabel}</span>
-        <span className={styles.weekCount}>{week.count} images</span>
-        <div className={styles.weekBarWrap}>
-          <div className={styles.weekBar} style={{ width: `${pct}%` }} />
-        </div>
-        <div className={styles.chTags}>
-          {topChannels.map(([ch, n]) => {
-            const col = channelColors[ch] || "#888";
-            return (
-              <span
-                key={ch}
-                className={styles.chTag}
-                style={{ color: col, borderColor: `${col}33` }}
-              >
-                {ch} {n}
-              </span>
-            );
-          })}
-        </div>
-        {hasMilestones && <span className={styles.milestoneStar}>★ milestone</span>}
-        {hasArtist     && <span className={styles.artistStar}>🎨 artist</span>}
+      {/* Date + count */}
+      <div className={styles.weekRowMeta}>
+        <span className={styles.weekRowLabel}>{week.weekLabel}</span>
+        <span className={styles.weekRowCount}>{week.count} imgs</span>
       </div>
 
-      {/* Body */}
-      <div className={`${styles.weekBody}${collapsed ? " " + styles.collapsed : ""}`}>
+      {/* Activity bar */}
+      <div className={styles.weekRowBarWrap}>
+        <div
+          className={styles.weekRowBar}
+          style={{ width: `${pct}%`, background: week.hasMilestones ? "#7c5cfc" : "#444" }}
+        />
+      </div>
 
-        {/* ── Official milestones (@MidEvilsNFT) ──────────────────────────── */}
-        {hasMilestones && (
-          <div className={styles.tweetSection}>
-            <div className={`${styles.tweetSectionLabel} ${styles.labelMilestone}`}>
-              ★ official milestone
-            </div>
-            <div className={styles.embedGrid}>
-              {week.milestones.map((m, i) => (
-                <TweetEmbed key={i} url={m.url} />
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Channel chips + badges */}
+      <div className={styles.weekRowTags}>
+        {topChannels.map(([ch]) => {
+          const col = channelColors[ch] || "#888";
+          return (
+            <span
+              key={ch}
+              className={styles.weekRowChip}
+              style={{ background: `${col}22`, color: col, borderColor: `${col}44` }}
+            >
+              {ch}
+            </span>
+          );
+        })}
+        {week.hasMilestones && <span className={styles.badgeMilestone}>★</span>}
+        {week.hasArtist     && <span className={styles.badgeArtist}>🎨</span>}
+        {week.hasHighlights && <span className={styles.badgeHighlight}>💬</span>}
+      </div>
 
-        {/* ── Artist work (@sircandyapple, @jonnydegods) ──────────────────── */}
-        {hasArtist && (
-          <div className={styles.tweetSection}>
-            <div className={`${styles.tweetSectionLabel} ${styles.labelArtist}`}>
-              🎨 artist work
-            </div>
-            <div className={styles.embedGrid}>
-              {week.artistTweets.map((a, i) => (
-                <TweetEmbed key={i} url={a.url} />
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Preview thumbnails */}
+      {week.previews?.length > 0 && (
+        <div className={styles.weekRowPreviews}>
+          {week.previews.slice(0, 3).map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt=""
+              className={styles.weekRowThumb}
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
+            />
+          ))}
+        </div>
+      )}
+    </button>
+  );
+}
 
-        {/* ── Community highlights ─────────────────────────────────────────── */}
-        {hasHighlights && (
-          <div className={styles.tweetSection}>
-            <div className={`${styles.tweetSectionLabel} ${styles.labelHighlight}`}>
-              ★ community highlight
-            </div>
-            <div className={styles.embedGrid}>
-              {week.highlights.map((h, i) => (
-                <TweetEmbed key={i} url={h.url} />
-              ))}
-            </div>
-          </div>
-        )}
+// ── Full week content panel ───────────────────────────────────────────────────
+function WeekContent({ weekKey, channelColors, onImageClick }) {
+  const [weekData, setWeekData] = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+  const [showAll,  setShowAll]  = useState(false);
 
-        {/* ── Community tweet image grid (meme_registry) ───────────────────── */}
-        {week.commTweets?.length > 0 && (
-          <div style={{ marginBottom: 14 }}>
-            <div className={styles.commLabel}>
-              <span className={styles.commDot} />
-              {week.commTweets.length} community tweet{week.commTweets.length !== 1 ? "s" : ""}
-            </div>
-            <div className={styles.imgGrid}>
-              {week.commTweets.map((ct, i) => (
-                <div
-                  key={i}
-                  className={`${styles.imgCard} ${styles.commCard}`}
-                  onClick={() => onImageClick(imgUrl(ct.file))}
+  const BATCH = 24;
+
+  useEffect(() => {
+    if (!weekKey) return;
+    setLoading(true);
+    setError(null);
+    setWeekData(null);
+    setShowAll(false);
+
+    fetch(`/api/midevils/timeline/${weekKey}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => { setWeekData(d); setLoading(false); })
+      .catch((e) => { setError(e.message); setLoading(false); });
+  }, [weekKey]);
+
+  if (loading) return (
+    <div className={styles.weekContentLoading}>
+      <div className={styles.weekContentSpinner} />
+      <span>Loading week…</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className={styles.weekContentError}>Failed to load: {error}</div>
+  );
+
+  if (!weekData) return null;
+
+  const allImgs    = weekData.images ?? [];
+  const visImgs    = showAll ? allImgs : allImgs.slice(0, BATCH);
+  const hiddenCnt  = allImgs.length - BATCH;
+  const hasMilestones = weekData.milestones?.length  > 0;
+  const hasArtist     = weekData.artistTweets?.length > 0;
+  const hasHighlights = weekData.highlights?.length  > 0;
+
+  return (
+    <div className={styles.weekContent}>
+      {/* Week heading */}
+      <div className={styles.weekContentHeader}>
+        <h2 className={styles.weekContentTitle}>{weekData.weekLabel}</h2>
+        <span className={styles.weekContentMeta}>
+          {weekData.count} images across{" "}
+          {Object.keys(weekData.channels ?? {}).length} channel
+          {Object.keys(weekData.channels ?? {}).length !== 1 ? "s" : ""}
+        </span>
+        <div className={styles.weekContentChips}>
+          {Object.entries(weekData.channels ?? {})
+            .sort((a, b) => b[1] - a[1])
+            .map(([ch, n]) => {
+              const col = channelColors[ch] || "#888";
+              return (
+                <span
+                  key={ch}
+                  className={styles.weekContentChip}
+                  style={{ color: col, borderColor: `${col}44`, background: `${col}11` }}
                 >
-                  <img
-                    src={imgUrl(ct.file)}
-                    alt={`@${ct.username}`}
-                    loading="lazy"
-                  />
-                  <span className={styles.chDot} style={{ background: "#1d9bf0" }} />
-                  {ct.tweetUrl
-                    ? <a className={styles.commUsername} href={ct.tweetUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>@{ct.username}</a>
-                    : <span className={styles.commUsername}>@{ct.username}</span>
-                  }
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                  {ch} · {n}
+                </span>
+              );
+            })}
+        </div>
+      </div>
 
-        {/* ── Discord image grid ───────────────────────────────────────────── */}
-        <div className={styles.imgGrid}>
-          {visibleImgs.map((img, i) => {
-            const col = channelColors[img.channel] || "#888";
-            return (
+      {/* ── Official milestones */}
+      {hasMilestones && (
+        <div className={styles.tweetSection}>
+          <div className={`${styles.tweetSectionLabel} ${styles.labelMilestone}`}>
+            ★ official milestone
+          </div>
+          <div className={styles.embedGrid}>
+            {weekData.milestones.map((m, i) => (
+              <TweetEmbed key={i} url={m.url} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Artist work */}
+      {hasArtist && (
+        <div className={styles.tweetSection}>
+          <div className={`${styles.tweetSectionLabel} ${styles.labelArtist}`}>
+            🎨 artist work
+          </div>
+          <div className={styles.embedGrid}>
+            {weekData.artistTweets.map((a, i) => (
+              <TweetEmbed key={i} url={a.url} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Community highlights */}
+      {hasHighlights && (
+        <div className={styles.tweetSection}>
+          <div className={`${styles.tweetSectionLabel} ${styles.labelHighlight}`}>
+            💬 community highlight
+          </div>
+          <div className={styles.embedGrid}>
+            {weekData.highlights.map((h, i) => (
+              <TweetEmbed key={i} url={h.url} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Community tweets (memes) */}
+      {weekData.commTweets?.length > 0 && (
+        <div style={{ marginBottom: 16 }}>
+          <div className={styles.commLabel}>
+            <span className={styles.commDot} />
+            {weekData.commTweets.length} community tweet{weekData.commTweets.length !== 1 ? "s" : ""}
+          </div>
+          <div className={styles.imgGrid}>
+            {weekData.commTweets.map((ct, i) => (
               <div
                 key={i}
-                className={styles.imgCard}
-                onClick={() => onImageClick(imgUrl(img.file))}
+                className={`${styles.imgCard} ${styles.commCard}`}
+                onClick={() => onImageClich(imgUrl(ct.file))}
               >
-                <img
-                  src={imgUrl(img.file)}
-                  alt=""
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.closest(`.${styles.imgCard}`).style.display = "none"; }}
-                />
-                <span className={styles.chDot} style={{ background: col }} />
+                <img src={imgUrl(ct.file)} alt={`@${ct.username}`} loading="lazy" />
+                <span className={styles.chDot} style={{ background: "#1d9bf0" }} />
+                {ct.tweetUrl
+                  ? <a className={styles.commUsername} href={ct.tweetUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>@{ct.username}</a>
+                  : <span className={styles.commUsername}>@{ct.username}</span>
+                }
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
+      )}
 
-        {!showAll && hiddenCount > 0 && (
-          <button
-            className={styles.showMore}
-            onClick={(e) => { e.stopPropagation(); setShowAll(true); }}
-          >
-            + {hiddenCount} more images
-          </button>
-        )}
-      </div>
+      {/* ── Discord image grid */}
+      {allImgs.length > 0 && (
+        <>
+          <div className={styles.imgGrid}>
+            {visImgs.map((img, i) => {
+              const col = channelColors[img.channel] || "#888";
+              return (
+                <div
+                  key={i}
+                  className={styles.imgCard}
+                  onClick={() => onImageClick(imgUrl(img.file))}
+                >
+                  <img
+                    src={imgUrl(img.file)}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.closest("." + styles.imgCard).style.display = "none"; }}
+                  />
+                  <span className={styles.chDot} style={{ background: col }} />
+                </div>
+              );
+            })}
+          </div>
+          {!showAll && hiddenCnt > 0 && (
+            <button
+              className={styles.showMore}
+              onClick={() => setShowAll(true)}
+            >
+              + {hiddenCnt} more images
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
 
 // ── Main Chronicle component ──────────────────────────────────────────────────
 export default function MidevilsChronicle() {
-  const [data,           setData]           = useState(null);
-  const [loading,        setLoading]        = useState(true);
-  const [error,          setError]          = useState(null);
-  const [searchQ,        setSearchQ]        = useState("");
-  const [activeChannels, setActiveChannels] = useState(new Set());
-  const [highlightIdx,   setHighlightIdx]   = useState(-1);
-  const [lightboxSrc,    setLightboxSrc]    = useState(null);
-  const [highlightedWk,  setHighlightedWk]  = useState(null);
+  const [summary,       setSummary]       = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [selectedWeek,  setSelectedWeek]  = useState(null);  // week key string
+  const [selectedIdx,   setSelectedIdx]   = useState(-1);
+  const [lightboxSrc,   setLightboxSrc]   = useState(null);
 
-  // Load Twitter widget script once. TweetEmbed components call createTweet()
-  // individually — no need for a global widgets.load() call.
+  const weekListRef   = useRef(null);
+  const contentRef    = useRef(null);
+
+  // Load Twitter widget script once
   useEffect(() => {
     if (document.querySelector('script[src*="platform.twitter.com"]')) return;
     const s = document.createElement("script");
-    s.src     = "https://platform.twitter.com/widgets.js";
-    s.async   = true;
+    s.src = "https://platform.twitter.com/widgets.js";
+    s.async = true;
     s.charset = "utf-8";
     document.body.appendChild(s);
   }, []);
 
-  // Fetch timeline data
+  // Fetch summary on mount
   useEffect(() => {
     fetch("/api/midevils/timeline")
       .then((r) => {
@@ -327,9 +398,14 @@ export default function MidevilsChronicle() {
         return r.json();
       })
       .then((d) => {
-        setData(d);
-        setActiveChannels(new Set(Object.keys(d.channelColors)));
+        setSummary(d);
         setLoading(false);
+        // Default: select the most recent week
+        if (d.weeks?.length) {
+          const lastIdx = d.weeks.length - 1;
+          setSelectedIdx(lastIdx);
+          setSelectedWeek(d.weeks[lastIdx].week);
+        }
       })
       .catch((e) => {
         setError(e.message);
@@ -337,25 +413,28 @@ export default function MidevilsChronicle() {
       });
   }, []);
 
-  // Pulse bar click: scroll to week and highlight
+  // Pulse click: select week + scroll list to it
   const handleBarClick = useCallback((idx) => {
-    if (!data) return;
-    setHighlightIdx(idx);
-    const wk = data.weeks[idx].week;
-    setHighlightedWk(wk);
-    const el = document.getElementById(`wk-${wk}`);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    setTimeout(() => setHighlightedWk(null), 2000);
-  }, [data]);
+    if (!summary?.weeks) return;
+    const wk = summary.weeks[idx];
+    setSelectedIdx(idx);
+    setSelectedWeek(wk.week);
+    // Scroll week list row into view
+    const row = weekListRef.current?.querySelector(`[data-wk="${wk.week}"]`);
+    if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    // On mobile: scroll content pane into view
+    if (window.innerWidth < 900) {
+      contentRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [summary]);
 
-  // Channel filter toggle
-  const toggleChannel = useCallback((ch) => {
-    setActiveChannels((prev) => {
-      const next = new Set(prev);
-      if (next.has(ch)) next.delete(ch);
-      else next.add(ch);
-      return next;
-    });
+  const handleWeekSelect = useCallback((wk, idx) => {
+    setSelectedWeek(wk);
+    setSelectedIdx(idx);
+    // On mobile scroll to content
+    if (window.innerWidth < 900) {
+      setTimeout(() => contentRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    }
   }, []);
 
   // Keyboard close lightbox
@@ -364,34 +443,6 @@ export default function MidevilsChronicle() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-
-  // Filtered months: apply search + channel filters to images
-  const filteredMonths = useMemo(() => {
-    if (!data) return [];
-    const q = searchQ.toLowerCase().trim();
-    return data.months.map((month) => ({
-      ...month,
-      weeks: month.weeks
-        .map((week) => {
-          const imgs = week.images.filter(
-            (img) =>
-              activeChannels.has(img.channel) &&
-              (!q ||
-                img.file.toLowerCase().includes(q) ||
-                img.channel.toLowerCase().includes(q) ||
-                (img.username ?? "").toLowerCase().includes(q) ||
-                (img.author ?? "").toLowerCase().includes(q))
-          );
-          return { ...week, images: imgs };
-        })
-        .filter((w) => w.images.length > 0 || w.milestones.length > 0 || w.artistTweets?.length > 0 || w.highlights?.length > 0),
-    })).filter((m) => m.weeks.length > 0);
-  }, [data, searchQ, activeChannels]);
-
-  const totalVisible = useMemo(
-    () => filteredMonths.reduce((s, m) => s + m.weeks.reduce((ws, w) => ws + w.images.length, 0), 0),
-    [filteredMonths]
-  );
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -408,62 +459,33 @@ export default function MidevilsChronicle() {
             They&rsquo;re only half evil.<br />
             The MidEvils community pulse — memes shared, tweets that hit, weeks that went off.
           </p>
-          {data && (
+          {summary && (
             <div className={styles.statsRow}>
               <div className={styles.stat}>
-                <div className={styles.statN}>{data.totalImages.toLocaleString()}</div>
+                <div className={styles.statN}>{summary.totalImages?.toLocaleString()}</div>
                 <div className={styles.statL}>Community Moments</div>
               </div>
               <div className={styles.stat}>
-                <div className={styles.statN}>{data.weeks.length}</div>
+                <div className={styles.statN}>{summary.weeks?.length}</div>
                 <div className={styles.statL}>Active Weeks</div>
               </div>
               <div className={styles.stat}>
-                <div className={styles.statN}>{data.totalMilestones ?? 0}</div>
+                <div className={styles.statN}>{summary.totalMilestones ?? 0}</div>
                 <div className={styles.statL}>Milestone Tweets</div>
               </div>
               <div className={styles.stat}>
-                <div className={styles.statN}>{data.totalArtist ?? 0}</div>
+                <div className={styles.statN}>{summary.totalArtist ?? 0}</div>
                 <div className={styles.statL}>Artist Posts</div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Loading / error states */}
+        {/* Loading / error */}
         {loading && (
-          <div style={{ padding: "0 36px 60px" }}>
-            {/* Skeleton pulse bar */}
-            <div style={{
-              height: 80, borderRadius: 8, background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
-              backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
-              margin: "32px 0 40px",
-            }} />
-            {/* Skeleton week cards */}
-            {[1,2,3].map(i => (
-              <div key={i} style={{ marginBottom: 28 }}>
-                <div style={{
-                  height: 18, width: "12%", borderRadius: 4, marginBottom: 16,
-                  background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
-                  backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
-                }} />
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))", gap: 8 }}>
-                  {Array.from({ length: 8 + i * 2 }).map((_, j) => (
-                    <div key={j} style={{
-                      height: 160, borderRadius: 6,
-                      background: "linear-gradient(90deg,#1a1a2e 25%,#22223a 50%,#1a1a2e 75%)",
-                      backgroundSize: "200% 100%", animation: "skeletonShimmer 1.4s infinite",
-                    }} />
-                  ))}
-                </div>
-              </div>
-            ))}
-            <style>{`
-              @keyframes skeletonShimmer {
-                0%   { background-position: 200% 0 }
-                100% { background-position: -200% 0 }
-              }
-            `}</style>
+          <div style={{ padding: "40px 36px", textAlign: "center", color: "#888" }}>
+            <div className={styles.weekContentSpinner} style={{ margin: "0 auto 16px" }} />
+            Loading chronicle…
           </div>
         )}
         {error && (
@@ -472,18 +494,18 @@ export default function MidevilsChronicle() {
           </div>
         )}
 
-        {data && (
+        {summary && (
           <>
-            {/* Pulse graph */}
+            {/* Pulse graph — sticky at top */}
             <div className={styles.pulseSection}>
               <div className={styles.pulseHeader}>
                 <span className={styles.pulseLabel}>Community Activity Pulse</span>
                 <div className={styles.pulseLegend}>
                   {[
-                    ["#a070f0", "Milestone week"],
-                    ["#c8832a", "High engagement"],
-                    ["#7a4a20", "Active week"],
-                    ["#3a2a18", "Low activity"],
+                    ["#7c5cfc", "Milestone"],
+                    ["#c8832a", "High activity"],
+                    ["#999",    "Active"],
+                    ["#d0d0d0", "Quiet"],
                   ].map(([color, label]) => (
                     <span key={label} className={styles.legendItem}>
                       <span className={styles.legendDot} style={{ background: color }} />
@@ -493,71 +515,62 @@ export default function MidevilsChronicle() {
                 </div>
               </div>
               <PulseGraph
-                weeks={data.weeks}
-                maxScore={data.maxScore}
-                highlightIdx={highlightIdx}
+                weeks={summary.weeks}
+                maxScore={summary.maxScore}
+                selectedIdx={selectedIdx}
                 onBarClick={handleBarClick}
               />
               <div className={styles.pulseFooter}>
-                <span className={styles.pulseDate}>
-                  {data.weeks[0]?.weekLabel ?? ""}
-                </span>
-                <span className={styles.pulseHint}>Click any bar to jump to that week</span>
-                <span className={styles.pulseDate}>
-                  {data.weeks[data.weeks.length - 1]?.weekLabel ?? ""}
-                </span>
+                <span className={styles.pulseDate}>{summary.weeks[0]?.weekLabel ?? ""}</span>
+                <span className={styles.pulseHint}>Click any bar to view that week</span>
+                <span className={styles.pulseDate}>{summary.weeks[summary.weeks.length - 1]?.weekLabel ?? ""}</span>
               </div>
             </div>
 
-            {/* Toolbar */}
-            <div className={styles.toolbar}>
-              <input
-                className={styles.search}
-                type="text"
-                placeholder="Search images, channels…"
-                autoComplete="off"
-                value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
-              />
-              <div className={styles.chFilters}>
-                {Object.entries(data.channelColors).map(([ch, color]) => (
-                  <button
-                    key={ch}
-                    className={`${styles.chBtn}${activeChannels.has(ch) ? " " + styles.active : ""}`}
-                    style={{ color, borderColor: color }}
-                    onClick={() => toggleChannel(ch)}
-                  >
-                    {ch}
-                  </button>
-                ))}
-              </div>
-              <span className={styles.toolbarCount}>
-                {totalVisible.toLocaleString()} images
-              </span>
-            </div>
+            {/* Two-column layout */}
+            <div className={styles.splitLayout}>
 
-            {/* Timeline */}
-            <div className={styles.timeline}>
-              {filteredMonths.map((month) => (
-                <div key={month.key} className={styles.monthBlock}>
-                  <div className={styles.monthHeading}>{month.label}</div>
-                  {month.weeks.map((week) => (
-                    <WeekCard
-                      key={week.week}
-                      week={week}
-                      maxCount={data.maxCount}
-                      channelColors={data.channelColors}
-                      isHighlighted={week.week === highlightedWk}
-                      onImageClick={setLightboxSrc}
-                    />
+              {/* LEFT: scrollable week list */}
+              <div className={styles.weekListPanel} ref={weekListRef}>
+                <div className={styles.weekListInner}>
+                  {summary.months?.map((month) => (
+                    <div key={month.key} className={styles.weekListMonth}>
+                      <div className={styles.weekListMonthLabel}>{month.label}</div>
+                      {month.weeks.map((wk) => {
+                        const weekObj = summary.weeks.find((w) => w.week === wk);
+                        if (!weekObj) return null;
+                        const idx = summary.weeks.indexOf(weekObj);
+                        return (
+                          <WeekRow
+                            key={wk}
+                            week={weekObj}
+                            maxScore={summary.maxScore}
+                            channelColors={summary.channelColors}
+                            isSelected={selectedWeek === wk}
+                            onClick={() => handleWeekSelect(wk, idx)}
+                          />
+                        );
+                      })}
+                    </div>
                   ))}
                 </div>
-              ))}
-              {filteredMonths.length === 0 && (
-                <div style={{ padding: "60px 0", textAlign: "center", color: "#6868a0" }}>
-                  No results match your filters.
-                </div>
-              )}
+              </div>
+
+              {/* RIGHT: selected week content */}
+              <div className={styles.contentPanel} ref={contentRef}>
+                {selectedWeek ? (
+                  <WeekContent
+                    key={selectedWeek}
+                    weekKey={selectedWeek}
+                    channelColors={summary.channelColors}
+                    onImageClick={setLightboxSrc}
+                  />
+                ) : (
+                  <div className={styles.contentEmpty}>
+                    <span>← Select a week to explore its content</span>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}
