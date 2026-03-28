@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./midevils.module.css";
 
 // ── Twitter embed helper ───────────────────────────────────────────────────────
@@ -123,69 +123,6 @@ function PulseGraph({ weeks, maxScore, selectedIdx, onBarClick }) {
       className={styles.pulseCanvas}
       onClick={handleClick}
     />
-  );
-}
-
-// ── Week row in the left panel ────────────────────────────────────────────────
-function WeekRow({ week, maxScore, channelColors, isSelected, onClick }) {
-  const pct = Math.round(((week.score ?? week.count ?? 0) / Math.max(maxScore, 1)) * 100);
-  const topChannels = Object.entries(week.channels ?? {})
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
-
-  return (
-    <button
-      className={`${styles.weekRow}${isSelected ? " " + styles.weekRowSelected : ""}`}
-      onClick={onClick}
-    >
-      {/* Date + count */}
-      <div className={styles.weekRowMeta}>
-        <span className={styles.weekRowLabel}>{week.weekLabel}</span>
-        <span className={styles.weekRowCount}>{week.count} imgs</span>
-      </div>
-
-      {/* Activity bar */}
-      <div className={styles.weekRowBarWrap}>
-        <div
-          className={styles.weekRowBar}
-          style={{ width: `${pct}%`, background: week.hasMilestones ? "#7c5cfc" : "#444" }}
-        />
-      </div>
-
-      {/* Channel chips + badges */}
-      <div className={styles.weekRowTags}>
-        {topChannels.map(([ch]) => {
-          const col = channelColors[ch] || "#888";
-          return (
-            <span
-              key={ch}
-              className={styles.weekRowChip}
-              style={{ background: `${col}22`, color: col, borderColor: `${col}44` }}
-            >
-              {ch}
-            </span>
-          );
-        })}
-        {week.hasOfficialTweets && <span className={styles.badgeMilestone}>★</span>}
-        {week.hasArtist         && <span className={styles.badgeArtist}>🎨</span>}
-      </div>
-
-      {/* Preview thumbnails */}
-      {week.previews?.length > 0 && (
-        <div className={styles.weekRowPreviews}>
-          {week.previews.slice(0, 3).map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt=""
-              className={styles.weekRowThumb}
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.display = "none"; }}
-            />
-          ))}
-        </div>
-      )}
-    </button>
   );
 }
 
@@ -354,15 +291,13 @@ function WeekContent({ weekKey, channelColors, onImageClick }) {
 
 // ── Main Chronicle component ──────────────────────────────────────────────────
 export default function MidevilsChronicle() {
-  const [summary,       setSummary]       = useState(null);
-  const [loading,       setLoading]       = useState(true);
-  const [error,         setError]         = useState(null);
-  const [selectedWeek,  setSelectedWeek]  = useState(null);  // week key string
-  const [selectedIdx,   setSelectedIdx]   = useState(-1);
-  const [lightboxSrc,   setLightboxSrc]   = useState(null);
+  const [summary,      setSummary]      = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+  const [selectedIdx,  setSelectedIdx]  = useState(-1);
+  const [lightboxSrc,  setLightboxSrc]  = useState(null);
 
-  const weekListRef   = useRef(null);
-  const contentRef    = useRef(null);
+  const selectedWeek = summary?.weeks?.[selectedIdx]?.week ?? null;
 
   // Load Twitter widget script once
   useEffect(() => {
@@ -384,49 +319,35 @@ export default function MidevilsChronicle() {
       .then((d) => {
         setSummary(d);
         setLoading(false);
-        // Default: select the most recent week
-        if (d.weeks?.length) {
-          const lastIdx = d.weeks.length - 1;
-          setSelectedIdx(lastIdx);
-          setSelectedWeek(d.weeks[lastIdx].week);
-        }
+        if (d.weeks?.length) setSelectedIdx(d.weeks.length - 1);
       })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
+      .catch((e) => { setError(e.message); setLoading(false); });
   }, []);
 
-  // Pulse click: select week + scroll list to it
   const handleBarClick = useCallback((idx) => {
-    if (!summary?.weeks) return;
-    const wk = summary.weeks[idx];
     setSelectedIdx(idx);
-    setSelectedWeek(wk.week);
-    // Scroll week list row into view
-    const row = weekListRef.current?.querySelector(`[data-wk="${wk.week}"]`);
-    if (row) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    // On mobile: scroll content pane into view
-    if (window.innerWidth < 900) {
-      contentRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+  }, []);
+
+  const handlePrev = useCallback(() => {
+    setSelectedIdx((i) => Math.max(0, i - 1));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setSelectedIdx((i) => Math.min((summary?.weeks?.length ?? 1) - 1, i + 1));
   }, [summary]);
 
-  const handleWeekSelect = useCallback((wk, idx) => {
-    setSelectedWeek(wk);
-    setSelectedIdx(idx);
-    // On mobile scroll to content
-    if (window.innerWidth < 900) {
-      setTimeout(() => contentRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
-    }
-  }, []);
-
-  // Keyboard close lightbox
+  // Keyboard: arrow keys to navigate weeks, Escape to close lightbox
   useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") setLightboxSrc(null); };
+    const handler = (e) => {
+      if (e.key === "Escape")      setLightboxSrc(null);
+      if (e.key === "ArrowLeft")   handlePrev();
+      if (e.key === "ArrowRight")  handleNext();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [handlePrev, handleNext]);
+
+  const totalWeeks = summary?.weeks?.length ?? 0;
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -450,7 +371,7 @@ export default function MidevilsChronicle() {
                 <div className={styles.statL}>Community Moments</div>
               </div>
               <div className={styles.stat}>
-                <div className={styles.statN}>{summary.weeks?.length}</div>
+                <div className={styles.statN}>{totalWeeks}</div>
                 <div className={styles.statL}>Active Weeks</div>
               </div>
               <div className={styles.stat}>
@@ -507,55 +428,47 @@ export default function MidevilsChronicle() {
               <div className={styles.pulseFooter}>
                 <span className={styles.pulseDate}>{summary.weeks[0]?.weekLabel ?? ""}</span>
                 <span className={styles.pulseHint}>Click any bar to view that week</span>
-                <span className={styles.pulseDate}>{summary.weeks[summary.weeks.length - 1]?.weekLabel ?? ""}</span>
+                <span className={styles.pulseDate}>{summary.weeks[totalWeeks - 1]?.weekLabel ?? ""}</span>
               </div>
             </div>
 
-            {/* Two-column layout */}
-            <div className={styles.splitLayout}>
-
-              {/* LEFT: scrollable week list */}
-              <div className={styles.weekListPanel} ref={weekListRef}>
-                <div className={styles.weekListInner}>
-                  {summary.months?.map((month) => (
-                    <div key={month.key} className={styles.weekListMonth}>
-                      <div className={styles.weekListMonthLabel}>{month.label}</div>
-                      {month.weeks.map((wk) => {
-                        const weekObj = summary.weeks.find((w) => w.week === wk);
-                        if (!weekObj) return null;
-                        const idx = summary.weeks.indexOf(weekObj);
-                        return (
-                          <WeekRow
-                            key={wk}
-                            week={weekObj}
-                            maxScore={summary.maxScore}
-                            channelColors={summary.channelColors}
-                            isSelected={selectedWeek === wk}
-                            onClick={() => handleWeekSelect(wk, idx)}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
+            {/* Week navigator */}
+            <div className={styles.weekNav}>
+              <button
+                className={styles.weekNavArrow}
+                onClick={handlePrev}
+                disabled={selectedIdx <= 0}
+                aria-label="Previous week"
+              >
+                ‹
+              </button>
+              <div className={styles.weekNavInfo}>
+                <span className={styles.weekNavLabel}>
+                  {summary.weeks[selectedIdx]?.weekLabel ?? ""}
+                </span>
+                <span className={styles.weekNavCounter}>
+                  Week {selectedIdx + 1} of {totalWeeks}
+                </span>
               </div>
-
-              {/* RIGHT: selected week content */}
-              <div className={styles.contentPanel} ref={contentRef}>
-                {selectedWeek ? (
-                  <WeekContent
-                    key={selectedWeek}
-                    weekKey={selectedWeek}
-                    channelColors={summary.channelColors}
-                    onImageClick={setLightboxSrc}
-                  />
-                ) : (
-                  <div className={styles.contentEmpty}>
-                    <span>← Select a week to explore its content</span>
-                  </div>
-                )}
-              </div>
+              <button
+                className={styles.weekNavArrow}
+                onClick={handleNext}
+                disabled={selectedIdx >= totalWeeks - 1}
+                aria-label="Next week"
+              >
+                ›
+              </button>
             </div>
+
+            {/* Full-width week content */}
+            {selectedWeek && (
+              <WeekContent
+                key={selectedWeek}
+                weekKey={selectedWeek}
+                channelColors={summary.channelColors}
+                onImageClick={setLightboxSrc}
+              />
+            )}
           </>
         )}
 
