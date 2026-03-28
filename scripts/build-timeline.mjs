@@ -114,16 +114,13 @@ function build() {
     });
   }
 
-  const timelineStart = discord.reduce((min, m) => {
-    if (!m.downloaded || !m.timestamp) return min;
-    const dt = parseDate(m.timestamp);
-    return dt && (!min || dt < min) ? dt : min;
-  }, null);
+  // Clamp artist tweets to the MidEvils project window (Aug 1 2025 onward)
+  const timelineStart = new Date('2025-08-01T00:00:00Z');
 
   const artistByWeek = new Map();
   for (const a of artistTwts) {
     const dt = parseDate(a.date); if (!dt) continue;
-    if (timelineStart && dt < timelineStart) continue;
+    if (dt < timelineStart) continue;
     const wk = weekKey(dt);
     if (!artistByWeek.has(wk)) artistByWeek.set(wk, []);
     artistByWeek.get(wk).push({
