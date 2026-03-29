@@ -538,6 +538,8 @@
     "r3_east_0": "east_s1",
     "r3_midwest_0": "midwest_s1",
     "r3_east_1": "east_s2",
-    "r3_midwest_1": "midwest_s6"
+    "r3_midwest_1": "midwest_s6",
+    "r4_west": "west_s1",
+    "r4_south": "south_s3"
   }
 }
