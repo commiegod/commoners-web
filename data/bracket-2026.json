@@ -541,6 +541,7 @@
     "r3_midwest_1": "midwest_s6",
     "r4_west": "west_s1",
     "r4_south": "south_s3",
-    "r4_midwest": "midwest_s1"
+    "r4_midwest": "midwest_s1",
+    "r4_east": "east_s2"
   }
 }
