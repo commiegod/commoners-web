@@ -5,10 +5,10 @@
   "ffPairings": [
     [
       "east",
-      "west"
+      "south"
     ],
     [
-      "south",
+      "west",
       "midwest"
     ]
   ],

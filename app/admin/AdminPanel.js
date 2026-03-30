@@ -864,7 +864,7 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
 
   function getFinalFourGames() {
     if (!bracket) return [];
-    const pairings = bracket.ffPairings || [["east","west"],["south","midwest"]];
+    const pairings = bracket.ffPairings || [["east","south"],["west","midwest"]];
     return pairings.map(([r1, r2], i) => {
       const g1 = `r4_${r1}`, g2 = `r4_${r2}`;
       const w1 = resultsEdits[g1], w2 = resultsEdits[g2];
