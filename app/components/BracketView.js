@@ -165,23 +165,81 @@ function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, f
   );
 }
 
+// ── Final Four game metadata ───────────────────────────────────────────────────
+const FF_GAME_INFO = {
+  ff_0:  { date: "Apr 4 · 6:09 PM ET",  tv: "TBS/truTV", spread: "ILL -2.5"  },
+  ff_1:  { date: "Apr 4 · 8:49 PM ET",  tv: "TBS/truTV", spread: "MICH -1.5" },
+  champ: { date: "Apr 7 · 9:20 PM ET",  tv: "CBS" },
+};
+
+// ── FF pick split bar ──────────────────────────────────────────────────────────
+function FFPickSplit({ gameId, bracket, results, picks, pickDistribution }) {
+  const { teamA, teamB } = getGameTeams(gameId, bracket, results, picks);
+  const gameDist = pickDistribution?.[gameId];
+  const total = gameDist?.total || 0;
+  if (!total || !teamA || !teamB) return null;
+  const pctA = Math.round(((gameDist[teamA.id] || 0) / total) * 100);
+  const pctB = 100 - pctA;
+  const nameA = teamA.shortName ?? teamA.name;
+  const nameB = teamB.shortName ?? teamB.name;
+  return (
+    <div className="w-full mt-1">
+      <div className="flex justify-between text-[10px] text-muted mb-0.5">
+        <span>{nameA} {pctA}%</span>
+        <span>{pctB}% {nameB}</span>
+      </div>
+      <div className="flex h-1.5 rounded overflow-hidden w-full">
+        <div className="bg-gold transition-all" style={{ width: `${pctA}%` }} />
+        <div className="bg-border transition-all" style={{ width: `${pctB}%` }} />
+      </div>
+      <p className="text-[9px] text-muted text-center mt-0.5">{total} picks</p>
+    </div>
+  );
+}
+
 // ── Center Final Four + Championship column ───────────────────────────────────
 
 function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-6 px-4 min-w-[160px]">
-      <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">Final Four</p>
+    <div className="flex flex-col items-center justify-center gap-4 px-4 min-w-[172px] max-w-[190px]">
+
+      {/* FF Game 1 */}
+      <div className="flex flex-col items-center w-full gap-1">
+        <p className="text-xs text-muted tracking-widest uppercase text-center font-semibold">Final Four</p>
+        <div className="text-center mb-1">
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.ff_0.date}</p>
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.ff_0.tv}
+            <span className="ml-1.5 text-[10px] text-gold font-semibold">{FF_GAME_INFO.ff_0.spread}</span>
+          </p>
+        </div>
         <Matchup gameId="ff_0" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <FFPickSplit gameId="ff_0" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
-      <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-gold tracking-widest uppercase text-center mb-1 font-semibold">Championship</p>
+
+      {/* Championship */}
+      <div className="flex flex-col items-center w-full gap-1">
+        <p className="text-xs text-gold tracking-widest uppercase text-center font-semibold">Championship</p>
+        <div className="text-center mb-1">
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.champ.date}</p>
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.champ.tv}</p>
+        </div>
         <Matchup gameId="champ" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <FFPickSplit gameId="champ" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
-      <div className="flex flex-col items-center gap-1">
-        <p className="text-xs text-muted tracking-widest uppercase text-center mb-1">Final Four</p>
+
+      {/* FF Game 2 */}
+      <div className="flex flex-col items-center w-full gap-1">
+        <p className="text-xs text-muted tracking-widest uppercase text-center font-semibold">Final Four</p>
+        <div className="text-center mb-1">
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.ff_1.date}</p>
+          <p className="text-[10px] text-muted">{FF_GAME_INFO.ff_1.tv}
+            <span className="ml-1.5 text-[10px] text-gold font-semibold">{FF_GAME_INFO.ff_1.spread}</span>
+          </p>
+        </div>
         <Matchup gameId="ff_1" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <FFPickSplit gameId="ff_1" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
+
     </div>
   );
 }
