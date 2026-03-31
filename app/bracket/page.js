@@ -227,6 +227,22 @@ export default function BracketPage() {
                   <span className="text-muted">{entries.length} entries submitted.</span>
                 </div>
               )}
+              {bracket.ff_repick_open && (
+                <div className="mt-3 border border-amber-400/60 bg-amber-50/60 rounded px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">⚠ Final Four Re-Pick Open</p>
+                    <p className="text-xs text-amber-800 mt-0.5">
+                      The bracket matchups were corrected. Re-submit your Final Four picks before Apr 4 tipoff.
+                    </p>
+                  </div>
+                  <Link
+                    href="/bracket/repick"
+                    className="bg-amber-500 text-white font-semibold text-xs px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
+                  >
+                    Re-Pick Final Four →
+                  </Link>
+                </div>
+              )}
               {bracket.status === "complete" && (
                 <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
                   Tournament complete. Final standings below.
@@ -272,12 +288,24 @@ export default function BracketPage() {
                       className="flex items-center justify-between px-4 py-2.5 hover:bg-card transition-colors"
                     >
                       <span className="text-sm text-gold font-medium">{entry.username}</span>
-                      {tournamentStarted && (
-                        <span className="text-xs text-muted">{entry.score} pts</span>
-                      )}
+                      <div className="flex items-center gap-3">
+                        {bracket?.ff_repick_open && !entry.picks?.ff_0 && (
+                          <span className="text-xs text-amber-600 font-medium">⚠ FF picks needed</span>
+                        )}
+                        {tournamentStarted && (
+                          <span className="text-xs text-muted">{entry.score} pts</span>
+                        )}
+                      </div>
                     </Link>
                   ))}
                 </div>
+                {bracket?.ff_repick_open && mine.some((e) => !e.picks?.ff_0) && (
+                  <div className="mt-2">
+                    <Link href="/bracket/repick" className="text-xs text-amber-600 hover:underline font-medium">
+                      Re-pick your Final Four →
+                    </Link>
+                  </div>
+                )}
               </div>
             );
           })()}

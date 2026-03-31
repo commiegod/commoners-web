@@ -64,10 +64,7 @@
         "r2_midwest_0": "midwest_s1",
         "r3_midwest_0": "midwest_s1",
         "r3_midwest_1": "midwest_s3",
-        "r4_midwest": "midwest_s3",
-        "ff_0": "east_s2",
-        "ff_1": "south_s6",
-        "champ": "south_s6"
+        "r4_midwest": "midwest_s3"
       },
       "tiebreaker": 155,
       "submittedAt": 1773616234943
@@ -136,10 +133,7 @@
         "r3_south_0": "south_s1",
         "r3_south_1": "south_s6",
         "r4_south": "south_s1",
-        "r4_midwest": "midwest_s3",
-        "ff_0": "west_s1",
-        "ff_1": "south_s1",
-        "champ": "west_s1"
+        "r4_midwest": "midwest_s3"
       },
       "tiebreaker": 139,
       "submittedAt": 1773627079904
@@ -208,10 +202,7 @@
         "r2_midwest_1": "midwest_s4",
         "r2_midwest_0": "midwest_s1",
         "r3_midwest_0": "midwest_s1",
-        "r4_midwest": "midwest_s1",
-        "ff_1": "midwest_s1",
-        "ff_0": "west_s1",
-        "champ": "midwest_s1"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 137,
       "submittedAt": 1773699180502
@@ -280,10 +271,7 @@
         "r2_midwest_0": "midwest_s1",
         "r3_midwest_0": "midwest_s1",
         "r3_midwest_1": "midwest_s2",
-        "r4_midwest": "midwest_s1",
-        "ff_1": "midwest_s1",
-        "ff_0": "east_s1",
-        "champ": "east_s1"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 135,
       "submittedAt": 1773769968519
@@ -352,10 +340,7 @@
         "r1_midwest_5": "midwest_s3",
         "r2_midwest_3": "midwest_s2",
         "r3_midwest_1": "midwest_s2",
-        "r4_midwest": "midwest_s1",
-        "ff_1": "midwest_s1",
-        "ff_0": "west_s4",
-        "champ": "west_s4"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 130,
       "submittedAt": 1773785566980
@@ -424,10 +409,7 @@
         "r2_midwest_3": "midwest_s2",
         "r3_midwest_1": "midwest_s2",
         "r3_midwest_0": "midwest_s1",
-        "r4_midwest": "midwest_s1",
-        "ff_0": "east_s1",
-        "ff_1": "midwest_s1",
-        "champ": "east_s1"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 137,
       "submittedAt": 1773872081222
@@ -496,10 +478,7 @@
         "r2_midwest_3": "midwest_s2",
         "r2_midwest_2": "midwest_s6",
         "r3_midwest_1": "midwest_s2",
-        "r4_midwest": "midwest_s1",
-        "ff_0": "east_s1",
-        "champ": "east_s1",
-        "ff_1": "midwest_s1"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 137,
       "submittedAt": 1773873418988
@@ -568,10 +547,7 @@
         "r2_east_3": "east_s7",
         "r3_east_1": "east_s3",
         "r3_east_0": "east_s1",
-        "r4_east": "east_s3",
-        "ff_1": "midwest_s1",
-        "ff_0": "east_s3",
-        "champ": "midwest_s1"
+        "r4_east": "east_s3"
       },
       "tiebreaker": 154,
       "submittedAt": 1773876863476
@@ -640,10 +616,7 @@
         "r2_midwest_3": "midwest_s7",
         "r3_midwest_1": "midwest_s11",
         "r3_midwest_0": "midwest_s1",
-        "r4_midwest": "midwest_s1",
-        "ff_0": "east_s1",
-        "ff_1": "midwest_s1",
-        "champ": "midwest_s1"
+        "r4_midwest": "midwest_s1"
       },
       "tiebreaker": 98,
       "submittedAt": 1773879732223
@@ -683,7 +656,6 @@
         "r3_west_1": "west_s6",
         "r3_west_0": "west_s1",
         "r4_west": "west_s6",
-        "ff_0": "east_s4",
         "r1_south_0": "south_s1",
         "r1_south_1": "south_s8",
         "r1_south_2": "south_s5",
@@ -713,9 +685,7 @@
         "r2_midwest_0": "midwest_s1",
         "r3_midwest_0": "midwest_s1",
         "r3_midwest_1": "midwest_s3",
-        "r4_midwest": "midwest_s3",
-        "ff_1": "midwest_s3",
-        "champ": "east_s4"
+        "r4_midwest": "midwest_s3"
       },
       "tiebreaker": 160,
       "submittedAt": 1773884863242
@@ -770,7 +740,6 @@
         "r3_midwest_1": "midwest_s2",
         "r3_midwest_0": "midwest_s1",
         "r4_midwest": "midwest_s1",
-        "ff_1": "midwest_s1",
         "r1_west_7": "west_s2",
         "r1_west_6": "west_s7",
         "r1_west_5": "west_s3",
@@ -785,9 +754,7 @@
         "r2_west_3": "west_s2",
         "r3_west_1": "west_s2",
         "r3_west_0": "west_s1",
-        "r4_west": "west_s1",
-        "ff_0": "west_s1",
-        "champ": "west_s1"
+        "r4_west": "west_s1"
       },
       "tiebreaker": 139,
       "submittedAt": 1773884977413
@@ -856,10 +823,7 @@
         "r3_midwest_0": "midwest_s1",
         "r3_midwest_1": "midwest_s2",
         "r4_midwest": "midwest_s1",
-        "r4_east": "east_s1",
-        "ff_0": "east_s1",
-        "ff_1": "midwest_s1",
-        "champ": "east_s1"
+        "r4_east": "east_s1"
       },
       "tiebreaker": 168,
       "submittedAt": 1773911566302
