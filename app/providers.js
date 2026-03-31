@@ -5,19 +5,7 @@ import { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { RPC_URL } from "../lib/programClient";
-import dynamic from "next/dynamic";
-
-// Load the deep link provider as a client-only chunk so the heavy @noble crypto
-// libraries are never included in the server bundle or initial page payload.
-// Desktop users and Phantom in-app browser users pay zero cost for this.
-const PhantomDeeplinkProvider = dynamic(
-  () =>
-    import("./context/PhantomDeeplinkContext").then(
-      (m) => m.PhantomDeeplinkProvider
-    ),
-  { ssr: false, loading: () => null }
-);
-
+import { PhantomDeeplinkProvider } from "./context/PhantomDeeplinkContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 // Polyfill Buffer globally for Solana libraries that need it

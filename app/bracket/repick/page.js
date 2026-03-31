@@ -1,15 +1,12 @@
 "use client";
 
+import ConnectButton from "../../components/ConnectButton";
+
 import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-const WalletMultiButton = dynamic(
-  () =>
-    import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
 const MIDEVILS_COLLECTION = "w44WvLKRdLGye2ghhDJBxcmnWpBo31A1tCBko2G6DgW";
 const MAINNET_RPC =
@@ -399,7 +396,7 @@ export default function RepickPage() {
         </p>
         <div className="bg-card border border-border rounded px-4 py-6 text-sm text-muted max-w-sm">
           <p className="mb-4">Connect your wallet to re-pick.</p>
-          <WalletMultiButton
+          <ConnectButton
             style={{
               backgroundColor: "#1a1a1a",
               color: "#f5f5f5",

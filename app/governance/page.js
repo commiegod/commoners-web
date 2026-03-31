@@ -1,5 +1,7 @@
 "use client";
 
+import ConnectButton from "../components/ConnectButton";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -19,10 +21,6 @@ import {
 } from "../../lib/commoners";
 import proposalsData from "../../data/proposals.json";
 
-const WalletMultiButton = dynamic(
-  () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
@@ -325,7 +323,7 @@ export default function GovernancePage() {
               </span>
             ) : null
           ) : (
-            <WalletMultiButton
+            <ConnectButton
               style={{
                 backgroundColor: "transparent",
                 border: "1px solid #1a1a1a",

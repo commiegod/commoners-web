@@ -1,5 +1,7 @@
 "use client";
 
+import ConnectButton from "../../components/ConnectButton";
+
 import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -25,26 +27,7 @@ import Link from "next/link";
 import BracketView from "../../components/BracketView";
 import { allGameIds, getGameTeams, getTeamById } from "../../../lib/bracket";
 
-const WalletMultiButton = dynamic(
-  () =>
-    import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
-function ConnectButton({ style }) {
-  const dl = usePhantomDeeplink();
-  if (dl?.needsDeepLink) {
-    return (
-      <button
-        onClick={() => dl.connect()}
-        style={{ cursor: "pointer", ...style }}
-      >
-        Connect Phantom
-      </button>
-    );
-  }
-  return <WalletMultiButton style={style} />;
-}
 
 const MIDEVILS_COLLECTION = "w44WvLKRdLGye2ghhDJBxcmnWpBo31A1tCBko2G6DgW";
 const MAINNET_RPC =

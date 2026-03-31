@@ -1,5 +1,7 @@
 "use client";
 
+import ConnectButton from "../components/ConnectButton";
+
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -8,37 +10,7 @@ import Link from "next/link";
 import { getCommonerCount } from "../../lib/commoners";
 import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
 
-const WalletMultiButton = dynamic(
-  () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
-// Deep-link-aware connect button: forwards to Phantom universal link on mobile,
-// falls back to WalletMultiButton on desktop / Phantom in-app browser.
-function ConnectButton({ style }) {
-  const deeplink = usePhantomDeeplink();
-  if (deeplink?.needsDeepLink) {
-    return (
-      <button
-        onClick={() => deeplink.connect()}
-        style={{
-          backgroundColor: "transparent",
-          border: "1px solid #1a1a1a",
-          color: "#1a1a1a",
-          fontSize: "0.75rem",
-          borderRadius: "9999px",
-          padding: "0.375rem 0.75rem",
-          lineHeight: 1.5,
-          cursor: "pointer",
-          ...style,
-        }}
-      >
-        Connect Phantom
-      </button>
-    );
-  }
-  return <WalletMultiButton style={style} />;
-}
 
 function timeAgo(ts) {
   const s = Math.floor((Date.now() - ts) / 1000);

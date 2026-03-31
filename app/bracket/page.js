@@ -1,5 +1,7 @@
 "use client";
 
+import ConnectButton from "../components/ConnectButton";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,10 +10,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import BracketView from "../components/BracketView";
 import { MAX_SCORE, getTeamById } from "../../lib/bracket";
 
-const WalletMultiButton = dynamic(
-  () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
 const FF_REGIONS = ["east", "west", "south", "midwest"];
 
@@ -259,7 +257,7 @@ export default function BracketPage() {
                   <h2 className="text-sm text-muted uppercase tracking-widest mb-3">Your Entries</h2>
                   <div className="border border-border rounded bg-background px-4 py-3 flex items-center gap-3 flex-wrap">
                     <p className="text-sm text-muted">Connect your wallet to see your entries.</p>
-                    <WalletMultiButton
+                    <ConnectButton
                       style={{
                         backgroundColor: "transparent",
                         border: "1px solid #1a1a1a",

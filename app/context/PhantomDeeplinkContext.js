@@ -4,15 +4,15 @@
  * PhantomDeeplinkContext
  *
  * Manages wallet connection state for mobile users who open the site in Safari
- * or Chrome (where Phantom is not injected as window.solana).
+ * or Chrome (where Phantom is NOT injected as window.solana).
  *
- * The context detects whether deep link mode is needed, exposes connect() and
- * signMessageDeepLink() methods, and restores the session from sessionStorage
- * on every page load (since deep link flows involve full browser navigations).
- *
- * Desktop users and Phantom in-app browser users are completely unaffected —
- * needsDeepLink will be false for them and the standard WalletMultiButton flow
- * continues to work as before.
+ * Design principles:
+ *  - The context is ALWAYS statically imported (no next/dynamic) so it is
+ *    immediately available to every component that calls usePhantomDeeplink().
+ *  - Lightweight helpers (device detection, sessionStorage) are inlined here.
+ *  - Heavy crypto (@noble/curves, @noble/ciphers) is lazily imported inside
+ *    connect() and signMessageDeepLink() — only loaded when actually needed.
+ *  - Desktop / Phantom in-app browser users are completely unaffected.
  */
 
 import {
@@ -23,16 +23,45 @@ import {
   useCallback,
 } from "react";
 
-import {
-  buildConnectURL,
-  buildSignMessageURL,
-  computeBoxKey,
-  decryptPayload,
-  loadDeeplinkSession,
-  saveDeeplinkSession,
-  clearDeeplinkSession,
-  needsPhantomDeepLink,
-} from "../../lib/phantomDeeplink";
+// ─── Inline lightweight helpers (no crypto imports) ───────────────────────────
+
+const SS = "phantom_dl_";
+
+function _isMobileWithoutPhantom() {
+  if (typeof window === "undefined") return false;
+  return (
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) &&
+    !window.solana?.isPhantom
+  );
+}
+
+function _loadSession() {
+  try {
+    const publicKey = sessionStorage.getItem(SS + "public_key");
+    const session = sessionStorage.getItem(SS + "session");
+    const boxKeyRaw = sessionStorage.getItem(SS + "box_key");
+    if (!publicKey || !session || !boxKeyRaw) return null;
+    return {
+      publicKey,
+      session,
+      boxKey: new Uint8Array(JSON.parse(boxKeyRaw)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function _saveSession({ publicKey, session, boxKey }) {
+  sessionStorage.setItem(SS + "public_key", publicKey);
+  sessionStorage.setItem(SS + "session", session);
+  sessionStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
+}
+
+function _clearSession() {
+  ["public_key", "session", "phantom_pubkey", "box_key", "keypair"].forEach(
+    (k) => sessionStorage.removeItem(SS + k)
+  );
+}
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -41,85 +70,40 @@ const PhantomDeeplinkContext = createContext(null);
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function PhantomDeeplinkProvider({ children }) {
-  // null = not yet determined (SSR), false = standard path, true = deep link needed
   const [needsDeepLink, setNeedsDeepLink] = useState(false);
-
-  // Active session — set after a successful connect callback
-  // Shape: { publicKey: string, session: string, phantomPublicKey: string, boxKey: Uint8Array }
   const [dlSession, setDlSession] = useState(null);
 
-  // On mount: detect device + restore any existing session from sessionStorage
+  // Detect device + restore any existing session on mount
   useEffect(() => {
-    const deepLinkNeeded = needsPhantomDeepLink();
-    setNeedsDeepLink(deepLinkNeeded);
-
-    if (deepLinkNeeded) {
-      const existing = loadDeeplinkSession();
+    if (_isMobileWithoutPhantom()) {
+      setNeedsDeepLink(true);
+      const existing = _loadSession();
       if (existing) setDlSession(existing);
     }
   }, []);
 
   // ── Connect ────────────────────────────────────────────────────────────────
 
-  /**
-   * Redirect the user to Phantom to approve the wallet connection.
-   * @param {string} [returnPath] - path to return to after connect (default: current path)
-   */
-  const connect = useCallback((returnPath) => {
+  const connect = useCallback(async (returnPath) => {
+    // Lazy-load the heavy crypto only when the user actually taps Connect
+    const { buildConnectURL } = await import("../../lib/phantomDeeplink");
+
     const appUrl = window.location.origin;
-    const ret = encodeURIComponent(returnPath || window.location.pathname + window.location.search);
+    const ret = encodeURIComponent(
+      returnPath || window.location.pathname + window.location.search
+    );
     const redirectLink = `${window.location.origin}/phantom-callback?return=${ret}`;
     const url = buildConnectURL({ appUrl, redirectLink });
     window.location.href = url;
   }, []);
 
-  // ── Handle connect callback (called from /phantom-callback page) ───────────
-
-  /**
-   * Process the URL params returned by Phantom after a connect request.
-   * Decrypts the session, saves it, and updates in-memory state.
-   */
-  const handleConnectCallback = useCallback(
-    ({ phantom_encryption_public_key, nonce, data }) => {
-      const boxKey = computeBoxKey(phantom_encryption_public_key);
-      const decrypted = decryptPayload(data, nonce, boxKey);
-      const { public_key, session } = decrypted;
-
-      const sessionData = {
-        publicKey: public_key,
-        session,
-        phantomPublicKey: phantom_encryption_public_key,
-        boxKey,
-      };
-
-      saveDeeplinkSession(sessionData);
-      setDlSession(sessionData);
-      return sessionData;
-    },
-    []
-  );
-
   // ── signMessage deep link ──────────────────────────────────────────────────
 
-  /**
-   * Redirect the user to Phantom to sign a message.
-   *
-   * Before redirecting, saves `pendingData` to sessionStorage under
-   * `phantom_pending_<pendingKey>` so the originating page can retrieve it
-   * after Phantom redirects back. Also saves the signedMessage string so the
-   * server-side timestamp check works correctly.
-   *
-   * @param {object} opts
-   * @param {Uint8Array}  opts.messageBytes   - raw bytes to sign
-   * @param {string}      opts.returnPath     - path to return to after signing
-   * @param {string}      opts.pendingKey     - key for sessionStorage (e.g. "bracket")
-   * @param {object}      opts.pendingData    - form state to preserve across the redirect
-   */
   const signMessageDeepLink = useCallback(
-    ({ messageBytes, returnPath, pendingKey, pendingData }) => {
-      if (!dlSession) throw new Error("No Phantom deep link session — call connect() first");
+    async ({ messageBytes, returnPath, pendingKey, pendingData }) => {
+      if (!dlSession) throw new Error("No deep link session — call connect() first");
 
-      // Persist form state so the originating page can complete the action on return
+      // Save form state before redirecting
       if (pendingKey && pendingData) {
         sessionStorage.setItem(
           "phantom_pending_" + pendingKey,
@@ -127,7 +111,12 @@ export function PhantomDeeplinkProvider({ children }) {
         );
       }
 
-      const ret = encodeURIComponent(returnPath || window.location.pathname + window.location.search);
+      // Lazy-load crypto
+      const { buildSignMessageURL } = await import("../../lib/phantomDeeplink");
+
+      const ret = encodeURIComponent(
+        returnPath || window.location.pathname + window.location.search
+      );
       const redirectLink =
         `${window.location.origin}/phantom-callback` +
         `?action=signMessage&return=${ret}`;
@@ -138,31 +127,7 @@ export function PhantomDeeplinkProvider({ children }) {
         boxKey: dlSession.boxKey,
         redirectLink,
       });
-
       window.location.href = url;
-    },
-    [dlSession]
-  );
-
-  // ── Handle signMessage callback (called from /phantom-callback page) ───────
-
-  /**
-   * Decrypt the signMessage response returned by Phantom.
-   * Returns the signature as a base58 string.
-   */
-  const handleSignMessageCallback = useCallback(
-    ({ nonce, data }) => {
-      if (!dlSession) {
-        // Session might have been restored from sessionStorage before the
-        // callback page mounts — try loading it directly
-        const restored = loadDeeplinkSession();
-        if (!restored) throw new Error("No Phantom deep link session found");
-
-        const decrypted = decryptPayload(data, nonce, restored.boxKey);
-        return decrypted.signature; // base58
-      }
-      const decrypted = decryptPayload(data, nonce, dlSession.boxKey);
-      return decrypted.signature; // base58
     },
     [dlSession]
   );
@@ -170,25 +135,29 @@ export function PhantomDeeplinkProvider({ children }) {
   // ── Disconnect ─────────────────────────────────────────────────────────────
 
   const disconnect = useCallback(() => {
-    clearDeeplinkSession();
+    _clearSession();
     setDlSession(null);
   }, []);
 
-  // ── Context value ──────────────────────────────────────────────────────────
-
-  const value = {
-    needsDeepLink,
-    connected: !!dlSession,
-    publicKey: dlSession?.publicKey ?? null,    // base58 string
-    connect,
-    handleConnectCallback,
-    signMessageDeepLink,
-    handleSignMessageCallback,
-    disconnect,
-  };
+  // ── Expose a way for the callback page to notify the context of a new session
+  // (called after the callback page writes to sessionStorage)
+  const refreshSession = useCallback(() => {
+    const session = _loadSession();
+    if (session) setDlSession(session);
+  }, []);
 
   return (
-    <PhantomDeeplinkContext.Provider value={value}>
+    <PhantomDeeplinkContext.Provider
+      value={{
+        needsDeepLink,
+        connected: !!dlSession,
+        publicKey: dlSession?.publicKey ?? null,
+        connect,
+        signMessageDeepLink,
+        disconnect,
+        refreshSession,
+      }}
+    >
       {children}
     </PhantomDeeplinkContext.Provider>
   );

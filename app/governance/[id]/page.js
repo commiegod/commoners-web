@@ -1,5 +1,7 @@
 "use client";
 
+import ConnectButton from "../../components/ConnectButton";
+
 import { useState, useEffect, useCallback, use } from "react";
 import Link from "next/link";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
@@ -23,10 +25,6 @@ import {
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
-const WalletMultiButton = dynamic(
-  () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
-  { ssr: false }
-);
 
 const STATUS_STYLES = {
   active:  "bg-green-50 text-green-700 border border-green-300",
@@ -519,7 +517,7 @@ export default function ProposalPage({ params }) {
                 ) : !connected ? (
                   <div>
                     <p className="text-xs text-muted mb-2">Connect wallet to vote.</p>
-                    <WalletMultiButton
+                    <ConnectButton
                       style={{
                         backgroundColor: "#1a1a1a", color: "#f5f5f5",
                         fontSize: "0.75rem", borderRadius: "9999px", height: "auto",

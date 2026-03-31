@@ -3,31 +3,44 @@
 /**
  * /phantom-callback
  *
- * This page receives Phantom's redirect after a deep link request (connect or
- * signMessage). It decrypts the response, stores the result, and immediately
- * navigates the user back to where they came from.
+ * Receives Phantom's redirect after a deep link request (connect or signMessage).
+ * Intentionally does NOT depend on PhantomDeeplinkContext — the context may not
+ * be fully mounted during the brief window between page load and the useEffect
+ * running, which would cause silent failures. Instead, this page calls the
+ * utility functions directly and writes to sessionStorage. The context reads
+ * that sessionStorage on its own mount useEffect and restores the session.
  *
- * URL params set by Phantom on success:
- *   Connect:     ?phantom_encryption_public_key=...&nonce=...&data=...
- *   signMessage: ?action=signMessage&nonce=...&data=...
+ * Phantom appends these params on success:
+ *   Connect:     ?phantom_encryption_public_key=…&nonce=…&data=…
+ *   signMessage: ?action=signMessage&nonce=…&data=…
  *   (+ &return=<encoded-path> that we added in our outbound URL)
- *
- * URL params set by Phantom on rejection/error:
- *   ?errorCode=...&errorMessage=...
+ *   Error:       ?errorCode=…&errorMessage=…
  */
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
 import bs58 from "bs58";
 
-// ─── Inner component (needs useSearchParams → must be inside Suspense) ────────
+const SS = "phantom_dl_";
+
+// ─── Lightweight session helpers (duplicated here to avoid any import chain) ──
+
+function saveSession({ publicKey, session, boxKey }) {
+  sessionStorage.setItem(SS + "public_key", publicKey);
+  sessionStorage.setItem(SS + "session", session);
+  sessionStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
+}
+
+function loadBoxKey() {
+  const raw = sessionStorage.getItem(SS + "box_key");
+  return raw ? new Uint8Array(JSON.parse(raw)) : null;
+}
+
+// ─── Inner component ──────────────────────────────────────────────────────────
 
 function CallbackHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { handleConnectCallback, handleSignMessageCallback } = usePhantomDeeplink();
-
   const [status, setStatus] = useState("Connecting…");
 
   useEffect(() => {
@@ -36,65 +49,71 @@ function CallbackHandler() {
     const errorCode = searchParams.get("errorCode");
     const errorMessage = searchParams.get("errorMessage");
 
-    // ── Error from Phantom ────────────────────────────────────────────────────
+    // ── Phantom returned an error ─────────────────────────────────────────────
     if (errorCode) {
       const msg =
         errorCode === "4001"
           ? "Connection rejected."
           : `Phantom error: ${errorMessage || errorCode}`;
       setStatus(msg);
-      // Give the user a moment to read the message, then go back
       setTimeout(() => router.replace(returnPath), 1800);
       return;
     }
 
-    try {
-      // ── signMessage callback ────────────────────────────────────────────────
-      if (action === "signMessage") {
-        const nonce = searchParams.get("nonce");
-        const data = searchParams.get("data");
+    // ── Process the response — import crypto lazily ───────────────────────────
+    import("../../lib/phantomDeeplink")
+      .then(({ computeBoxKey, decryptPayload }) => {
+        if (action === "signMessage") {
+          // ── signMessage response ────────────────────────────────────────────
+          const nonce = searchParams.get("nonce");
+          const data = searchParams.get("data");
 
-        // Decrypt the signature from Phantom's response
-        const signatureBase58 = handleSignMessageCallback({ nonce, data });
+          // Load existing box key from sessionStorage (saved during connect)
+          const boxKey = loadBoxKey();
+          if (!boxKey) throw new Error("No session box key found — please reconnect");
 
-        // Convert from base58 to base64 (the server verifies base64 signatures)
-        const signatureBytes = new Uint8Array(bs58.decode(signatureBase58));
-        const signatureBase64 = Buffer.from(signatureBytes).toString("base64");
+          const decrypted = decryptPayload(data, nonce, boxKey);
 
-        // Store for the originating page to pick up
-        sessionStorage.setItem(
-          "phantom_sign_result",
-          JSON.stringify({ signatureBase64, ts: Date.now() })
-        );
+          // Convert Phantom's base58 signature to base64 (server expects base64)
+          const signatureBytes = new Uint8Array(bs58.decode(decrypted.signature));
+          const signatureBase64 = Buffer.from(signatureBytes).toString("base64");
 
-        setStatus("Signed! Returning…");
+          sessionStorage.setItem(
+            "phantom_sign_result",
+            JSON.stringify({ signatureBase64, ts: Date.now() })
+          );
 
-        // Redirect back with a marker so the originating page knows to proceed
-        const sep = returnPath.includes("?") ? "&" : "?";
-        router.replace(`${returnPath}${sep}deeplink_signed=1`);
-      } else {
-        // ── Connect callback ──────────────────────────────────────────────────
-        const phantom_encryption_public_key = searchParams.get(
-          "phantom_encryption_public_key"
-        );
-        const nonce = searchParams.get("nonce");
-        const data = searchParams.get("data");
+          setStatus("Signed! Returning…");
+          const sep = returnPath.includes("?") ? "&" : "?";
+          router.replace(`${returnPath}${sep}deeplink_signed=1`);
+        } else {
+          // ── Connect response ────────────────────────────────────────────────
+          const phantom_encryption_public_key = searchParams.get(
+            "phantom_encryption_public_key"
+          );
+          const nonce = searchParams.get("nonce");
+          const data = searchParams.get("data");
 
-        handleConnectCallback({ phantom_encryption_public_key, nonce, data });
+          const boxKey = computeBoxKey(phantom_encryption_public_key);
+          const decrypted = decryptPayload(data, nonce, boxKey);
+          const { public_key, session } = decrypted;
 
-        setStatus("Connected! Returning…");
-        router.replace(returnPath);
-      }
-    } catch (err) {
-      console.error("[phantom-callback] error:", err);
-      setStatus("Something went wrong. Returning…");
-      setTimeout(() => router.replace(returnPath), 1800);
-    }
+          // Write session to sessionStorage — context reads this on mount
+          saveSession({ publicKey: public_key, session, boxKey });
+
+          setStatus("Connected! Returning…");
+          router.replace(returnPath);
+        }
+      })
+      .catch((err) => {
+        console.error("[phantom-callback]", err);
+        setStatus("Something went wrong. Returning…");
+        setTimeout(() => router.replace(returnPath), 1800);
+      });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-3 px-6 text-center">
-      {/* Phantom logo placeholder while processing */}
       <div className="w-12 h-12 rounded-full bg-card border border-border animate-pulse" />
       <p className="text-sm text-muted">{status}</p>
     </div>
