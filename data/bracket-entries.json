@@ -551,10 +551,13 @@
         "r2_east_3": "east_s7",
         "r3_east_1": "east_s3",
         "r3_east_0": "east_s1",
-        "r4_east": "east_s3"
+        "r4_east": "east_s3",
+        "ff_1": "midwest_s1",
+        "champ": "midwest_s1"
       },
-      "tiebreaker": 154,
-      "submittedAt": 1773876863476
+      "tiebreaker": 178,
+      "submittedAt": 1773876863476,
+      "ffRepickAt": 1774961654077
     },
     {
       "id": "af7df731-c47f-4d31-a041-29287f640e3b",
