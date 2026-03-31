@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { usePhantomDeeplink } from "../../context/PhantomDeeplinkContext";
 
 function formatDeadline(iso) {
   if (!iso) return null;
@@ -28,6 +30,21 @@ const WalletMultiButton = dynamic(
     import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
   { ssr: false }
 );
+
+function ConnectButton({ style }) {
+  const dl = usePhantomDeeplink();
+  if (dl?.needsDeepLink) {
+    return (
+      <button
+        onClick={() => dl.connect()}
+        style={{ cursor: "pointer", ...style }}
+      >
+        Connect Phantom
+      </button>
+    );
+  }
+  return <WalletMultiButton style={style} />;
+}
 
 const MIDEVILS_COLLECTION = "w44WvLKRdLGye2ghhDJBxcmnWpBo31A1tCBko2G6DgW";
 const MAINNET_RPC =
@@ -96,7 +113,15 @@ function cascadePicks(oldPicks, changedGameId, newTeamId, bracket) {
 
 export default function EnterBracketPage() {
   const { publicKey, signMessage, disconnect } = useWallet();
-  const walletAddress = publicKey?.toBase58() ?? null;
+  const deeplink = usePhantomDeeplink();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Resolve wallet address: deep link session takes precedence on mobile
+  const walletAddress =
+    deeplink?.connected && deeplink?.needsDeepLink
+      ? deeplink.publicKey
+      : (publicKey?.toBase58() ?? null);
 
   const [bracket, setBracket] = useState(null);
   const [myEntries, setMyEntries] = useState([]);
@@ -159,6 +184,58 @@ export default function EnterBracketPage() {
     check();
   }, [walletAddress]);
 
+  // ── Deep link: complete submission after returning from Phantom signing ──────
+  useEffect(() => {
+    if (searchParams.get("deeplink_signed") !== "1") return;
+
+    const pendingRaw = sessionStorage.getItem("phantom_pending_bracket");
+    const signResultRaw = sessionStorage.getItem("phantom_sign_result");
+    if (!pendingRaw || !signResultRaw) return;
+
+    const pending = JSON.parse(pendingRaw);
+    const { signatureBase64 } = JSON.parse(signResultRaw);
+
+    // Clean up before the async call so a refresh doesn't re-submit
+    sessionStorage.removeItem("phantom_pending_bracket");
+    sessionStorage.removeItem("phantom_sign_result");
+
+    // Remove the deeplink_signed param from the URL without re-rendering
+    router.replace("/bracket/enter");
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    fetch("/api/bracket/entries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddress: pending.walletAddress,
+        username: pending.username,
+        picks: pending.picks,
+        tiebreaker: pending.tiebreaker,
+        signature: signatureBase64,
+        signedMessage: pending.signedMessage,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) {
+          setSubmitError(data.error);
+        } else {
+          setSubmitSuccess(data.id);
+          setPicks({});
+          setUsername("");
+          setTiebreaker("");
+          setMyEntries((prev) => [
+            ...prev,
+            { id: data.id, username: pending.username, picks: pending.picks, submittedAt: Date.now() },
+          ]);
+        }
+      })
+      .catch((err) => setSubmitError(err.message))
+      .finally(() => setSubmitting(false));
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handlePickChange = useCallback(
     (gameId, teamId) => {
       if (!bracket) return;
@@ -182,13 +259,35 @@ export default function EnterBracketPage() {
     setSubmitError(null);
 
     try {
+      const signedMessage = buildChallengeMessage();
+      const msgBytes = new TextEncoder().encode(signedMessage);
+
+      // ── Deep link path (mobile Safari / Chrome) ──────────────────────────
+      if (deeplink?.needsDeepLink) {
+        // Save all form state before redirecting to Phantom — it will be read
+        // back in the useEffect above once Phantom redirects us back.
+        deeplink.signMessageDeepLink({
+          messageBytes: msgBytes,
+          returnPath: "/bracket/enter",
+          pendingKey: "bracket",
+          pendingData: {
+            walletAddress,
+            username: username.trim(),
+            picks,
+            tiebreaker: tiebreakerVal,
+            signedMessage,
+          },
+        });
+        // Page will navigate away — no need to setSubmitting(false)
+        return;
+      }
+
+      // ── Standard path (extension / Phantom in-app browser) ───────────────
       if (!signMessage) {
         setSubmitError("Your wallet does not support message signing. Please use Phantom or Backpack.");
         setSubmitting(false);
         return;
       }
-      const signedMessage = buildChallengeMessage();
-      const msgBytes = new TextEncoder().encode(signedMessage);
       const signatureBytes = await signMessage(msgBytes);
       const signature = Buffer.from(signatureBytes).toString("base64");
 
@@ -279,7 +378,7 @@ export default function EnterBracketPage() {
         </h1>
         <div className="bg-card border border-border rounded px-4 py-6 text-sm text-muted max-w-sm">
           <p className="mb-4">Connect your wallet to enter.</p>
-          <WalletMultiButton
+          <ConnectButton
             style={{
               backgroundColor: "#1a1a1a",
               color: "#f5f5f5",

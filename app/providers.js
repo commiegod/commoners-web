@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { RPC_URL } from "../lib/programClient";
+import { PhantomDeeplinkProvider } from "./context/PhantomDeeplinkContext";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 // Polyfill Buffer globally for Solana libraries that need it
@@ -21,7 +22,14 @@ export function Providers({ children }) {
   return (
     <ConnectionProvider endpoint={RPC_URL}>
       <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          {/* PhantomDeeplinkProvider handles mobile Safari/Chrome users who
+              open the site outside of Phantom's in-app browser. It is a no-op
+              for desktop users and Phantom in-app browser users. */}
+          <PhantomDeeplinkProvider>
+            {children}
+          </PhantomDeeplinkProvider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

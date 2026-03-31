@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -12,6 +13,77 @@ const WalletMultiButton = dynamic(
     ),
   { ssr: false }
 );
+
+/**
+ * WalletButton — renders the appropriate connect button based on context:
+ *   - Deep link mode (mobile Safari/Chrome): a custom button that triggers
+ *     Phantom's universal link connect flow.
+ *   - Standard mode (desktop / Phantom in-app browser): the normal
+ *     WalletMultiButton from @solana/wallet-adapter-react-ui.
+ */
+function WalletButton({ style }) {
+  const deeplink = usePhantomDeeplink();
+
+  // Deep link mode: mobile browser without Phantom injection
+  if (deeplink?.needsDeepLink) {
+    if (deeplink.connected) {
+      return (
+        <div className="flex items-center gap-2">
+          <span
+            style={{
+              fontSize: style?.fontSize ?? "0.75rem",
+              color: style?.color ?? "#1a1a1a",
+              border: style?.border ?? "1px solid #1a1a1a",
+              borderRadius: style?.borderRadius ?? "9999px",
+              padding: style?.padding ?? "0.375rem 0.75rem",
+              lineHeight: 1.5,
+              fontFamily: "monospace",
+            }}
+          >
+            {deeplink.publicKey.slice(0, 4)}…{deeplink.publicKey.slice(-4)}
+          </span>
+          <button
+            onClick={deeplink.disconnect}
+            style={{
+              fontSize: "0.65rem",
+              color: "#888",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        onClick={() => deeplink.connect()}
+        style={{
+          backgroundColor: style?.backgroundColor ?? "transparent",
+          border: style?.border ?? "1px solid #1a1a1a",
+          color: style?.color ?? "#1a1a1a",
+          fontSize: style?.fontSize ?? "0.75rem",
+          borderRadius: style?.borderRadius ?? "9999px",
+          padding: style?.padding ?? "0.375rem 0.75rem",
+          lineHeight: 1.5,
+          cursor: "pointer",
+          width: style?.width,
+          fontWeight: style?.fontWeight,
+          justifyContent: style?.justifyContent,
+        }}
+      >
+        Connect Phantom
+      </button>
+    );
+  }
+
+  // Standard mode
+  return <WalletMultiButton style={style} />;
+}
 
 const links = [
   { href: "/bounty", label: "Bounty" },
@@ -64,7 +136,7 @@ export default function Nav() {
               {link.label}
             </Link>
           ))}
-          <WalletMultiButton
+          <WalletButton
             style={{
               backgroundColor: "transparent",
               border: "1px solid #1a1a1a",
@@ -154,7 +226,7 @@ export default function Nav() {
 
         {/* Wallet at bottom */}
         <div className="px-8 pb-10 pt-6 border-t border-border shrink-0">
-          <WalletMultiButton
+          <WalletButton
             style={{
               backgroundColor: "#1a1a1a",
               color: "#f5f5f5",

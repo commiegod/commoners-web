@@ -2,14 +2,43 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { getCommonerCount } from "../../lib/commoners";
+import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
 
 const WalletMultiButton = dynamic(
   () => import("@solana/wallet-adapter-react-ui").then((m) => m.WalletMultiButton),
   { ssr: false }
 );
+
+// Deep-link-aware connect button: forwards to Phantom universal link on mobile,
+// falls back to WalletMultiButton on desktop / Phantom in-app browser.
+function ConnectButton({ style }) {
+  const deeplink = usePhantomDeeplink();
+  if (deeplink?.needsDeepLink) {
+    return (
+      <button
+        onClick={() => deeplink.connect()}
+        style={{
+          backgroundColor: "transparent",
+          border: "1px solid #1a1a1a",
+          color: "#1a1a1a",
+          fontSize: "0.75rem",
+          borderRadius: "9999px",
+          padding: "0.375rem 0.75rem",
+          lineHeight: 1.5,
+          cursor: "pointer",
+          ...style,
+        }}
+      >
+        Connect Phantom
+      </button>
+    );
+  }
+  return <WalletMultiButton style={style} />;
+}
 
 function timeAgo(ts) {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -28,8 +57,18 @@ function shortAddr(addr) {
 }
 
 export default function DiscussionPage() {
-  const { connected, publicKey, signMessage } = useWallet();
-  const walletAddress = publicKey?.toBase58() ?? null;
+  const { connected: adapterConnected, publicKey, signMessage } = useWallet();
+  const deeplink = usePhantomDeeplink();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Deep link session takes precedence on mobile
+  const connected =
+    deeplink?.needsDeepLink ? deeplink.connected : adapterConnected;
+  const walletAddress =
+    deeplink?.connected && deeplink?.needsDeepLink
+      ? deeplink.publicKey
+      : (publicKey?.toBase58() ?? null);
 
   const [threads, setThreads] = useState([]);
   const [page, setPage] = useState(1);
@@ -89,19 +128,77 @@ export default function DiscussionPage() {
     });
   }, [walletAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Deep link: complete post after returning from Phantom signing ────────────
+  useEffect(() => {
+    if (searchParams.get("deeplink_signed") !== "1") return;
+
+    const pendingRaw = sessionStorage.getItem("phantom_pending_discussion");
+    const signResultRaw = sessionStorage.getItem("phantom_sign_result");
+    if (!pendingRaw || !signResultRaw) return;
+
+    const pending = JSON.parse(pendingRaw);
+    const { signatureBase64 } = JSON.parse(signResultRaw);
+
+    sessionStorage.removeItem("phantom_pending_discussion");
+    sessionStorage.removeItem("phantom_sign_result");
+    router.replace("/discussion");
+
+    setSubmitting(true);
+    setError("");
+
+    fetch("/api/discussion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: pending.subject,
+        body: pending.body,
+        walletAddress: pending.walletAddress,
+        signature: signatureBase64,
+        signedMessage: pending.signedMessage,
+      }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.ok) {
+          setSubject("");
+          setBody("");
+          setShowForm(false);
+          return loadThreads();
+        } else {
+          setError(json.error || "Failed to post.");
+        }
+      })
+      .catch(() => setError("Network error."))
+      .finally(() => setSubmitting(false));
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!subject.trim() || !body.trim()) return;
     setSubmitting(true);
     setError("");
+
     try {
+      const signedMessage = `Post to The Board — Commoners DAO.\nTimestamp: ${Date.now()}`;
+      const msgBytes = new TextEncoder().encode(signedMessage);
+
+      // ── Deep link path ──────────────────────────────────────────────────
+      if (deeplink?.needsDeepLink) {
+        deeplink.signMessageDeepLink({
+          messageBytes: msgBytes,
+          returnPath: "/discussion",
+          pendingKey: "discussion",
+          pendingData: { subject, body, walletAddress, signedMessage },
+        });
+        return; // page navigates away
+      }
+
+      // ── Standard path ───────────────────────────────────────────────────
       if (!signMessage) {
         setError("Your wallet does not support message signing. Please use Phantom or Backpack.");
         setSubmitting(false);
         return;
       }
-      const signedMessage = `Post to The Board — Commoners DAO.\nTimestamp: ${Date.now()}`;
-      const msgBytes = new TextEncoder().encode(signedMessage);
       const signatureBytes = await signMessage(msgBytes);
       const signature = Buffer.from(signatureBytes).toString("base64");
 
@@ -158,7 +255,7 @@ export default function DiscussionPage() {
 
         <div className="shrink-0 pb-1">
           {!connected ? (
-            <WalletMultiButton
+            <ConnectButton
               style={{
                 backgroundColor: "transparent",
                 border: "1px solid #1a1a1a",
