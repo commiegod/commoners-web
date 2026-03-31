@@ -57,9 +57,6 @@ export async function PATCH(request, { params }) {
     if (!sigResult.ok) {
       return NextResponse.json({ error: sigResult.reason }, { status: 403 });
     }
-    if (!ff_0 || !ff_1 || !champ) {
-      return NextResponse.json({ error: "ff_0, ff_1, and champ picks are required" }, { status: 400 });
-    }
     if (tiebreaker == null || !Number.isInteger(tiebreaker) || tiebreaker < 0) {
       return NextResponse.json({ error: "Tiebreaker must be a non-negative whole number" }, { status: 400 });
     }
@@ -85,27 +82,50 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "This entry does not belong to your wallet" }, { status: 403 });
     }
 
-    // Validate the picks against the actual FF teams from results
+    // Compute which FF teams this entry is eligible to pick
+    // (must have correctly picked that team to win their region)
     const results = bracket.results ?? {};
-    const ff0Teams = new Set([results.r4_east, results.r4_south].filter(Boolean));
-    const ff1Teams = new Set([results.r4_west, results.r4_midwest].filter(Boolean));
-    const champTeams = new Set([ff_0, ff_1]);
+    const ffPairings = bracket.ffPairings ?? [["east","south"],["west","midwest"]];
+    const [ff0RegA, ff0RegB] = ffPairings[0];
+    const [ff1RegA, ff1RegB] = ffPairings[1];
+    const entryPicks = entries[entryIdx].picks ?? {};
 
-    if (!ff0Teams.has(ff_0)) {
-      return NextResponse.json({ error: `Invalid ff_0 pick — must be one of: ${[...ff0Teams].join(", ")}` }, { status: 400 });
+    const ff0Eligible = new Set([
+      entryPicks[`r4_${ff0RegA}`] === results[`r4_${ff0RegA}`] ? results[`r4_${ff0RegA}`] : null,
+      entryPicks[`r4_${ff0RegB}`] === results[`r4_${ff0RegB}`] ? results[`r4_${ff0RegB}`] : null,
+    ].filter(Boolean));
+
+    const ff1Eligible = new Set([
+      entryPicks[`r4_${ff1RegA}`] === results[`r4_${ff1RegA}`] ? results[`r4_${ff1RegA}`] : null,
+      entryPicks[`r4_${ff1RegB}`] === results[`r4_${ff1RegB}`] ? results[`r4_${ff1RegB}`] : null,
+    ].filter(Boolean));
+
+    // Validate picks — null is allowed when the entry has no eligible team for that slot
+    if (ff_0 != null && !ff0Eligible.has(ff_0)) {
+      return NextResponse.json({ error: "ff_0 pick is not a team you had advancing to the Final Four" }, { status: 400 });
     }
-    if (!ff1Teams.has(ff_1)) {
-      return NextResponse.json({ error: `Invalid ff_1 pick — must be one of: ${[...ff1Teams].join(", ")}` }, { status: 400 });
+    if (ff_0 == null && ff0Eligible.size > 0) {
+      return NextResponse.json({ error: "ff_0 pick is required" }, { status: 400 });
     }
-    if (!champTeams.has(champ)) {
-      return NextResponse.json({ error: "champ pick must be your ff_0 or ff_1 winner" }, { status: 400 });
+    if (ff_1 != null && !ff1Eligible.has(ff_1)) {
+      return NextResponse.json({ error: "ff_1 pick is not a team you had advancing to the Final Four" }, { status: 400 });
+    }
+    if (ff_1 == null && ff1Eligible.size > 0) {
+      return NextResponse.json({ error: "ff_1 pick is required" }, { status: 400 });
+    }
+    const champEligible = new Set([ff_0, ff_1].filter(Boolean));
+    if (champ != null && !champEligible.has(champ)) {
+      return NextResponse.json({ error: "champ pick must be your ff_0 or ff_1 winner pick" }, { status: 400 });
+    }
+    if (champ == null && champEligible.size > 0) {
+      return NextResponse.json({ error: "champ pick is required" }, { status: 400 });
     }
 
     // Update the entry
     const updatedEntries = [...entries];
     updatedEntries[entryIdx] = {
       ...updatedEntries[entryIdx],
-      picks: { ...updatedEntries[entryIdx].picks, ff_0, ff_1, champ },
+      picks: { ...updatedEntries[entryIdx].picks, ...(ff_0 ? { ff_0 } : {}), ...(ff_1 ? { ff_1 } : {}), ...(champ ? { champ } : {}) },
       tiebreaker,
       ffRepickAt: Date.now(),
     };

@@ -52,23 +52,29 @@ function buildRepickMessage(entryId) {
   return `FF repick for bracket entry ${entryId}.\nTimestamp: ${Date.now()}`;
 }
 
-function TeamButton({ team, selected, onClick, disabled }) {
+function TeamButton({ team, selected, onClick, eligible }) {
   if (!team) return null;
+  const disabled = !eligible;
   return (
     <button
-      onClick={() => !disabled && onClick(team.id)}
+      onClick={() => eligible && onClick(team.id)}
       disabled={disabled}
-      className={`flex-1 px-4 py-3 rounded border text-sm font-medium transition-all cursor-pointer ${
+      className={`flex-1 px-4 py-3 rounded border text-sm font-medium transition-all ${
         selected
-          ? "border-gold bg-gold/10 text-gold"
+          ? "border-gold bg-gold/10 text-gold cursor-pointer"
           : disabled
-          ? "border-border bg-card text-muted cursor-not-allowed"
-          : "border-border bg-card text-foreground hover:border-gold/60"
+          ? "border-border bg-card text-muted/40 cursor-not-allowed"
+          : "border-border bg-card text-foreground hover:border-gold/60 cursor-pointer"
       }`}
     >
       <div className="font-semibold">{team.name}</div>
       {team.seed && (
-        <div className="text-xs text-muted mt-0.5">#{team.seed} seed</div>
+        <div className={`text-xs mt-0.5 ${disabled ? "text-muted/40" : "text-muted"}`}>
+          #{team.seed} seed
+        </div>
+      )}
+      {disabled && (
+        <div className="text-xs mt-1 text-muted/40 italic">not in your bracket</div>
       )}
     </button>
   );
@@ -86,9 +92,8 @@ function EntryRepickForm({ entry, bracket, onDone }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Derive the 4 FF teams from bracket results
   const results = bracket.results ?? {};
-  const ffPairings = bracket.ffPairings ?? [];
+  const ffPairings = bracket.ffPairings ?? [["east","south"],["west","midwest"]];
 
   function getTeamById(id) {
     if (!id) return null;
@@ -99,16 +104,37 @@ function EntryRepickForm({ entry, bracket, onDone }) {
     return null;
   }
 
-  // ff_0: east vs south; ff_1: west vs midwest
-  const ff0TeamA = getTeamById(results.r4_east);
-  const ff0TeamB = getTeamById(results.r4_south);
-  const ff1TeamA = getTeamById(results.r4_west);
-  const ff1TeamB = getTeamById(results.r4_midwest);
+  // Which teams does this entry have in each FF game?
+  // Eligible = entry's pick for that region matches the actual regional winner
+  const [ff0RegA, ff0RegB] = ffPairings[0] ?? ["east","south"];
+  const [ff1RegA, ff1RegB] = ffPairings[1] ?? ["west","midwest"];
+
+  const ff0EligA = entry.picks?.[`r4_${ff0RegA}`] === results[`r4_${ff0RegA}`];
+  const ff0EligB = entry.picks?.[`r4_${ff0RegB}`] === results[`r4_${ff0RegB}`];
+  const ff1EligA = entry.picks?.[`r4_${ff1RegA}`] === results[`r4_${ff1RegA}`];
+  const ff1EligB = entry.picks?.[`r4_${ff1RegB}`] === results[`r4_${ff1RegB}`];
+
+  const hasFF0 = ff0EligA || ff0EligB;
+  const hasFF1 = ff1EligA || ff1EligB;
+
+  // Auto-select if only one team is eligible for a game
+  useEffect(() => {
+    if (ff0EligA && !ff0EligB) setFf0Pick(results[`r4_${ff0RegA}`]);
+    else if (!ff0EligA && ff0EligB) setFf0Pick(results[`r4_${ff0RegB}`]);
+    if (ff1EligA && !ff1EligB) setFf1Pick(results[`r4_${ff1RegA}`]);
+    else if (!ff1EligA && ff1EligB) setFf1Pick(results[`r4_${ff1RegB}`]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Derive actual team objects
+  const ff0TeamA = getTeamById(results[`r4_${ff0RegA}`]);
+  const ff0TeamB = getTeamById(results[`r4_${ff0RegB}`]);
+  const ff1TeamA = getTeamById(results[`r4_${ff1RegA}`]);
+  const ff1TeamB = getTeamById(results[`r4_${ff1RegB}`]);
 
   const champTeamA = ff0Pick ? getTeamById(ff0Pick) : null;
   const champTeamB = ff1Pick ? getTeamById(ff1Pick) : null;
 
-  // Clear champ if it's no longer reachable
+  // Clear champ if no longer reachable
   const handleFf0 = useCallback((id) => {
     setFf0Pick(id);
     setChampPick((prev) => (prev === id || (ff1Pick && prev === ff1Pick) ? prev : null));
@@ -121,7 +147,12 @@ function EntryRepickForm({ entry, bracket, onDone }) {
 
   const tiebreakerVal = tiebreaker === "" ? null : parseInt(tiebreaker, 10);
   const tiebreakerValid = tiebreakerVal !== null && Number.isInteger(tiebreakerVal) && tiebreakerVal >= 0;
-  const canSubmit = ff0Pick && ff1Pick && champPick && tiebreakerValid && walletAddress && !submitting;
+  // Only require a pick for games where the user has at least one eligible team
+  const canSubmit =
+    (!hasFF0 || ff0Pick) &&
+    (!hasFF1 || ff1Pick) &&
+    (!ff0Pick && !ff1Pick ? true : !!champPick) &&
+    tiebreakerValid && walletAddress && !submitting;
 
   async function handleSubmit() {
     if (!canSubmit || !signMessage) return;
@@ -140,9 +171,9 @@ function EntryRepickForm({ entry, bracket, onDone }) {
           walletAddress,
           signature,
           signedMessage: msg,
-          ff_0: ff0Pick,
-          ff_1: ff1Pick,
-          champ: champPick,
+          ff_0: hasFF0 ? ff0Pick : null,
+          ff_1: hasFF1 ? ff1Pick : null,
+          champ: champPick ?? null,
           tiebreaker: tiebreakerVal,
         }),
       });
@@ -184,9 +215,9 @@ function EntryRepickForm({ entry, bracket, onDone }) {
             <span className="ml-2 text-gold/70 normal-case">East vs South · Apr 4, 6:09 PM ET</span>
           </p>
           <div className="flex gap-2">
-            <TeamButton team={ff0TeamA} selected={ff0Pick === ff0TeamA?.id} onClick={handleFf0} />
+            <TeamButton team={ff0TeamA} selected={ff0Pick === ff0TeamA?.id} onClick={handleFf0} eligible={ff0EligA} />
             <div className="flex items-center text-xs text-muted font-medium px-1">vs</div>
-            <TeamButton team={ff0TeamB} selected={ff0Pick === ff0TeamB?.id} onClick={handleFf0} />
+            <TeamButton team={ff0TeamB} selected={ff0Pick === ff0TeamB?.id} onClick={handleFf0} eligible={ff0EligB} />
           </div>
         </div>
 
@@ -197,9 +228,9 @@ function EntryRepickForm({ entry, bracket, onDone }) {
             <span className="ml-2 text-gold/70 normal-case">West vs Midwest · Apr 4, 8:49 PM ET</span>
           </p>
           <div className="flex gap-2">
-            <TeamButton team={ff1TeamA} selected={ff1Pick === ff1TeamA?.id} onClick={handleFf1} />
+            <TeamButton team={ff1TeamA} selected={ff1Pick === ff1TeamA?.id} onClick={handleFf1} eligible={ff1EligA} />
             <div className="flex items-center text-xs text-muted font-medium px-1">vs</div>
-            <TeamButton team={ff1TeamB} selected={ff1Pick === ff1TeamB?.id} onClick={handleFf1} />
+            <TeamButton team={ff1TeamB} selected={ff1Pick === ff1TeamB?.id} onClick={handleFf1} eligible={ff1EligB} />
           </div>
         </div>
 
