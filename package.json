@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1014.0",
+    "@aws-sdk/lib-storage": "^3.1014.0",
     "@coral-xyz/anchor": "^0.32.1",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
@@ -20,6 +22,8 @@
     "bn.js": "^5.2.2",
     "buffer": "^6.0.3",
     "next": "16.1.6",
+    "pako": "^2.1.0",
+    "playwright": "^1.58.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

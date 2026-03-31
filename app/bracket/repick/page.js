@@ -125,6 +125,12 @@ function EntryRepickForm({ entry, bracket, onDone }) {
     else if (!ff1EligA && ff1EligB) setFf1Pick(results[`r4_${ff1RegB}`]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // If one game has no eligible teams, auto-set champ to the other game's winner
+  useEffect(() => {
+    if (!hasFF0 && ff1Pick) setChampPick(ff1Pick);
+    else if (!hasFF1 && ff0Pick) setChampPick(ff0Pick);
+  }, [ff0Pick, ff1Pick, hasFF0, hasFF1]);
+
   // Derive actual team objects
   const ff0TeamA = getTeamById(results[`r4_${ff0RegA}`]);
   const ff0TeamB = getTeamById(results[`r4_${ff0RegB}`]);
@@ -242,24 +248,28 @@ function EntryRepickForm({ entry, bracket, onDone }) {
           </p>
           {champTeamA && champTeamB ? (
             <div className="flex gap-2">
-              <TeamButton team={champTeamA} selected={champPick === champTeamA?.id} onClick={setChampPick} />
+              <TeamButton team={champTeamA} selected={champPick === champTeamA?.id} onClick={setChampPick} eligible={true} />
               <div className="flex items-center text-xs text-muted font-medium px-1">vs</div>
-              <TeamButton team={champTeamB} selected={champPick === champTeamB?.id} onClick={setChampPick} />
+              <TeamButton team={champTeamB} selected={champPick === champTeamB?.id} onClick={setChampPick} eligible={true} />
+            </div>
+          ) : (champTeamA || champTeamB) ? (
+            // Only one finalist — auto-selected, just show confirmation
+            <div className="bg-card border border-gold/40 rounded px-3 py-2 text-sm text-foreground">
+              Your champion: <span className="text-gold font-medium">{(champTeamA || champTeamB)?.name}</span>
+              <span className="text-xs text-muted ml-2">(only eligible team — auto-selected)</span>
             </div>
           ) : (
-            <p className="text-xs text-muted italic">Pick both Final Four games first</p>
+            <p className="text-xs text-muted italic">
+              {(hasFF0 || hasFF1) ? "Pick your Final Four games above first" : "No eligible teams — no points possible from this game"}
+            </p>
           )}
         </div>
 
-        {/* Tiebreaker */}
-        {champTeamA && champTeamB && (
+        {/* Tiebreaker — show whenever we have at least one champ team */}
+        {(champTeamA || champTeamB || (!hasFF0 && !hasFF1)) && (
           <div className="max-w-xs border border-gold/30 rounded bg-background px-4 py-3">
             <p className="text-xs text-gold uppercase tracking-widest mb-1">Tiebreaker</p>
-            <p className="text-sm text-foreground font-medium mb-0.5">
-              {champTeamA && champTeamB
-                ? `${champTeamA.name} vs. ${champTeamB.name}`
-                : "Championship Game"}
-            </p>
+            <p className="text-sm text-foreground font-medium mb-0.5">Championship Game</p>
             <p className="text-xs text-muted mb-3">
               Predicted combined total score — used to break ties.
             </p>
