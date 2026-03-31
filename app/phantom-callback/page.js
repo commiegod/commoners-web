@@ -85,7 +85,8 @@ function CallbackHandler() {
 
           setStatus("Signed! Returning…");
           const sep = returnPath.includes("?") ? "&" : "?";
-          router.replace(`${returnPath}${sep}deeplink_signed=1`);
+          // Full reload so provider remounts and session stays visible
+          window.location.href = `${returnPath}${sep}deeplink_signed=1`;
         } else {
           // ── Connect response ────────────────────────────────────────────────
           const phantom_encryption_public_key = searchParams.get(
@@ -102,7 +103,8 @@ function CallbackHandler() {
           saveSession({ publicKey: public_key, session, boxKey });
 
           setStatus("Connected! Returning…");
-          router.replace(returnPath);
+          // Full reload so PhantomDeeplinkProvider remounts and reads sessionStorage
+          window.location.href = returnPath;
         }
       })
       .catch((err) => {
