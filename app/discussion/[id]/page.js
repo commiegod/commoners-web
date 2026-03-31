@@ -2,7 +2,7 @@
 
 import ConnectButton from "../../components/ConnectButton";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, use, Suspense } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -28,7 +28,7 @@ function shortAddr(addr) {
   return addr.slice(0, 4) + "…" + addr.slice(-4);
 }
 
-export default function ThreadPage({ params }) {
+function ThreadPageInner({ params }) {
   const { id } = use(params);
   const { connected: adapterConnected, publicKey, signMessage } = useWallet();
   const deeplink = usePhantomDeeplink();
@@ -323,5 +323,13 @@ export default function ThreadPage({ params }) {
         ) : null}
       </div>
     </div>
+  );
+}
+
+export default function ThreadPage({ params }) {
+  return (
+    <Suspense fallback={null}>
+      <ThreadPageInner params={params} />
+    </Suspense>
   );
 }

@@ -2,7 +2,7 @@
 
 import ConnectButton from "../../components/ConnectButton";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { usePhantomDeeplink } from "../../context/PhantomDeeplinkContext";
@@ -94,7 +94,7 @@ function cascadePicks(oldPicks, changedGameId, newTeamId, bracket) {
   return updated;
 }
 
-export default function EnterBracketPage() {
+function EnterBracketPageInner() {
   const { publicKey, signMessage, disconnect } = useWallet();
   const deeplink = usePhantomDeeplink();
   const searchParams = useSearchParams();
@@ -615,5 +615,13 @@ export default function EnterBracketPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function EnterBracketPage() {
+  return (
+    <Suspense fallback={null}>
+      <EnterBracketPageInner />
+    </Suspense>
   );
 }

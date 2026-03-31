@@ -2,7 +2,7 @@
 
 import ConnectButton from "../components/ConnectButton";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -28,7 +28,7 @@ function shortAddr(addr) {
   return addr.slice(0, 4) + "…" + addr.slice(-4);
 }
 
-export default function DiscussionPage() {
+function DiscussionPageInner() {
   const { connected: adapterConnected, publicKey, signMessage } = useWallet();
   const deeplink = usePhantomDeeplink();
   const searchParams = useSearchParams();
@@ -385,5 +385,13 @@ export default function DiscussionPage() {
       </p>
     </div>
     </div>
+  );
+}
+
+export default function DiscussionPage() {
+  return (
+    <Suspense fallback={null}>
+      <DiscussionPageInner />
+    </Suspense>
   );
 }
