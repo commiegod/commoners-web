@@ -104,15 +104,15 @@ function DiscussionPageInner() {
   useEffect(() => {
     if (searchParams.get("deeplink_signed") !== "1") return;
 
-    const pendingRaw = sessionStorage.getItem("phantom_pending_discussion");
-    const signResultRaw = sessionStorage.getItem("phantom_sign_result");
+    const pendingRaw = localStorage.getItem("phantom_pending_discussion");
+    const signResultRaw = localStorage.getItem("phantom_sign_result");
     if (!pendingRaw || !signResultRaw) return;
 
     const pending = JSON.parse(pendingRaw);
     const { signatureBase64 } = JSON.parse(signResultRaw);
 
-    sessionStorage.removeItem("phantom_pending_discussion");
-    sessionStorage.removeItem("phantom_sign_result");
+    localStorage.removeItem("phantom_pending_discussion");
+    localStorage.removeItem("phantom_sign_result");
     router.replace("/discussion");
 
     setSubmitting(true);

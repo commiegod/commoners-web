@@ -7,8 +7,8 @@
  * Intentionally does NOT depend on PhantomDeeplinkContext — the context may not
  * be fully mounted during the brief window between page load and the useEffect
  * running, which would cause silent failures. Instead, this page calls the
- * utility functions directly and writes to sessionStorage. The context reads
- * that sessionStorage on its own mount useEffect and restores the session.
+ * utility functions directly and writes to localStorage. The context reads
+ * that localStorage on its own mount useEffect and restores the session.
  *
  * Phantom appends these params on success:
  *   Connect:     ?phantom_encryption_public_key=…&nonce=…&data=…
@@ -26,13 +26,13 @@ const SS = "phantom_dl_";
 // ─── Lightweight session helpers (duplicated here to avoid any import chain) ──
 
 function saveSession({ publicKey, session, boxKey }) {
-  sessionStorage.setItem(SS + "public_key", publicKey);
-  sessionStorage.setItem(SS + "session", session);
-  sessionStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
+  localStorage.setItem(SS + "public_key", publicKey);
+  localStorage.setItem(SS + "session", session);
+  localStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
 }
 
 function loadBoxKey() {
-  const raw = sessionStorage.getItem(SS + "box_key");
+  const raw = localStorage.getItem(SS + "box_key");
   return raw ? new Uint8Array(JSON.parse(raw)) : null;
 }
 
@@ -68,7 +68,7 @@ function CallbackHandler() {
           const nonce = searchParams.get("nonce");
           const data = searchParams.get("data");
 
-          // Load existing box key from sessionStorage (saved during connect)
+          // Load existing box key from localStorage (saved during connect)
           const boxKey = loadBoxKey();
           if (!boxKey) throw new Error("No session box key found — please reconnect");
 
@@ -78,7 +78,7 @@ function CallbackHandler() {
           const signatureBytes = new Uint8Array(bs58.decode(decrypted.signature));
           const signatureBase64 = Buffer.from(signatureBytes).toString("base64");
 
-          sessionStorage.setItem(
+          localStorage.setItem(
             "phantom_sign_result",
             JSON.stringify({ signatureBase64, ts: Date.now() })
           );
@@ -99,11 +99,11 @@ function CallbackHandler() {
           const decrypted = decryptPayload(data, nonce, boxKey);
           const { public_key, session } = decrypted;
 
-          // Write session to sessionStorage — context reads this on mount
+          // Write session to localStorage — context reads this on mount
           saveSession({ publicKey: public_key, session, boxKey });
 
           setStatus("Connected! Returning…");
-          // Full reload so PhantomDeeplinkProvider remounts and reads sessionStorage
+          // Full reload so PhantomDeeplinkProvider remounts and reads localStorage
           window.location.href = returnPath;
         }
       })

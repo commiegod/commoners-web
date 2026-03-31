@@ -9,7 +9,7 @@
  * Design principles:
  *  - The context is ALWAYS statically imported (no next/dynamic) so it is
  *    immediately available to every component that calls usePhantomDeeplink().
- *  - Lightweight helpers (device detection, sessionStorage) are inlined here.
+ *  - Lightweight helpers (device detection, localStorage) are inlined here.
  *  - Heavy crypto (@noble/curves, @noble/ciphers) is lazily imported inside
  *    connect() and signMessageDeepLink() — only loaded when actually needed.
  *  - Desktop / Phantom in-app browser users are completely unaffected.
@@ -37,9 +37,9 @@ function _isMobileWithoutPhantom() {
 
 function _loadSession() {
   try {
-    const publicKey = sessionStorage.getItem(SS + "public_key");
-    const session = sessionStorage.getItem(SS + "session");
-    const boxKeyRaw = sessionStorage.getItem(SS + "box_key");
+    const publicKey = localStorage.getItem(SS + "public_key");
+    const session = localStorage.getItem(SS + "session");
+    const boxKeyRaw = localStorage.getItem(SS + "box_key");
     if (!publicKey || !session || !boxKeyRaw) return null;
     return {
       publicKey,
@@ -52,14 +52,14 @@ function _loadSession() {
 }
 
 function _saveSession({ publicKey, session, boxKey }) {
-  sessionStorage.setItem(SS + "public_key", publicKey);
-  sessionStorage.setItem(SS + "session", session);
-  sessionStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
+  localStorage.setItem(SS + "public_key", publicKey);
+  localStorage.setItem(SS + "session", session);
+  localStorage.setItem(SS + "box_key", JSON.stringify(Array.from(boxKey)));
 }
 
 function _clearSession() {
   ["public_key", "session", "phantom_pubkey", "box_key", "keypair"].forEach(
-    (k) => sessionStorage.removeItem(SS + k)
+    (k) => localStorage.removeItem(SS + k)
   );
 }
 
@@ -105,7 +105,7 @@ export function PhantomDeeplinkProvider({ children }) {
 
       // Save form state before redirecting
       if (pendingKey && pendingData) {
-        sessionStorage.setItem(
+        localStorage.setItem(
           "phantom_pending_" + pendingKey,
           JSON.stringify(pendingData)
         );
@@ -140,7 +140,7 @@ export function PhantomDeeplinkProvider({ children }) {
   }, []);
 
   // ── Expose a way for the callback page to notify the context of a new session
-  // (called after the callback page writes to sessionStorage)
+  // (called after the callback page writes to localStorage)
   const refreshSession = useCallback(() => {
     const session = _loadSession();
     if (session) setDlSession(session);
