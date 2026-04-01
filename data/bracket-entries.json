@@ -777,10 +777,14 @@
         "r2_west_3": "west_s2",
         "r3_west_1": "west_s2",
         "r3_west_0": "west_s1",
-        "r4_west": "west_s1"
+        "r4_west": "west_s1",
+        "ff_0": "east_s2",
+        "ff_1": "west_s1",
+        "champ": "west_s1"
       },
-      "tiebreaker": 139,
-      "submittedAt": 1773884977413
+      "tiebreaker": 165,
+      "submittedAt": 1773884977413,
+      "ffRepickAt": 1775045943077
     },
     {
       "id": "820792f8-6811-4602-8a45-70aaa77cc101",
