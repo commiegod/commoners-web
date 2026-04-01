@@ -713,9 +713,9 @@
         "r3_midwest_1": "midwest_s3",
         "r4_midwest": "midwest_s3"
       },
-      "tiebreaker": 165,
+      "tiebreaker": 150,
       "submittedAt": 1773884863242,
-      "ffRepickAt": 1775045967452
+      "ffRepickAt": 1775046091263
     },
     {
       "id": "c047274a-7c0d-4888-8136-2659fb058d2c",
