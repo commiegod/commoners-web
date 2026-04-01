@@ -87,6 +87,26 @@ function CallbackHandler() {
           const sep = returnPath.includes("?") ? "&" : "?";
           // Full reload so provider remounts and session stays visible
           window.location.href = `${returnPath}${sep}deeplink_signed=1`;
+        } else if (action === "signAndSendTransaction") {
+          // ── signAndSendTransaction response ─────────────────────────────────
+          const nonce = searchParams.get("nonce");
+          const data = searchParams.get("data");
+
+          const boxKey = loadBoxKey();
+          if (!boxKey) throw new Error("No session box key found — please reconnect");
+
+          const decrypted = decryptPayload(data, nonce, boxKey);
+          const { signature } = decrypted;
+
+          localStorage.setItem(
+            "phantom_tx_result",
+            JSON.stringify({ signature, ts: Date.now() })
+          );
+
+          setStatus("Transaction sent! Returning…");
+          const sep = returnPath.includes("?") ? "&" : "?";
+          window.location.href = `${returnPath}${sep}deeplink_tx_sent=1`;
+
         } else {
           // ── Connect response ────────────────────────────────────────────────
           const phantom_encryption_public_key = searchParams.get(

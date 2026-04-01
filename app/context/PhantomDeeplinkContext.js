@@ -132,6 +132,27 @@ export function PhantomDeeplinkProvider({ children }) {
     [dlSession]
   );
 
+  // ── signAndSendTransaction deep link ───────────────────────────────────────
+
+  const signAndSendTransactionDeepLink = useCallback(
+    async ({ serializedTx, returnPath }) => {
+      if (!dlSession) throw new Error("No deep link session — call connect() first");
+      const { buildSignAndSendTransactionURL } = await import("../../lib/phantomDeeplink");
+      const ret = encodeURIComponent(returnPath || window.location.pathname);
+      const redirectLink =
+        `${window.location.origin}/phantom-callback` +
+        `?action=signAndSendTransaction&return=${ret}`;
+      const url = buildSignAndSendTransactionURL({
+        serializedTx,
+        session: dlSession.session,
+        boxKey: dlSession.boxKey,
+        redirectLink,
+      });
+      window.location.href = url;
+    },
+    [dlSession]
+  );
+
   // ── Disconnect ─────────────────────────────────────────────────────────────
 
   const disconnect = useCallback(() => {
@@ -154,6 +175,7 @@ export function PhantomDeeplinkProvider({ children }) {
         publicKey: dlSession?.publicKey ?? null,
         connect,
         signMessageDeepLink,
+        signAndSendTransactionDeepLink,
         disconnect,
         refreshSession,
       }}

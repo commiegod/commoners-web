@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PublicKey, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
+import ConnectButton from "./ConnectButton";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import idl from "../../lib/idl.json";
 import {
@@ -103,7 +104,7 @@ async function fetchActiveAuctions(connection) {
 
 // ── Single auction panel ──────────────────────────────────────────────────────
 
-function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
+function AuctionPanel({ auctionData, slotMeta, connection, wallet, deeplink }) {
   const { pubkey, state } = auctionData;
   const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 
@@ -118,6 +119,27 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
   const [settleError, setSettleError] = useState(null);
   const [settleSuccess, setSettleSuccess] = useState(null);
   const countdownRef = useRef(null);
+
+  // Effective public key — deep link session takes precedence on mobile
+  const effectivePublicKey =
+    deeplink?.needsDeepLink && deeplink?.connected
+      ? deeplink.publicKey
+      : wallet.publicKey?.toBase58() ?? null;
+
+  // Handle return from Phantom signAndSendTransaction
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get("deeplink_tx_sent")) return;
+    const raw = localStorage.getItem("phantom_tx_result");
+    if (!raw) return;
+    try {
+      const { signature } = JSON.parse(raw);
+      localStorage.removeItem("phantom_tx_result");
+      setTxSuccess(signature);
+      window.history.replaceState({}, "", window.location.pathname);
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Countdown ticker
   useEffect(() => {
@@ -145,7 +167,7 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
   }, [pubkey.toBase58()]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function placeBid() {
-    if (!wallet.publicKey) return;
+    if (!effectivePublicKey) return;
     setTxError(null);
     setTxSuccess(null);
     setBidding(true);
@@ -154,37 +176,61 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
       const minBid = computeMinNextBid(state);
       if (bidLamports.lt(minBid)) {
         setTxError(`Bid too low. Minimum: ${(minBid.toNumber() / LAMPORTS_PER_SOL).toFixed(3)} SOL`);
+        setBidding(false);
         return;
       }
-      const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
-      const program = new Program(idl, provider);
       const auctionId = state.auction_id;
       const [bidVault] = bidVaultPDA(auctionId);
       const [config] = configPDA();
-      const prevBidder = state.current_bidder ?? wallet.publicKey;
 
-      const sig = await program.methods
-        .placeBid(bidLamports)
-        .accounts({ bidder: wallet.publicKey, config, auction: pubkey, bidVault, prevBidder, systemProgram: SystemProgram.programId })
-        .rpc();
-
-      setTxSuccess(sig);
-      setHistoryLoading(true);
-      fetchBidHistory(connection, pubkey, auctionId)
-        .then(setBidHistory)
-        .catch(() => {})
-        .finally(() => setHistoryLoading(false));
+      if (deeplink?.needsDeepLink && deeplink?.connected) {
+        // ── Deep link path ─────────────────────────────────────────────────────
+        const { Transaction } = await import("@solana/web3.js");
+        const bidderPK = new PublicKey(effectivePublicKey);
+        const prevBidder = state.current_bidder ?? bidderPK;
+        const dummyWallet = { publicKey: bidderPK, signTransaction: async (t) => t, sendTransaction: async () => "" };
+        const provider = new AnchorProvider(connection, dummyWallet, { commitment: "confirmed" });
+        const program = new Program(idl, provider);
+        const ix = await program.methods
+          .placeBid(bidLamports)
+          .accounts({ bidder: bidderPK, config, auction: pubkey, bidVault, prevBidder, systemProgram: SystemProgram.programId })
+          .instruction();
+        const tx = new Transaction();
+        tx.add(ix);
+        tx.feePayer = bidderPK;
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        const serializedTx = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+        await deeplink.signAndSendTransactionDeepLink({ serializedTx, returnPath: window.location.pathname });
+        // redirects away — code below won't run
+      } else {
+        // ── Normal wallet adapter path ─────────────────────────────────────────
+        const prevBidder = state.current_bidder ?? wallet.publicKey;
+        const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
+        const program = new Program(idl, provider);
+        const sig = await program.methods
+          .placeBid(bidLamports)
+          .accounts({ bidder: wallet.publicKey, config, auction: pubkey, bidVault, prevBidder, systemProgram: SystemProgram.programId })
+          .rpc();
+        setTxSuccess(sig);
+        setHistoryLoading(true);
+        fetchBidHistory(connection, pubkey, auctionId)
+          .then(setBidHistory)
+          .catch(() => {})
+          .finally(() => setHistoryLoading(false));
+      }
     } catch (e) {
       setTxError(
         e?.message?.match(/custom program error: (0x\w+)/)?.[0] || e?.message || "Transaction failed"
       );
-    } finally {
       setBidding(false);
+    } finally {
+      if (!deeplink?.needsDeepLink) setBidding(false);
     }
   }
 
   async function settleAuction() {
-    if (!wallet.publicKey) return;
+    if (!effectivePublicKey) return;
     setSettleError(null);
     setSettleSuccess(null);
     setSettling(true);
@@ -313,16 +359,16 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
                     onChange={(e) => setBidInput(e.target.value)}
                     className="w-full bg-background border border-border px-3 py-2 pr-10 text-sm focus:outline-none focus:border-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder={minBidSol}
-                    disabled={!wallet.publicKey || bidding}
+                    disabled={!effectivePublicKey || bidding}
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">SOL</span>
                 </div>
-                {wallet.publicKey ? (
+                {effectivePublicKey ? (
                   <button onClick={placeBid} disabled={bidding} className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-50 transition-opacity">
                     {bidding ? "Sending…" : "Place Bid"}
                   </button>
                 ) : (
-                  <WalletMultiButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
+                  <ConnectButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
                 )}
               </div>
               {txError && <p className="text-xs text-red-600">{txError}</p>}
@@ -348,12 +394,12 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
                 <>
                   <p className="text-sm text-muted">
                     {state.current_bidder
-                      ? wallet.publicKey?.toBase58() === state.current_bidder.toBase58()
+                      ? effectivePublicKey === state.current_bidder.toBase58()
                         ? "You won this auction. Claim your NFT now."
                         : "Auction ended. Anyone can settle — the NFT transfers to the winner."
                       : "Auction ended with no bids. Settle to return the NFT to the seller."}
                   </p>
-                  {wallet.publicKey ? (
+                  {effectivePublicKey ? (
                     <button
                       onClick={settleAuction}
                       disabled={settling}
@@ -361,12 +407,12 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
                     >
                       {settling
                         ? "Settling…"
-                        : state.current_bidder?.toBase58() === wallet.publicKey?.toBase58()
+                        : state.current_bidder?.toBase58() === effectivePublicKey
                         ? "Claim Your NFT"
                         : "Settle Auction"}
                     </button>
                   ) : (
-                    <WalletMultiButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
+                    <ConnectButton style={{ backgroundColor: "#1a1a1a", color: "#f5f5f5", fontSize: "0.875rem", fontWeight: 600, borderRadius: "9999px", height: "auto", padding: "0.5rem 1rem", lineHeight: 1.5 }} />
                   )}
                   {settleError && <p className="text-xs text-red-600">{settleError}</p>}
                 </>
@@ -418,6 +464,7 @@ function AuctionPanel({ auctionData, slotMeta, connection, wallet }) {
 export default function CurrentAuction() {
   const { connection } = useConnection();
   const wallet = useWallet();
+  const deeplink = usePhantomDeeplink();
   const { slots, loading: scheduleLoading } = useAuctionSchedule();
 
   const [activeAuctions, setActiveAuctions] = useState([]); // [{pubkey, state}]
@@ -485,6 +532,7 @@ export default function CurrentAuction() {
                 slotMeta={slotMeta}
                 connection={connection}
                 wallet={wallet}
+                deeplink={deeplink}
               />
             );
           })}

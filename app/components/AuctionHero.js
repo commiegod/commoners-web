@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PublicKey, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
+import ConnectButton from "./ConnectButton";
 import { AnchorProvider, Program, BN } from "@coral-xyz/anchor";
 import bounties from "../../data/bounties.json";
 import idl from "../../lib/idl.json";
@@ -62,7 +63,14 @@ function Skeleton() {
 export default function AuctionHero() {
   const { connection } = useConnection();
   const wallet = useWallet();
+  const deeplink = usePhantomDeeplink();
   const { slots, loading: scheduleLoading } = useAuctionSchedule();
+
+  // Effective public key — deep link session takes precedence on mobile
+  const effectivePublicKey =
+    deeplink?.needsDeepLink && deeplink?.connected
+      ? deeplink.publicKey
+      : wallet.publicKey?.toBase58() ?? null;
 
   const [auctionData, setAuctionData] = useState(null);
   const [label, setLabel] = useState("TODAY'S AUCTION");
@@ -142,10 +150,26 @@ export default function AuctionHero() {
     setBidInput((min.toNumber() / LAMPORTS_PER_SOL).toFixed(3));
   }, [chainAuction]);
 
+  // ── Handle return from Phantom signAndSendTransaction ──────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get("deeplink_tx_sent")) return;
+    const raw = localStorage.getItem("phantom_tx_result");
+    if (!raw) return;
+    try {
+      const { signature } = JSON.parse(raw);
+      localStorage.removeItem("phantom_tx_result");
+      setTxSuccess(signature);
+      window.history.replaceState({}, "", window.location.pathname);
+      fetchChainState();
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── bid placement ───────────────────────────────────────────────────────────
 
   async function placeBid() {
-    if (!wallet.publicKey || !chainAuction) return;
+    if (!effectivePublicKey || !chainAuction) return;
     setTxError(null);
     setTxSuccess(null);
     setBidding(true);
@@ -158,42 +182,59 @@ export default function AuctionHero() {
         setTxError(
           `Bid too low. Minimum: ${(minBid.toNumber() / LAMPORTS_PER_SOL).toFixed(3)} SOL`
         );
+        setBidding(false);
         return;
       }
-
-      const provider = new AnchorProvider(connection, wallet, {
-        commitment: "confirmed",
-      });
-      const program = new Program(idl, provider);
 
       const auctionId = chainAuction.state.auction_id;
       const [bidVault] = bidVaultPDA(auctionId);
       const [config] = configPDA();
-      const prevBidder =
-        chainAuction.state.current_bidder ?? wallet.publicKey;
 
-      const sig = await program.methods
-        .placeBid(bidLamports)
-        .accounts({
-          bidder: wallet.publicKey,
-          config,
-          auction: chainAuction.pubkey,
-          bidVault,
-          prevBidder,
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc();
+      if (deeplink?.needsDeepLink && deeplink?.connected) {
+        // ── Deep link path: build tx, send to Phantom to sign & submit ────────
+        const { Transaction } = await import("@solana/web3.js");
+        const bidderPK = new PublicKey(effectivePublicKey);
+        const prevBidder = chainAuction.state.current_bidder ?? bidderPK;
 
-      setTxSuccess(sig);
-      await fetchChainState();
+        // Build the instruction via Anchor without signing
+        const dummyWallet = { publicKey: bidderPK, signTransaction: async (t) => t, sendTransaction: async () => "" };
+        const provider = new AnchorProvider(connection, dummyWallet, { commitment: "confirmed" });
+        const program = new Program(idl, provider);
+        const ix = await program.methods
+          .placeBid(bidLamports)
+          .accounts({ bidder: bidderPK, config, auction: chainAuction.pubkey, bidVault, prevBidder, systemProgram: SystemProgram.programId })
+          .instruction();
+
+        const tx = new Transaction();
+        tx.add(ix);
+        tx.feePayer = bidderPK;
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+
+        const serializedTx = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+        await deeplink.signAndSendTransactionDeepLink({ serializedTx, returnPath: window.location.pathname });
+        // ^^ redirects away, code below won't run
+      } else {
+        // ── Normal wallet adapter path ─────────────────────────────────────────
+        const prevBidder = chainAuction.state.current_bidder ?? wallet.publicKey;
+        const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
+        const program = new Program(idl, provider);
+        const sig = await program.methods
+          .placeBid(bidLamports)
+          .accounts({ bidder: wallet.publicKey, config, auction: chainAuction.pubkey, bidVault, prevBidder, systemProgram: SystemProgram.programId })
+          .rpc();
+        setTxSuccess(sig);
+        await fetchChainState();
+      }
     } catch (e) {
       const msg =
         e?.message?.match(/custom program error: (0x\w+)/)?.[0] ||
         e?.message ||
         "Transaction failed";
       setTxError(msg);
-    } finally {
       setBidding(false);
+    } finally {
+      if (!deeplink?.needsDeepLink) setBidding(false);
     }
   }
 
@@ -289,13 +330,13 @@ export default function AuctionHero() {
                           onChange={(e) => setBidInput(e.target.value)}
                           className="w-full bg-background border border-border px-3 py-2 pr-10 text-sm focus:outline-none focus:border-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           placeholder={minBidSol || "0.000"}
-                          disabled={!wallet.publicKey || bidding}
+                          disabled={!effectivePublicKey || bidding}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
                           SOL
                         </span>
                       </div>
-                      {wallet.publicKey ? (
+                      {effectivePublicKey ? (
                         <button
                           onClick={placeBid}
                           disabled={bidding}
@@ -304,7 +345,7 @@ export default function AuctionHero() {
                           {bidding ? "Sending…" : "Place Bid"}
                         </button>
                       ) : (
-                        <WalletMultiButton
+                        <ConnectButton
                           style={{
                             backgroundColor: "#1a1a1a",
                             color: "#f5f5f5",
