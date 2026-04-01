@@ -87,8 +87,8 @@ function CallbackHandler() {
           const sep = returnPath.includes("?") ? "&" : "?";
           // Full reload so provider remounts and session stays visible
           window.location.href = `${returnPath}${sep}deeplink_signed=1`;
-        } else if (action === "signAndSendTransaction") {
-          // ── signAndSendTransaction response ─────────────────────────────────
+        } else if (action === "signTransaction") {
+          // ── signTransaction response: Phantom signed it, we broadcast ─────────
           const nonce = searchParams.get("nonce");
           const data = searchParams.get("data");
 
@@ -96,16 +96,30 @@ function CallbackHandler() {
           if (!boxKey) throw new Error("No session box key found — please reconnect");
 
           const decrypted = decryptPayload(data, nonce, boxKey);
-          const { signature } = decrypted;
+          // decrypted.transaction is a bs58-encoded signed transaction
+          const signedTxBytes = new Uint8Array(bs58.decode(decrypted.transaction));
 
-          localStorage.setItem(
-            "phantom_tx_result",
-            JSON.stringify({ signature, ts: Date.now() })
-          );
+          setStatus("Broadcasting transaction…");
 
-          setStatus("Transaction sent! Returning…");
-          const sep = returnPath.includes("?") ? "&" : "?";
-          window.location.href = `${returnPath}${sep}deeplink_tx_sent=1`;
+          // Broadcast the signed transaction ourselves
+          import("@solana/web3.js").then(({ Connection }) => {
+            const rpcUrl =
+              process.env.NEXT_PUBLIC_HELIUS_RPC_URL ||
+              "https://api.mainnet-beta.solana.com";
+            const connection = new Connection(rpcUrl, "confirmed");
+            return connection.sendRawTransaction(signedTxBytes, {
+              skipPreflight: false,
+              preflightCommitment: "confirmed",
+            });
+          }).then((signature) => {
+            localStorage.setItem(
+              "phantom_tx_result",
+              JSON.stringify({ signature, ts: Date.now() })
+            );
+            setStatus("Transaction sent! Returning…");
+            const sep = returnPath.includes("?") ? "&" : "?";
+            window.location.href = `${returnPath}${sep}deeplink_tx_sent=1`;
+          });
 
         } else {
           // ── Connect response ────────────────────────────────────────────────
