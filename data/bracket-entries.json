@@ -642,10 +642,13 @@
         "r2_midwest_3": "midwest_s7",
         "r3_midwest_1": "midwest_s11",
         "r3_midwest_0": "midwest_s1",
-        "r4_midwest": "midwest_s1"
+        "r4_midwest": "midwest_s1",
+        "ff_1": "midwest_s1",
+        "champ": "midwest_s1"
       },
-      "tiebreaker": 98,
-      "submittedAt": 1773879732223
+      "tiebreaker": 169,
+      "submittedAt": 1773879732223,
+      "ffRepickAt": 1775136605273
     },
     {
       "id": "7d9b7202-e16b-4721-8d75-378771dfef35",
