@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getGameTeams, R1_MATCHUPS, getRound, ROUND_POINTS } from "../../lib/bracket";
+import { getGameTeams, getTeamById, R1_MATCHUPS, getRound, ROUND_POINTS } from "../../lib/bracket";
 
 const ROUND_LABELS = { 1: "R64", 2: "R32", 3: "S16", 4: "E8" };
 const MOBILE_TABS = [
@@ -33,9 +33,6 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminated
   const isCorrectPick = result && pick === team.id && result === pick;
   const isWrongPick = result && pick && pick !== result && pick === team.id;
   const isClickable = mode === "pick" && onPickChange && !result && !isEliminated;
-
-  // Points earned for a correct pick
-  const pts = isCorrectPick ? (ROUND_POINTS[getRound(gameId)] ?? null) : null;
 
   let textClass = "text-foreground";
   if (isEliminated) textClass = "text-muted/35";
@@ -77,16 +74,6 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminated
       ) : pickPct != null ? (
         <span className="text-muted/40 shrink-0 ml-1">{pickPct}%</span>
       ) : null}
-
-      {/* Points badge for a correct pick */}
-      {pts && (
-        <span className="shrink-0 text-[9px] font-bold text-green-600 ml-0.5 whitespace-nowrap">+{pts}</span>
-      )}
-
-      {/* Star indicator: this team is the user's pending pick */}
-      {mode === "view" && isPicked && (
-        <span className="shrink-0 text-[9px] text-gold ml-0.5">★</span>
-      )}
     </div>
   );
 }
@@ -106,10 +93,29 @@ function Matchup({ gameId, bracket, results, picks, onPickChange, mode, eliminat
   const teamAScore = gameScore && result && teamA ? (teamA.id === result ? gameScore.winner : gameScore.loser) : null;
   const teamBScore = gameScore && result && teamB ? (teamB.id === result ? gameScore.winner : gameScore.loser) : null;
 
+  // Pick label row (view mode)
+  const pick = picks[gameId];
+  const pickedTeam = pick ? getTeamById(bracket, pick) : null;
+  const isCorrect = !!(result && result === pick);
+  const isWrong = !!(result && pick && result !== pick);
+  const pts = isCorrect ? (ROUND_POINTS[getRound(gameId)] ?? null) : null;
+  const pickLabel = pickedTeam ? (pickedTeam.shortName ?? pickedTeam.name) : null;
+
   return (
     <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden">
       <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctA} teamScore={teamAScore} />
       <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctB} teamScore={teamBScore} />
+      {mode === "view" && pickLabel && (
+        <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] border-t border-border/50 ${
+          isCorrect ? "bg-green-500/10 text-green-600" :
+          isWrong   ? "bg-red-500/10 text-red-400"    :
+                      "text-gold/80"
+        }`}>
+          <span className="shrink-0 font-bold">{isCorrect ? "✓" : isWrong ? "✗" : "◆"}</span>
+          <span className="truncate flex-1">{pickLabel}</span>
+          {pts && <span className="shrink-0 font-bold ml-0.5 whitespace-nowrap">+{pts}</span>}
+        </div>
+      )}
     </div>
   );
 }
