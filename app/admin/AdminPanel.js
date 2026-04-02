@@ -643,6 +643,8 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
   const [teamNames, setTeamNames] = useState({});
   // Results editing: { r1_east_0: "east_s1", ... }
   const [resultsEdits, setResultsEdits] = useState({});
+  // Score editing: { r1_east_0: { winner: 72, loser: 53 }, ... }
+  const [scoresEdits, setScoresEdits] = useState({});
   // Status + deadline
   const [statusEdit, setStatusEdit] = useState("");
   const [deadlineEdit, setDeadlineEdit] = useState("");
@@ -685,6 +687,7 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
       }
       setTeamNames(names);
       setResultsEdits({ ...b.results });
+      setScoresEdits({ ...(b.scores ?? {}) });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -738,7 +741,14 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
   }
 
   function saveResults() {
-    save({ results: resultsEdits });
+    // Strip empty score entries before saving
+    const cleanScores = {};
+    for (const [gameId, s] of Object.entries(scoresEdits)) {
+      if (s?.winner != null && s?.loser != null && s.winner !== "" && s.loser !== "") {
+        cleanScores[gameId] = { winner: Number(s.winner), loser: Number(s.loser) };
+      }
+    }
+    save({ results: resultsEdits, scores: cleanScores });
   }
 
   async function espnSync(type) {
@@ -881,13 +891,20 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
 
   function ResultGameRow({ game }) {
     const winner = resultsEdits[game.id] || "";
+    const gameScore = scoresEdits[game.id] || {};
     const options = [
       ...(game.teamAId ? [{ id: game.teamAId, label: game.labelA }] : []),
       ...(game.teamBId ? [{ id: game.teamBId, label: game.labelB }] : []),
     ];
+    function setScore(field, val) {
+      setScoresEdits(prev => ({
+        ...prev,
+        [game.id]: { ...(prev[game.id] || {}), [field]: val },
+      }));
+    }
     return (
-      <div className="flex items-center gap-3 py-1.5 border-b border-border/50 last:border-0 text-xs">
-        <div className="flex-1 text-muted">{game.labelA} <span className="text-muted/40">vs</span> {game.labelB}</div>
+      <div className="flex flex-wrap items-center gap-2 py-1.5 border-b border-border/50 last:border-0 text-xs">
+        <div className="flex-1 min-w-[120px] text-muted">{game.labelA} <span className="text-muted/40">vs</span> {game.labelB}</div>
         <select
           value={winner}
           onChange={e => setResultsEdits(prev => ({ ...prev, [game.id]: e.target.value || undefined }))}
@@ -896,6 +913,32 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
           <option value="">— No result —</option>
           {options.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
+        {/* Score inputs — only shown when a winner is selected */}
+        {winner && (
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min="0"
+              max="200"
+              placeholder="W"
+              value={gameScore.winner ?? ""}
+              onChange={e => setScore("winner", e.target.value)}
+              className="bg-background border border-border px-1.5 py-1 text-xs focus:outline-none focus:border-gold w-14 text-center"
+              title="Winner score"
+            />
+            <span className="text-muted/40">–</span>
+            <input
+              type="number"
+              min="0"
+              max="200"
+              placeholder="L"
+              value={gameScore.loser ?? ""}
+              onChange={e => setScore("loser", e.target.value)}
+              className="bg-background border border-border px-1.5 py-1 text-xs focus:outline-none focus:border-gold w-14 text-center"
+              title="Loser score"
+            />
+          </div>
+        )}
       </div>
     );
   }

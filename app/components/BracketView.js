@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getGameTeams, R1_MATCHUPS } from "../../lib/bracket";
+import { getGameTeams, R1_MATCHUPS, getRound, ROUND_POINTS } from "../../lib/bracket";
 
 const ROUND_LABELS = { 1: "R64", 2: "R32", 3: "S16", 4: "E8" };
 const MOBILE_TABS = [
@@ -14,7 +14,7 @@ const MOBILE_TABS = [
 
 // ── Team slot ─────────────────────────────────────────────────────────────────
 
-function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminatedTeams, pickPct }) {
+function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminatedTeams, pickPct, teamScore }) {
   if (!team) {
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 text-xs border-b border-border last:border-0 text-muted/40">
@@ -33,6 +33,9 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminated
   const isCorrectPick = result && pick === team.id && result === pick;
   const isWrongPick = result && pick && pick !== result && pick === team.id;
   const isClickable = mode === "pick" && onPickChange && !result && !isEliminated;
+
+  // Points earned for a correct pick
+  const pts = isCorrectPick ? (ROUND_POINTS[getRound(gameId)] ?? null) : null;
 
   let textClass = "text-foreground";
   if (isEliminated) textClass = "text-muted/35";
@@ -67,8 +70,22 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminated
         <img src={team.logoUrl} alt="" className={`w-3.5 h-3.5 object-contain shrink-0 ${isEliminated ? "opacity-25 grayscale" : ""}`} aria-hidden="true" />
       )}
       <span className="truncate leading-tight flex-1">{team.name || "TBD"}</span>
-      {pickPct != null && (
+
+      {/* Score (when game is complete) or pick% (when game pending) */}
+      {teamScore != null ? (
+        <span className={`shrink-0 font-mono text-[10px] ml-1 ${isWinner || isCorrectPick ? "font-bold" : "text-muted/50"}`}>{teamScore}</span>
+      ) : pickPct != null ? (
         <span className="text-muted/40 shrink-0 ml-1">{pickPct}%</span>
+      ) : null}
+
+      {/* Points badge for a correct pick */}
+      {pts && (
+        <span className="shrink-0 text-[9px] font-bold text-green-600 ml-0.5 whitespace-nowrap">+{pts}</span>
+      )}
+
+      {/* Star indicator: this team is the user's pending pick */}
+      {mode === "view" && isPicked && (
+        <span className="shrink-0 text-[9px] text-gold ml-0.5">★</span>
       )}
     </div>
   );
@@ -76,23 +93,30 @@ function TeamSlot({ team, gameId, results, picks, onPickChange, mode, eliminated
 
 // ── Single matchup box ────────────────────────────────────────────────────────
 
-function Matchup({ gameId, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution }) {
+function Matchup({ gameId, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution, scores }) {
   const { teamA, teamB } = getGameTeams(gameId, bracket, results, picks);
   const gameDist = pickDistribution?.[gameId];
   const total = gameDist?.total || 0;
   const pctA = total && teamA ? Math.round(((gameDist[teamA.id] || 0) / total) * 100) : null;
   const pctB = total && teamB ? Math.round(((gameDist[teamB.id] || 0) / total) * 100) : null;
+
+  // Per-team scores from completed game data
+  const gameScore = scores?.[gameId];
+  const result = results[gameId];
+  const teamAScore = gameScore && result && teamA ? (teamA.id === result ? gameScore.winner : gameScore.loser) : null;
+  const teamBScore = gameScore && result && teamB ? (teamB.id === result ? gameScore.winner : gameScore.loser) : null;
+
   return (
     <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden">
-      <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctA} />
-      <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctB} />
+      <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctA} teamScore={teamAScore} />
+      <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctB} teamScore={teamBScore} />
     </div>
   );
 }
 
 // ── Single round column ───────────────────────────────────────────────────────
 
-function RegionRound({ region, round, count, label, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution }) {
+function RegionRound({ region, round, count, label, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution, scores }) {
   const gameIds = [];
   for (let i = 0; i < count; i++) {
     if (round === 1) gameIds.push(`r1_${region}_${i}`);
@@ -116,6 +140,7 @@ function RegionRound({ region, round, count, label, bracket, results, picks, onP
             mode={mode}
             eliminatedTeams={eliminatedTeams}
             pickDistribution={pickDistribution}
+            scores={scores}
           />
         ))}
       </div>
@@ -125,7 +150,7 @@ function RegionRound({ region, round, count, label, bracket, results, picks, onP
 
 // ── Full region block (4 rounds) ──────────────────────────────────────────────
 
-function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, flip, eliminatedTeams, pickDistribution }) {
+function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, flip, eliminatedTeams, pickDistribution, scores }) {
   const regionData = bracket.regions[regionKey];
   if (!regionData) return null;
 
@@ -150,6 +175,7 @@ function RegionBlock({ regionKey, bracket, results, picks, onPickChange, mode, f
       mode={mode}
       eliminatedTeams={eliminatedTeams}
       pickDistribution={pickDistribution}
+      scores={scores}
     />
   ));
 
@@ -199,7 +225,7 @@ function FFPickSplit({ gameId, bracket, results, picks, pickDistribution }) {
 
 // ── Center Final Four + Championship column ───────────────────────────────────
 
-function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution }) {
+function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution, scores }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 px-4 min-w-[172px] max-w-[190px]">
 
@@ -212,7 +238,7 @@ function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedT
             <span className="ml-1.5 text-[10px] text-gold font-semibold">{FF_GAME_INFO.ff_0.spread}</span>
           </p>
         </div>
-        <Matchup gameId="ff_0" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <Matchup gameId="ff_0" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} scores={scores} />
         <FFPickSplit gameId="ff_0" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
 
@@ -223,7 +249,7 @@ function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedT
           <p className="text-[10px] text-muted">{FF_GAME_INFO.champ.date}</p>
           <p className="text-[10px] text-muted">{FF_GAME_INFO.champ.tv}</p>
         </div>
-        <Matchup gameId="champ" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <Matchup gameId="champ" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} scores={scores} />
         <FFPickSplit gameId="champ" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
 
@@ -236,7 +262,7 @@ function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedT
             <span className="ml-1.5 text-[10px] text-gold font-semibold">{FF_GAME_INFO.ff_1.spread}</span>
           </p>
         </div>
-        <Matchup gameId="ff_1" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <Matchup gameId="ff_1" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} scores={scores} />
         <FFPickSplit gameId="ff_1" bracket={bracket} results={results} picks={picks} pickDistribution={pickDistribution} />
       </div>
 
@@ -246,11 +272,11 @@ function CenterColumn({ bracket, results, picks, onPickChange, mode, eliminatedT
 
 // ── Mobile single-region view ─────────────────────────────────────────────────
 
-function MobileRegionView({ regionKey, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution }) {
+function MobileRegionView({ regionKey, bracket, results, picks, onPickChange, mode, eliminatedTeams, pickDistribution, scores }) {
   if (regionKey === "ff") {
     return (
       <div className="overflow-x-auto py-4 px-2">
-        <CenterColumn bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+        <CenterColumn bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} scores={scores} />
       </div>
     );
   }
@@ -280,6 +306,7 @@ function MobileRegionView({ regionKey, bracket, results, picks, onPickChange, mo
             mode={mode}
             eliminatedTeams={eliminatedTeams}
             pickDistribution={pickDistribution}
+            scores={scores}
           />
         ))}
       </div>
@@ -303,6 +330,7 @@ export default function BracketView({
   bracket,
   results = {},
   picks = {},
+  scores = {},
   onPickChange = null,
   mode = "view",
   fit = false,
@@ -361,6 +389,7 @@ export default function BracketView({
           bracket={bracket}
           results={results}
           picks={picks}
+          scores={scores}
           onPickChange={onPickChange}
           mode={mode}
           eliminatedTeams={eliminatedTeams}
@@ -381,17 +410,17 @@ export default function BracketView({
         >
           {/* Left half: East (top) + South (bottom) */}
           <div className="flex flex-col gap-6">
-            <RegionBlock regionKey="east" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={false} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
-            <RegionBlock regionKey="south" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={false} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+            <RegionBlock regionKey="east" bracket={bracket} results={results} picks={picks} scores={scores} onPickChange={onPickChange} mode={mode} flip={false} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+            <RegionBlock regionKey="south" bracket={bracket} results={results} picks={picks} scores={scores} onPickChange={onPickChange} mode={mode} flip={false} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
           </div>
 
           {/* Center */}
-          <CenterColumn bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+          <CenterColumn bracket={bracket} results={results} picks={picks} scores={scores} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
 
           {/* Right half: West (top) + Midwest (bottom) — mirrored */}
           <div className="flex flex-col gap-6">
-            <RegionBlock regionKey="west" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={true} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
-            <RegionBlock regionKey="midwest" bracket={bracket} results={results} picks={picks} onPickChange={onPickChange} mode={mode} flip={true} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+            <RegionBlock regionKey="west" bracket={bracket} results={results} picks={picks} scores={scores} onPickChange={onPickChange} mode={mode} flip={true} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
+            <RegionBlock regionKey="midwest" bracket={bracket} results={results} picks={picks} scores={scores} onPickChange={onPickChange} mode={mode} flip={true} eliminatedTeams={eliminatedTeams} pickDistribution={pickDistribution} />
           </div>
         </div>
       </div>

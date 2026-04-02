@@ -83,6 +83,7 @@ export default function BracketPage() {
   }, []);
 
   const results = bracket?.results ?? {};
+  const scores  = bracket?.scores  ?? {};
   const tournamentStarted =
     bracket?.status === "in_progress" || bracket?.status === "complete";
   const visibleEntries = showAll ? entries : entries.slice(0, SHOW_INITIAL);
@@ -421,7 +422,7 @@ export default function BracketPage() {
             <div className="animate-pulse bg-card border border-border rounded h-64 mx-2" />
           ) : bracket ? (
             <div className="border border-border rounded overflow-hidden bg-background">
-              <BracketView bracket={bracket} results={results} fit pickDistribution={pickDistribution} />
+              <BracketView bracket={bracket} results={results} scores={scores} fit pickDistribution={pickDistribution} />
             </div>
           ) : null}
         </div>

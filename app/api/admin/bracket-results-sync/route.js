@@ -70,6 +70,7 @@ export async function POST(request) {
   }
 
   const results = { ...(bracket.results ?? {}) };
+  const scores  = { ...(bracket.scores  ?? {}) };
   let updated = 0;
   const skipped = [];
 
@@ -125,6 +126,14 @@ export async function POST(request) {
       updated++;
     }
 
+    // Store game scores for display in bracket view
+    if (!scores[gameId]) {
+      const loser = competitors.find((c) => !c.winner);
+      if (winner.score > 0 && loser?.score > 0) {
+        scores[gameId] = { winner: winner.score, loser: loser.score };
+      }
+    }
+
     // Store championship final scores for tiebreaker
     if (info.round === "champ") {
       const loser = competitors.find((c) => !c.winner);
@@ -135,6 +144,7 @@ export async function POST(request) {
   }
 
   bracket.results = results;
+  bracket.scores  = scores;
   await putFile(
     "data/bracket-2026.json",
     bracket,

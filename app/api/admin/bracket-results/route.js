@@ -13,7 +13,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { results, status, entryDeadline, teams, championshipScore } = body ?? {};
+    const { results, status, entryDeadline, teams, championshipScore, scores } = body ?? {};
 
     const { content: bracket, sha } = await getFile("data/bracket-2026.json");
     if (!bracket) {
@@ -69,6 +69,11 @@ export async function POST(request) {
           }
         }
       }
+    }
+
+    // Merge game scores (partial update: { [gameId]: { winner: N, loser: N } })
+    if (scores && typeof scores === "object") {
+      bracket.scores = { ...(bracket.scores ?? {}), ...scores };
     }
 
     // Update championship score (for tiebreaker)

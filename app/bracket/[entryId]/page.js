@@ -80,6 +80,7 @@ export default function EntryPage() {
   if (!entry || !bracket) return null;
 
   const results = bracket.results ?? {};
+  const scores  = bracket.scores  ?? {};
   const champTeam = entry.picks?.champ ? getTeamById(bracket, entry.picks.champ) : null;
 
   return (
@@ -181,6 +182,7 @@ export default function EntryPage() {
           <BracketView
             bracket={bracket}
             results={results}
+            scores={scores}
             picks={entry.picks}
             mode="view"
           />
