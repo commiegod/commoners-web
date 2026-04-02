@@ -103,19 +103,19 @@ function Matchup({ gameId, bracket, results, picks, onPickChange, mode, eliminat
 
   return (
     <div className="border border-border bg-background min-w-[120px] max-w-[140px] overflow-hidden">
-      <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctA} teamScore={teamAScore} />
-      <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctB} teamScore={teamBScore} />
       {mode === "view" && pickLabel && (
-        <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] border-t border-border/50 ${
+        <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] border-b border-border/50 ${
           isCorrect ? "bg-green-500/10 text-green-600" :
           isWrong   ? "bg-red-500/10 text-red-400"    :
                       "text-gold/80"
         }`}>
-          <span className="shrink-0 font-bold">{isCorrect ? "✓" : isWrong ? "✗" : "◆"}</span>
-          <span className="truncate flex-1">{pickLabel}</span>
-          {pts && <span className="shrink-0 font-bold ml-0.5 whitespace-nowrap">+{pts}</span>}
+          <span className="truncate flex-1 font-semibold">{pickLabel}</span>
+          {pts && <span className="shrink-0 font-bold whitespace-nowrap">+{pts}</span>}
+          <span className="shrink-0 ml-0.5">{isCorrect ? "✓" : isWrong ? "✗" : "◆"}</span>
         </div>
       )}
+      <TeamSlot team={teamA} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctA} teamScore={teamAScore} />
+      <TeamSlot team={teamB} gameId={gameId} results={results} picks={picks} onPickChange={onPickChange} mode={mode} eliminatedTeams={eliminatedTeams} pickPct={pctB} teamScore={teamBScore} />
     </div>
   );
 }
