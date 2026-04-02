@@ -544,5 +544,247 @@
     "r4_south": "south_s3",
     "r4_midwest": "midwest_s1",
     "r4_east": "east_s2"
+  },
+  "scores": {
+    "r1_east_0": {
+      "winner": 71,
+      "loser": 65
+    },
+    "r1_midwest_0": {
+      "winner": 101,
+      "loser": 80
+    },
+    "r1_south_7": {
+      "winner": 78,
+      "loser": 47
+    },
+    "r1_east_5": {
+      "winner": 92,
+      "loser": 67
+    },
+    "r1_south_5": {
+      "winner": 105,
+      "loser": 70
+    },
+    "r1_west_5": {
+      "winner": 73,
+      "loser": 64
+    },
+    "r1_south_3": {
+      "winner": 76,
+      "loser": 47
+    },
+    "r1_west_3": {
+      "winner": 97,
+      "loser": 78
+    },
+    "r1_west_2": {
+      "winner": 83,
+      "loser": 82
+    },
+    "r1_south_2": {
+      "winner": 78,
+      "loser": 68
+    },
+    "r1_east_4": {
+      "winner": 83,
+      "loser": 79
+    },
+    "r1_south_4": {
+      "winner": 82,
+      "loser": 78
+    },
+    "r1_west_4": {
+      "winner": 79,
+      "loser": 71
+    },
+    "r1_south_6": {
+      "winner": 63,
+      "loser": 50
+    },
+    "r1_east_1": {
+      "winner": 66,
+      "loser": 64
+    },
+    "r1_midwest_1": {
+      "winner": 102,
+      "loser": 77
+    },
+    "r1_west_0": {
+      "winner": 92,
+      "loser": 58
+    },
+    "r1_south_0": {
+      "winner": 114,
+      "loser": 55
+    },
+    "r1_midwest_7": {
+      "winner": 108,
+      "loser": 74
+    },
+    "r1_west_7": {
+      "winner": 104,
+      "loser": 71
+    },
+    "r1_east_7": {
+      "winner": 82,
+      "loser": 71
+    },
+    "r1_midwest_5": {
+      "winner": 82,
+      "loser": 73
+    },
+    "r1_midwest_3": {
+      "winner": 90,
+      "loser": 70
+    },
+    "r1_east_3": {
+      "winner": 68,
+      "loser": 60
+    },
+    "r1_midwest_2": {
+      "winner": 91,
+      "loser": 71
+    },
+    "r1_east_2": {
+      "winner": 79,
+      "loser": 53
+    },
+    "r1_midwest_4": {
+      "winner": 78,
+      "loser": 56
+    },
+    "r1_midwest_6": {
+      "winner": 89,
+      "loser": 84
+    },
+    "r1_east_6": {
+      "winner": 75,
+      "loser": 71
+    },
+    "r1_west_6": {
+      "winner": 80,
+      "loser": 66
+    },
+    "r1_west_1": {
+      "winner": 86,
+      "loser": 76
+    },
+    "r1_south_1": {
+      "winner": 67,
+      "loser": 61
+    },
+    "r2_midwest_0": {
+      "winner": 95,
+      "loser": 72
+    },
+    "r2_east_0": {
+      "winner": 81,
+      "loser": 58
+    },
+    "r2_south_3": {
+      "winner": 88,
+      "loser": 57
+    },
+    "r2_east_2": {
+      "winner": 77,
+      "loser": 69
+    },
+    "r2_west_2": {
+      "winner": 74,
+      "loser": 68
+    },
+    "r2_south_2": {
+      "winner": 76,
+      "loser": 55
+    },
+    "r2_south_1": {
+      "winner": 74,
+      "loser": 72
+    },
+    "r2_west_1": {
+      "winner": 94,
+      "loser": 88
+    },
+    "r2_south_0": {
+      "winner": 73,
+      "loser": 72
+    },
+    "r2_west_0": {
+      "winner": 78,
+      "loser": 66
+    },
+    "r2_west_3": {
+      "winner": 79,
+      "loser": 69
+    },
+    "r2_midwest_3": {
+      "winner": 82,
+      "loser": 63
+    },
+    "r2_east_3": {
+      "winner": 73,
+      "loser": 57
+    },
+    "r2_midwest_2": {
+      "winner": 79,
+      "loser": 72
+    },
+    "r2_east_1": {
+      "winner": 67,
+      "loser": 65
+    },
+    "r2_midwest_1": {
+      "winner": 90,
+      "loser": 65
+    },
+    "r3_west_0": {
+      "winner": 109,
+      "loser": 88
+    },
+    "r3_west_1": {
+      "winner": 79,
+      "loser": 77
+    },
+    "r3_south_1": {
+      "winner": 65,
+      "loser": 55
+    },
+    "r3_south_0": {
+      "winner": 77,
+      "loser": 71
+    },
+    "r3_east_0": {
+      "winner": 80,
+      "loser": 75
+    },
+    "r3_midwest_0": {
+      "winner": 90,
+      "loser": 77
+    },
+    "r3_east_1": {
+      "winner": 67,
+      "loser": 63
+    },
+    "r3_midwest_1": {
+      "winner": 76,
+      "loser": 62
+    },
+    "r4_west": {
+      "winner": 79,
+      "loser": 64
+    },
+    "r4_south": {
+      "winner": 71,
+      "loser": 59
+    },
+    "r4_midwest": {
+      "winner": 95,
+      "loser": 62
+    },
+    "r4_east": {
+      "winner": 73,
+      "loser": 72
+    }
   }
 }
