@@ -1106,9 +1106,14 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
 
       {/* Entry list */}
       <div className="bg-card border border-border p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs text-muted uppercase tracking-widest">
-            Entries ({entries.length} total)
+            Entries ({entries.length} total
+            {entries.length > 0 && (() => {
+              const missing = entries.filter(e => !e.picks?.ff_0 || !e.picks?.ff_1 || !e.picks?.champ || e.tiebreaker == null).length;
+              return missing > 0 ? <span className="text-red-500 ml-1">· {missing} missing FF picks</span> : null;
+            })()}
+            )
           </p>
           {entries.length > 0 && (
             <input
@@ -1128,23 +1133,43 @@ function BracketAdminSection({ token, onEntriesLoaded }) {
               if (!entrySearch) return true;
               const q = entrySearch.toLowerCase();
               return entry.username?.toLowerCase().includes(q) || entry.walletAddress?.toLowerCase().includes(q);
-            }).map((entry, i) => (
-              <div key={entry.id} className="flex items-center gap-2 text-xs py-1 border-b border-border/50 last:border-0">
-                <span className="text-muted w-6 shrink-0">#{i+1}</span>
-                <span className="flex-1 font-medium truncate">{entry.username}</span>
-                <span className="font-mono text-muted shrink-0">{entry.walletAddress?.slice(0,4)}…{entry.walletAddress?.slice(-4)}</span>
-                <span className="font-semibold text-gold shrink-0">{entry.score ?? 0} pts</span>
-                <a href={`/bracket/${entry.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-foreground shrink-0">↗</a>
-                <button
-                  onClick={() => deleteEntry(entry.id)}
-                  disabled={deletingEntryId === entry.id}
-                  className="text-muted hover:text-red-500 transition-colors shrink-0 disabled:opacity-40 cursor-pointer"
-                  title="Delete entry"
-                >
-                  {deletingEntryId === entry.id ? "…" : "✕"}
-                </button>
-              </div>
-            ))}
+            }).map((entry, i) => {
+              const hasFF = entry.picks?.ff_0 && entry.picks?.ff_1 && entry.picks?.champ && entry.tiebreaker != null;
+              const ff0Name = entry.picks?.ff_0 ? (teamNames[entry.picks.ff_0] || entry.picks.ff_0) : null;
+              const ff1Name = entry.picks?.ff_1 ? (teamNames[entry.picks.ff_1] || entry.picks.ff_1) : null;
+              const champName = entry.picks?.champ ? (teamNames[entry.picks.champ] || entry.picks.champ) : null;
+              return (
+                <div key={entry.id} className={`text-xs py-1.5 border-b border-border/50 last:border-0 ${!hasFF ? "bg-red-500/5" : ""}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted w-6 shrink-0">#{i+1}</span>
+                    <span className="flex-1 font-medium truncate">{entry.username}</span>
+                    <span className="font-mono text-muted shrink-0">{entry.walletAddress?.slice(0,4)}…{entry.walletAddress?.slice(-4)}</span>
+                    <span className="font-semibold text-gold shrink-0">{entry.score ?? 0} pts</span>
+                    {hasFF ? (
+                      <span className="text-green-600 shrink-0" title="FF picks submitted">✓</span>
+                    ) : (
+                      <span className="text-red-500 shrink-0 font-semibold" title="Missing FF picks">!</span>
+                    )}
+                    <a href={`/bracket/${entry.id}`} target="_blank" rel="noreferrer" className="text-muted hover:text-foreground shrink-0">↗</a>
+                    <button
+                      onClick={() => deleteEntry(entry.id)}
+                      disabled={deletingEntryId === entry.id}
+                      className="text-muted hover:text-red-500 transition-colors shrink-0 disabled:opacity-40 cursor-pointer"
+                      title="Delete entry"
+                    >
+                      {deletingEntryId === entry.id ? "…" : "✕"}
+                    </button>
+                  </div>
+                  {/* FF picks detail row */}
+                  <div className="flex gap-3 mt-0.5 pl-8 text-muted">
+                    <span>FF1: <span className={ff0Name ? "text-foreground" : "text-red-400"}>{ff0Name ?? "—"}</span></span>
+                    <span>FF2: <span className={ff1Name ? "text-foreground" : "text-red-400"}>{ff1Name ?? "—"}</span></span>
+                    <span>Champ: <span className={champName ? "text-gold" : "text-red-400"}>{champName ?? "—"}</span></span>
+                    <span>TB: <span className={entry.tiebreaker != null ? "text-foreground" : "text-red-400"}>{entry.tiebreaker ?? "—"}</span></span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
