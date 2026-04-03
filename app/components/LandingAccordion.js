@@ -38,7 +38,7 @@ export default function LandingAccordion() {
         grows in value with every auction.
       </p>
 
-      <div className="border-t border-border">
+      <div id="faq" className="border-t border-border">
         <AccordionItem title="Who Are Commoners">
           <p className="text-muted leading-relaxed">
             In the MidEvils collection, most NFTs carry 4–8 visible traits.
@@ -239,6 +239,33 @@ export default function LandingAccordion() {
             The zero-fee threshold is the first governance proposal — the community votes to
             confirm or adjust the exact amounts.
           </p>
+        </AccordionItem>
+
+        <AccordionItem title="Burns & The Graveyard">
+          <p className="text-muted leading-relaxed mb-4">
+            Burning a Commoner NFT is an irreversible action — and it carries a permanent consequence
+            for governance. If you burn your 3-trait MidEvil, you forfeit your membership in the
+            Commoner&apos;s DAO. The burned NFT no longer registers in the eligibility check, so the
+            wallet loses its vote immediately.
+          </p>
+          <p className="text-muted leading-relaxed mb-4">
+            This is intentional. The DAO&apos;s health depends on active, participating holders. Locking
+            up governance tokens through burns sounds compelling, but it tends to concentrate power
+            without improving decisions — and it severs the holder from the community they helped
+            build. Keeping your Commoner means keeping your seat at the table, and keeping the asset
+            liquid for whatever comes next.
+          </p>
+          <p className="text-muted leading-relaxed mb-5">
+            Burned Commoners aren&apos;t forgotten. They live on as soulbound tokens in the{" "}
+            <strong className="text-foreground">MidEvil Graveyard</strong> collection — a permanent
+            on-chain record of every character that was sacrificed. We&apos;ve built a shrine to honor them.
+          </p>
+          <a
+            href="/graveyard"
+            className="inline-block px-4 py-2 border border-border text-muted text-sm hover:text-foreground hover:border-foreground transition-colors"
+          >
+            Visit the Graveyard ↗
+          </a>
         </AccordionItem>
 
         <AccordionItem title="Links & Resources">

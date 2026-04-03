@@ -243,8 +243,37 @@ export default function BracketPage() {
                 </div>
               )}
               {bracket.status === "complete" && (
-                <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
-                  Tournament complete. Final standings below.
+                <div className="space-y-3">
+                  <div className="bg-card border border-border rounded px-4 py-3 text-sm text-foreground">
+                    Tournament complete. Final standings below.
+                  </div>
+                  {entries.length > 0 && (() => {
+                    const winner = entries[0];
+                    const champ = winner?.picks?.champ
+                      ? getTeamById(bracket, winner.picks.champ)
+                      : null;
+                    return (
+                      <div className="border border-gold/50 bg-gold/5 rounded px-5 py-4 flex items-center gap-4 flex-wrap">
+                        <span className="text-2xl">🏆</span>
+                        <div>
+                          <p className="text-xs text-gold uppercase tracking-widest mb-0.5">Winner</p>
+                          <p className="font-blackletter text-xl text-foreground leading-tight">
+                            {winner.username}
+                          </p>
+                          {champ && (
+                            <p className="text-xs text-muted mt-0.5">
+                              Called {champ.shortName ?? champ.name} — {winner.score} / {MAX_SCORE} pts
+                            </p>
+                          )}
+                        </div>
+                        <div className="ml-auto text-right">
+                          <p className="text-xs text-muted">Prize</p>
+                          <p className="text-sm font-medium text-foreground">MidEvil #3614 — Chadwick</p>
+                          <p className="text-xs text-muted/60">Transferred directly to winner&apos;s wallet</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

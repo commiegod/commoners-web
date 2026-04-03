@@ -219,13 +219,14 @@ export default function GalleryPage() {
             <button
               key={nft.id}
               onClick={() => setSelected(nft)}
-              className="group relative overflow-hidden bg-background aspect-square focus:outline-none cursor-pointer"
+              className="group relative overflow-hidden bg-card aspect-square focus:outline-none cursor-pointer"
             >
               <img
                 src={nft.image}
                 alt={nft.name}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
+                decoding="async"
               />
               {/* Name + rarity — visible on hover only */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-2 pt-6 pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

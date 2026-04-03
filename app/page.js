@@ -10,6 +10,16 @@ export default function Home() {
       <CurrentAuction />
       <RecentAuctions />
 
+      {/* ── Testing phase note ── */}
+      <div className="text-center -mt-8">
+        <p className="text-xs text-muted/60">
+          Auctions are live on Solana devnet —{" "}
+          <a href="/#faq" className="hover:text-muted underline underline-offset-2 transition-colors">
+            what does that mean?
+          </a>
+        </p>
+      </div>
+
       {/* ── Tagline / Story section ── */}
       <section
         className="border-y border-border"

@@ -13,6 +13,19 @@ const links = [
   { href: "/midevils", label: "Scrolls" },
 ];
 
+// Mid March Madness bracket pill lifecycle:
+// - Before Apr 7 2026 end of day: LIVE
+// - Apr 8–14 2026: show "Results" (no LIVE badge)
+// - After Apr 14 2026: hidden
+const BRACKET_LIVE_UNTIL   = new Date("2026-04-08T00:00:00");
+const BRACKET_RESULTS_UNTIL = new Date("2026-04-15T00:00:00");
+function getBracketPhase() {
+  const now = new Date();
+  if (now < BRACKET_LIVE_UNTIL)    return "live";
+  if (now < BRACKET_RESULTS_UNTIL) return "results";
+  return "hidden";
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -27,21 +40,30 @@ export default function Nav() {
 
         {/* Desktop links + wallet */}
         <div className="hidden sm:flex items-center gap-6">
-          {/* Bracket — temporary featured link */}
-          <Link
-            href="/bracket"
-            className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
-              pathname === "/bracket"
-                ? "bg-gold text-card border-gold"
-                : "bg-gold/10 text-gold border-gold/40 hover:bg-gold/20"
-            }`}
-          >
-            <span>🏀</span>
-            <span className="font-blackletter tracking-wide">Mid March Madness</span>
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide">
-              Live
-            </span>
-          </Link>
+          {/* Bracket — featured link, lifecycle-aware */}
+          {getBracketPhase() !== "hidden" && (
+            <Link
+              href="/bracket"
+              className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                pathname === "/bracket"
+                  ? "bg-gold text-card border-gold"
+                  : "bg-gold/10 text-gold border-gold/40 hover:bg-gold/20"
+              }`}
+            >
+              <span>🏀</span>
+              <span className="font-blackletter tracking-wide">Mid March Madness</span>
+              {getBracketPhase() === "live" && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide">
+                  Live
+                </span>
+              )}
+              {getBracketPhase() === "results" && (
+                <span className="absolute -top-2 -right-2 bg-foreground text-background text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide">
+                  Results
+                </span>
+              )}
+            </Link>
+          )}
 
           {links.map((link) => (
             <Link
@@ -113,20 +135,29 @@ export default function Nav() {
 
         {/* Links — large, centered */}
         <div className="flex-1 flex flex-col justify-center px-8 overflow-y-auto">
-          {/* Bracket — featured */}
-          <Link
-            href="/bracket"
-            onClick={() => setOpen(false)}
-            className={`flex items-center gap-2 py-4 font-blackletter text-3xl border-b border-border/40 transition-colors ${
-              pathname === "/bracket" ? "text-gold" : "text-foreground hover:text-gold"
-            }`}
-          >
-            <span>🏀</span>
-            <span>Mid March Madness</span>
-            <span className="ml-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide self-center">
-              Live
-            </span>
-          </Link>
+          {/* Bracket — featured, lifecycle-aware */}
+          {getBracketPhase() !== "hidden" && (
+            <Link
+              href="/bracket"
+              onClick={() => setOpen(false)}
+              className={`flex items-center gap-2 py-4 font-blackletter text-3xl border-b border-border/40 transition-colors ${
+                pathname === "/bracket" ? "text-gold" : "text-foreground hover:text-gold"
+              }`}
+            >
+              <span>🏀</span>
+              <span>Mid March Madness</span>
+              {getBracketPhase() === "live" && (
+                <span className="ml-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide self-center">
+                  Live
+                </span>
+              )}
+              {getBracketPhase() === "results" && (
+                <span className="ml-1 bg-foreground text-background text-[9px] font-bold px-1.5 py-px rounded-full leading-none uppercase tracking-wide self-center">
+                  Results
+                </span>
+              )}
+            </Link>
+          )}
 
           {links.map((link) => (
             <Link

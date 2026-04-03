@@ -1,0 +1,45 @@
+{
+  "note": "The 5 Commoner NFTs (3-trait MidEvils) that have been burned. Each entry should include the original commoner mint address, the graveyard soulbound token address, the NFT number/name, the image URL, traits, and the approximate burn date. Populate from the MidEvil Graveyard collection on-chain.",
+  "burned": [
+    {
+      "id": "",
+      "graveyardMint": "",
+      "name": "MidEvil #???",
+      "image": "",
+      "burnedAt": "",
+      "traits": []
+    },
+    {
+      "id": "",
+      "graveyardMint": "",
+      "name": "MidEvil #???",
+      "image": "",
+      "burnedAt": "",
+      "traits": []
+    },
+    {
+      "id": "",
+      "graveyardMint": "",
+      "name": "MidEvil #???",
+      "image": "",
+      "burnedAt": "",
+      "traits": []
+    },
+    {
+      "id": "",
+      "graveyardMint": "",
+      "name": "MidEvil #???",
+      "image": "",
+      "burnedAt": "",
+      "traits": []
+    },
+    {
+      "id": "",
+      "graveyardMint": "",
+      "name": "MidEvil #???",
+      "image": "",
+      "burnedAt": "",
+      "traits": []
+    }
+  ]
+}
