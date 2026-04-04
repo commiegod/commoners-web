@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchBurnedCommoners } from "../../lib/graveyard";
+import { TOTAL_NFTS } from "../../lib/commoners";
 
 export const metadata = {
   title: "The Graveyard — Commoner's DAO",
@@ -99,7 +100,7 @@ export default async function GraveyardPage() {
     fetchError = true;
   }
 
-  const remaining = 120 - burned.length;
+  const remaining = TOTAL_NFTS - burned.length;
 
   return (
     <div className="max-w-2xl">

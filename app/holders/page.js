@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import commoners from "../../data/commoners.json";
 import { RPC_URL } from "../../lib/programClient";
+import { TOTAL_NFTS } from "../../lib/commoners";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
@@ -107,12 +108,12 @@ export default function HoldersPage() {
 
   const uniqueHolders = leaderboard.length;
   const avgPerHolder =
-    uniqueHolders > 0 ? (120 / uniqueHolders).toFixed(1) : "—";
+    uniqueHolders > 0 ? (TOTAL_NFTS / uniqueHolders).toFixed(1) : "—";
   const topHolder = leaderboard[0]?.count ?? 0;
 
   // Additional stats
   const top10Count = leaderboard.slice(0, 10).reduce((s, r) => s + r.count, 0);
-  const top10Pct = uniqueHolders > 0 ? ((top10Count / 120) * 100).toFixed(1) : "—";
+  const top10Pct = uniqueHolders > 0 ? ((top10Count / TOTAL_NFTS) * 100).toFixed(1) : "—";
   const singleHolders = leaderboard.filter((r) => r.count === 1).length;
 
   // Distribution buckets: 1, 2, 3, 4, 5+
@@ -148,7 +149,7 @@ export default function HoldersPage() {
           label="Unique Holders"
           value={loading ? "—" : uniqueHolders}
         />
-        <StatCard label="Total Supply" value={120} sub="3-trait MidEvils" />
+        <StatCard label="Total Supply" value={TOTAL_NFTS} sub="3-trait MidEvils" />
         <StatCard
           label="Avg per Holder"
           value={loading ? "—" : avgPerHolder}
@@ -221,7 +222,7 @@ export default function HoldersPage() {
           </div>
 
           {leaderboard.map((row, i) => {
-            const pct = ((row.count / 120) * 100).toFixed(1);
+            const pct = ((row.count / TOTAL_NFTS) * 100).toFixed(1);
             const isExpanded = expanded === row.wallet;
 
             return (
