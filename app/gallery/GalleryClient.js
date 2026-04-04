@@ -1,25 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import commoners from "../../data/commoners.json";
 import rarityData from "../../data/rarity.json";
 
 const RARITY = rarityData.rankings; // mint → { rank, score }
-
-// Precompute trait type → sorted unique values (from full set; burned ones are filtered later)
-const TRAIT_MAP = {};
-for (const nft of commoners.nfts) {
-  for (const { trait_type, value } of nft.traits) {
-    if (!TRAIT_MAP[trait_type]) TRAIT_MAP[trait_type] = new Set();
-    TRAIT_MAP[trait_type].add(value);
-  }
-}
-// Skip trait types with only one value (no filtering utility)
-const FILTER_TYPES = Object.entries(TRAIT_MAP)
-  .filter(([, v]) => v.size > 1)
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([k]) => k);
-for (const t of FILTER_TYPES) TRAIT_MAP[t] = [...TRAIT_MAP[t]].sort();
 
 function nftNumber(name) {
   return parseInt(name.match(/#(\d+)/)?.[1] ?? "0", 10);
@@ -29,14 +13,25 @@ function shortAddr(addr) {
   return addr.slice(0, 4) + "…" + addr.slice(-4);
 }
 
-// burnedMints: string[] of mint addresses to exclude (passed from server component)
-export default function GalleryClient({ burnedMints = [] }) {
-  const burnedSet = useMemo(() => new Set(burnedMints), [burnedMints]);
-  // Active Commoners only — burned ones live on the Graveyard page
-  const activeNfts = useMemo(
-    () => commoners.nfts.filter((nft) => !burnedSet.has(nft.id)),
-    [burnedSet]
-  );
+// nfts: active Commoner NFTs passed from the server component.
+// Already filtered (burned excluded, 3-trait only) — no client-side filtering needed.
+export default function GalleryClient({ nfts = [] }) {
+  // Build trait filter map from the live nfts list
+  const { TRAIT_MAP, FILTER_TYPES } = useMemo(() => {
+    const map = {};
+    for (const nft of nfts) {
+      for (const { trait_type, value } of nft.traits) {
+        if (!map[trait_type]) map[trait_type] = new Set();
+        map[trait_type].add(value);
+      }
+    }
+    const types = Object.entries(map)
+      .filter(([, v]) => v.size > 1)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k]) => k);
+    for (const t of types) map[t] = [...map[t]].sort();
+    return { TRAIT_MAP: map, FILTER_TYPES: types };
+  }, [nfts]);
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("number-asc");
@@ -47,7 +42,7 @@ export default function GalleryClient({ burnedMints = [] }) {
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   const filtered = useMemo(() => {
-    let list = [...activeNfts];
+    let list = [...nfts];
 
     // Trait filters
     for (const [type, val] of Object.entries(filters)) {
@@ -114,7 +109,7 @@ export default function GalleryClient({ burnedMints = [] }) {
       <div className="px-4 pt-6 pb-4 max-w-6xl mx-auto">
         <h1 className="font-blackletter text-3xl text-gold mb-1">Gallery</h1>
         <p className="text-sm text-muted">
-          {activeNfts.length} active Commoner NFTs — 3-trait MidEvils with exactly Background, Skin,
+          {nfts.length} active Commoner NFTs — 3-trait MidEvils with exactly Background, Skin,
           and one additional trait. Each grants one vote in the DAO.
         </p>
       </div>
@@ -203,7 +198,7 @@ export default function GalleryClient({ burnedMints = [] }) {
           {/* Count */}
           <span className="ml-auto text-sm text-muted">
             {filtered.length}
-            <span className="hidden sm:inline"> / {activeNfts.length} Commoners</span>
+            <span className="hidden sm:inline"> / {nfts.length} Commoners</span>
           </span>
         </div>
       </div>
