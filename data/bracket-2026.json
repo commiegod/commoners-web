@@ -544,7 +544,8 @@
     "r4_south": "south_s3",
     "r4_midwest": "midwest_s1",
     "r4_east": "east_s2",
-    "ff_0": "east_s2"
+    "ff_0": "east_s2",
+    "ff_1": "midwest_s1"
   },
   "scores": {
     "r1_east_0": {
@@ -790,6 +791,10 @@
     "ff_0": {
       "winner": 71,
       "loser": 62
+    },
+    "ff_1": {
+      "winner": 91,
+      "loser": 73
     }
   }
 }
