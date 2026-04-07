@@ -545,7 +545,8 @@
     "r4_midwest": "midwest_s1",
     "r4_east": "east_s2",
     "ff_0": "east_s2",
-    "ff_1": "midwest_s1"
+    "ff_1": "midwest_s1",
+    "champ": "midwest_s1"
   },
   "scores": {
     "r1_east_0": {
@@ -795,6 +796,14 @@
     "ff_1": {
       "winner": 91,
       "loser": 73
+    },
+    "champ": {
+      "winner": 69,
+      "loser": 63
     }
+  },
+  "championshipScore": {
+    "winner": 69,
+    "loser": 63
   }
 }
