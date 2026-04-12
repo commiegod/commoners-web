@@ -1,7 +1,7 @@
 {
   "year": 2026,
-  "status": "complete",
-  "ff_repick_open": false,
+  "status": "in_progress",
+  "ff_repick_open": true,
   "entryDeadline": "2026-03-19T20:15:00.000Z",
   "ffPairings": [
     [
@@ -545,8 +545,7 @@
     "r4_midwest": "midwest_s1",
     "r4_east": "east_s2",
     "ff_0": "east_s2",
-    "ff_1": "midwest_s1",
-    "champ": "midwest_s1"
+    "ff_1": "midwest_s1"
   },
   "scores": {
     "r1_east_0": {
@@ -796,14 +795,6 @@
     "ff_1": {
       "winner": 91,
       "loser": 73
-    },
-    "champ": {
-      "winner": 69,
-      "loser": 63
     }
-  },
-  "championshipScore": {
-    "winner": 69,
-    "loser": 63
   }
 }
