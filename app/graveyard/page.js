@@ -159,7 +159,7 @@ export default async function GraveyardPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
           {burned.map((nft) => (
-            <BurnedCard key={nft.graveyardMint} nft={nft} />
+            <BurnedCard key={nft.originalMint} nft={nft} />
           ))}
         </div>
       )}
