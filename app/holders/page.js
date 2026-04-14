@@ -13,7 +13,7 @@ const MAINNET_RPC =
   process.env.NEXT_PUBLIC_HELIUS_MAINNET_RPC_URL ||
   "https://api.mainnet-beta.solana.com";
 
-const CACHE_KEY = "holders_v1";
+const CACHE_KEY = "holders_v2"; // bumped: filters burned + exposes activeSupply
 const CACHE_TTL = 5 * 60 * 1000;
 const MINTS = commoners.nfts.map((n) => n.id);
 
@@ -60,8 +60,13 @@ async function loadHolders(skipCache = false) {
   const json = await res.json();
   const assets = json.result || [];
 
+  // Exclude burned Commoners — their last owner is still in DAS but they
+  // no longer count toward supply, governance, or leaderboard standings.
+  const activeAssets = assets.filter((a) => a && a.burnt !== true);
+  const burnedCount = assets.length - activeAssets.length;
+
   const ownerMap = {};
-  for (const asset of assets) {
+  for (const asset of activeAssets) {
     const owner = asset?.ownership?.owner;
     const mint = asset?.id;
     if (!owner || !mint) continue;
@@ -73,7 +78,8 @@ async function loadHolders(skipCache = false) {
     .map(([wallet, mints]) => ({ wallet, count: mints.length, mints }))
     .sort((a, b) => b.count - a.count);
 
-  const data = { leaderboard, fetchedAt: Date.now() };
+  const activeSupply = activeAssets.length;
+  const data = { leaderboard, activeSupply, burnedCount, fetchedAt: Date.now() };
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
   } catch (_) {}
@@ -83,6 +89,8 @@ async function loadHolders(skipCache = false) {
 
 export default function HoldersPage() {
   const [leaderboard, setLeaderboard] = useState([]);
+  const [activeSupply, setActiveSupply] = useState(TOTAL_NFTS);
+  const [burnedCount, setBurnedCount] = useState(0);
   const [fetchedAt, setFetchedAt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,6 +102,8 @@ export default function HoldersPage() {
     try {
       const result = await loadHolders(skipCache);
       setLeaderboard(result.leaderboard);
+      setActiveSupply(result.activeSupply ?? TOTAL_NFTS);
+      setBurnedCount(result.burnedCount ?? 0);
       setFetchedAt(result.fetchedAt);
     } catch (e) {
       setError(e.message);
@@ -108,12 +118,13 @@ export default function HoldersPage() {
 
   const uniqueHolders = leaderboard.length;
   const avgPerHolder =
-    uniqueHolders > 0 ? (TOTAL_NFTS / uniqueHolders).toFixed(1) : "—";
+    uniqueHolders > 0 ? (activeSupply / uniqueHolders).toFixed(1) : "—";
   const topHolder = leaderboard[0]?.count ?? 0;
 
   // Additional stats
   const top10Count = leaderboard.slice(0, 10).reduce((s, r) => s + r.count, 0);
-  const top10Pct = uniqueHolders > 0 ? ((top10Count / TOTAL_NFTS) * 100).toFixed(1) : "—";
+  const top10Pct =
+    activeSupply > 0 ? ((top10Count / activeSupply) * 100).toFixed(1) : "—";
   const singleHolders = leaderboard.filter((r) => r.count === 1).length;
 
   // Distribution buckets: 1, 2, 3, 4, 5+
@@ -149,7 +160,15 @@ export default function HoldersPage() {
           label="Unique Holders"
           value={loading ? "—" : uniqueHolders}
         />
-        <StatCard label="Total Supply" value={TOTAL_NFTS} sub="3-trait MidEvils" />
+        <StatCard
+          label="Active Supply"
+          value={loading ? "—" : activeSupply}
+          sub={
+            burnedCount > 0
+              ? `${TOTAL_NFTS} minted · ${burnedCount} burned`
+              : "3-trait MidEvils"
+          }
+        />
         <StatCard
           label="Avg per Holder"
           value={loading ? "—" : avgPerHolder}
@@ -222,7 +241,7 @@ export default function HoldersPage() {
           </div>
 
           {leaderboard.map((row, i) => {
-            const pct = ((row.count / TOTAL_NFTS) * 100).toFixed(1);
+            const pct = ((row.count / activeSupply) * 100).toFixed(1);
             const isExpanded = expanded === row.wallet;
 
             return (
