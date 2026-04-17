@@ -162,17 +162,27 @@ function build() {
 
   for (const m of discord) {
     const ts = m.timestamp ?? "", fn = m.filename_local ?? "", ch = m.channel ?? "unknown";
-    if (!ts || !fn || !m.downloaded) continue;
+    if (!ts) continue;
     const dt = parseDate(ts); if (!dt) continue;
     if (fn.includes("be6cfc6c")) continue;
+
+    // Determine if this entry has a directly-servable URL
+    const url = m.url ?? "";
+    const hasTwimg = url.includes("twimg.com");
+    const hasCdn   = url.includes("cdn.discordapp.com") || url.includes("media.discordapp.net");
+    const directUrl = hasTwimg ? url : null;
+
+    // Include entry if: downloaded to R2, OR has a direct Twitter image URL, OR has a CDN URL
+    if (!m.downloaded && !directUrl && !hasCdn) continue;
+    if (!fn && !directUrl && !hasCdn) continue;
+
     const wk = weekKey(dt);
     const bucket = ensureWeek(wk, dt);
     bucket.count++;
     bucket.channels[ch] = (bucket.channels[ch] ?? 0) + 1;
-    const twitterUrl = m.type === "embed" && m.url?.includes("twimg.com") ? m.url : null;
     bucket.images.push({
-      file: twitterUrl ?? `by-month/discord/${m.month}/${ch}/${fn}`,
-      direct: !!twitterUrl, channel: ch, author: m.author ?? "", ts: ts.slice(0, 10),
+      file: directUrl ?? (hasCdn ? url : `by-month/discord/${m.month}/${ch}/${fn}`),
+      direct: !!(directUrl || hasCdn), channel: ch, author: m.author ?? "", ts: ts.slice(0, 10),
     });
   }
 
