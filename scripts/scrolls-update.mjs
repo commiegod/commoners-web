@@ -456,17 +456,9 @@ async function crawlDiscord(context) {
           }
 
           // Embeds (Twitter previews, linked images, etc.)
+          // Only capture embed.image (full content image), NOT embed.thumbnail
+          // (thumbnails are just profile pics, X logos, and tiny icons)
           for (const embed of (msg.embeds || [])) {
-            // Thumbnail image (common for Twitter embeds)
-            if (embed.thumbnail?.proxy_url || embed.thumbnail?.url) {
-              images.push({
-                type: "embed",
-                url: embed.thumbnail.proxy_url || embed.thumbnail.url,
-                filename: null,
-                embedType: embed.type || "rich",
-              });
-            }
-            // Full image embed
             if (embed.image?.proxy_url || embed.image?.url) {
               images.push({
                 type: "embed",
