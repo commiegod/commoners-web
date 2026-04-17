@@ -70,7 +70,7 @@ const DISCORD_CHANNELS = [
   { name: "events",         id: "1417838150016958474" },
 ];
 
-const DISCORD_SCROLL_ROUNDS = 6;
+const DISCORD_SCROLL_ROUNDS = 15;
 const DISCORD_SCROLL_WAIT = 2000;
 
 // ── Snowflake ID → date (works for both Twitter and Discord) ─────────────────
@@ -108,11 +108,24 @@ function tweetIdToISO(idStr) {
 
 // ── Chrome profile setup ─────────────────────────────────────────────────────
 
+// Temp profile for Twitter (copied from Chrome Default — X sessions survive the copy)
 function makeTempProfile() {
   const tmp = mkdtempSync(join(tmpdir(), "scrolls-chrome-"));
   console.log(`  temp profile: ${tmp}`);
   execSync(`cp -r "${CHROME_DEFAULT}" "${tmp}/Default"`, { stdio: "inherit" });
   return tmp;
+}
+
+// Persistent profile for Discord (Discord sessions don't survive profile copies,
+// so we keep a dedicated Playwright profile that stays logged in between runs)
+const DISCORD_PROFILE_DIR = resolve(PROJECT_ROOT, ".playwright-discord-profile");
+
+function ensureDiscordProfile() {
+  const isNew = !existsSync(DISCORD_PROFILE_DIR);
+  if (isNew) {
+    execSync(`mkdir -p "${DISCORD_PROFILE_DIR}"`);
+  }
+  return isNew;
 }
 
 // ── Scrape a Twitter/X media tab ─────────────────────────────────────────────
@@ -280,142 +293,248 @@ async function crawlOfficialTweets(context) {
   return newEntries.length;
 }
 
-// ── Discord channel crawl ────────────────────────────────────────────────────
+// ── Discord channel crawl (API-based) ────────────────────────────────────────
+//
+// Uses Discord's internal API via fetch() from inside the browser context.
+// Since we're on discord.com with a logged-in session, the requests are
+// authenticated automatically. This is vastly faster than scroll-based
+// scraping — 100 messages per request instead of ~20 per scroll.
+
+const DISCORD_API_BATCH = 100; // max per request
+const DISCORD_API_DELAY = 1500; // ms between requests (rate limit safety)
+const DISCORD_MAX_PAGES = 20; // max pages per channel (2000 messages)
 
 async function crawlDiscord(context) {
-  console.log("\n── Crawling Discord channels ──");
+  console.log("\n── Crawling Discord channels (API mode) ──");
   const page = await context.newPage();
 
-  // Load existing registry and build a set of known message IDs
   const existing = JSON.parse(readFileSync(DISCORD_REGISTRY_PATH, "utf8"));
   const existingMsgIds = new Set(existing.map((e) => e.msgId));
 
-  // Find the latest timestamp so we know when to stop scrolling
+  // Find latest message ID per channel so we only fetch newer messages
+  const latestPerChannel = {};
+  for (const e of existing) {
+    const ch = e.channel;
+    const id = e.msgId;
+    if (!latestPerChannel[ch] || BigInt(id) > BigInt(latestPerChannel[ch])) {
+      latestPerChannel[ch] = id;
+    }
+  }
+
   let latestTimestamp = "";
   for (const e of existing) {
     if ((e.timestamp ?? "") > latestTimestamp) latestTimestamp = e.timestamp;
   }
   console.log(`  existing: ${existing.length} entries, latest: ${latestTimestamp.slice(0, 10)}`);
 
+  // Navigate to Discord and extract auth token
+  await page.goto(`https://discord.com/channels/${DISCORD_SERVER_ID}/${DISCORD_CHANNELS[0].id}`, {
+    waitUntil: "domcontentloaded", timeout: 30000,
+  });
+  await page.waitForTimeout(5000);
+
+  // Extract the user token from Discord's webpack modules
+  const authToken = await page.evaluate(() => {
+    // Method 1: webpackChunkdiscord_app — find getToken in all modules
+    try {
+      const wp = (window.webpackChunkdiscord_app || []);
+      let token = null;
+      wp.push([["__token_extract__"], {}, (req) => {
+        for (const id of Object.keys(req.c || {})) {
+          const mod = req.c[id]?.exports;
+          if (!mod) continue;
+          // Check every export and sub-export for getToken
+          const candidates = [mod, mod.default, mod.Z, mod.ZP];
+          for (const obj of candidates) {
+            if (!obj) continue;
+            if (typeof obj.getToken === "function") {
+              const t = obj.getToken();
+              if (typeof t === "string" && t.length > 20) { token = t; break; }
+            }
+            // Check all keys on the object
+            if (typeof obj === "object") {
+              for (const key of Object.keys(obj)) {
+                const sub = obj[key];
+                if (sub && typeof sub.getToken === "function") {
+                  const t = sub.getToken();
+                  if (typeof t === "string" && t.length > 20) { token = t; break; }
+                }
+              }
+            }
+            if (token) break;
+          }
+          if (token) break;
+        }
+      }]);
+      if (token) return token;
+    } catch {}
+
+    // Method 2: intercept from localStorage via iframe
+    try {
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+      const raw = iframe.contentWindow?.localStorage?.getItem("token");
+      iframe.remove();
+      if (raw) {
+        const cleaned = raw.replace(/^"|"$/g, "");
+        if (cleaned.length > 20) return cleaned;
+      }
+    } catch {}
+
+    return null;
+  });
+
+  if (!authToken) {
+    console.error("  ⚠ Could not extract Discord auth token. Make sure you're logged in.");
+    await page.close();
+    return 0;
+  }
+  const token = String(authToken);
+  console.log(`  auth token acquired (${token.slice(0, 10)}...)`);
+
   let totalNew = 0;
   const allNewEntries = [];
 
   for (const channel of DISCORD_CHANNELS) {
-    const channelUrl = `https://discord.com/channels/${DISCORD_SERVER_ID}/${channel.id}`;
-    console.log(`\n  #${channel.name} → ${channelUrl}`);
+    console.log(`\n  #${channel.name}`);
 
     try {
-      await page.goto(channelUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-      // Wait for messages to load
-      await page.waitForTimeout(4000);
+      const afterId = latestPerChannel[channel.name] || null;
+      let fetchedTotal = 0;
+      let channelImages = 0;
+      let beforeId = null; // paginate backwards from newest
+      let reachedExisting = false;
 
-      const channelEntries = [];
+      for (let pageNum = 0; pageNum < DISCORD_MAX_PAGES; pageNum++) {
+        // Build API URL — fetch messages, paginating backwards
+        let apiUrl = `https://discord.com/api/v9/channels/${channel.id}/messages?limit=${DISCORD_API_BATCH}`;
+        if (beforeId) apiUrl += `&before=${beforeId}`;
 
-      for (let round = 0; round < DISCORD_SCROLL_ROUNDS; round++) {
-        // Extract messages with images/embeds
-        const messages = await page.evaluate(() => {
-          const results = [];
+        const batch = await page.evaluate(async ({ url, token }) => {
+          try {
+            const resp = await fetch(url, {
+              headers: { "Authorization": token },
+            });
+            if (!resp.ok) return { error: resp.status, text: await resp.text() };
+            return { messages: await resp.json() };
+          } catch (e) {
+            return { error: e.message };
+          }
+        }, { url: apiUrl, token });
 
-          // Find all message list items
-          const msgEls = document.querySelectorAll('[id^="chat-messages-"]');
+        if (batch.error) {
+          console.warn(`    ⚠ API error: ${batch.error}`);
+          break;
+        }
 
-          for (const msgEl of msgEls) {
-            // Extract message ID from the element ID
-            const idMatch = msgEl.id.match(/chat-messages-(\d+)/);
-            if (!idMatch) continue;
-            const msgId = idMatch[1];
+        const messages = batch.messages || [];
+        if (messages.length === 0) break;
+        fetchedTotal += messages.length;
 
-            // Find images in this message
-            const images = [];
+        // Update beforeId for next page (messages come newest-first)
+        beforeId = messages[messages.length - 1].id;
 
-            // Direct attachment images
-            const attachImgs = msgEl.querySelectorAll(
-              '[class*="imageWrapper"] img[src*="cdn.discordapp.com"], ' +
-              '[class*="imageWrapper"] img[src*="media.discordapp.net"]'
-            );
-            for (const img of attachImgs) {
-              const src = img.src || "";
-              if (src && !src.includes("emoji") && !src.includes("avatar")) {
-                images.push({ type: "attachment", url: src });
-              }
+        let pageImages = 0;
+        for (const msg of messages) {
+          // Stop if we've reached messages we already have
+          if (existingMsgIds.has(msg.id)) {
+            reachedExisting = true;
+            continue;
+          }
+
+          const images = [];
+
+          // Attachments (directly uploaded files)
+          for (const att of (msg.attachments || [])) {
+            if (!att.content_type?.startsWith("image/")) continue;
+            images.push({
+              type: "attachment",
+              url: att.proxy_url || att.url,
+              filename: att.filename,
+            });
+          }
+
+          // Embeds (Twitter previews, linked images, etc.)
+          for (const embed of (msg.embeds || [])) {
+            // Thumbnail image (common for Twitter embeds)
+            if (embed.thumbnail?.proxy_url || embed.thumbnail?.url) {
+              images.push({
+                type: "embed",
+                url: embed.thumbnail.proxy_url || embed.thumbnail.url,
+                filename: null,
+                embedType: embed.type || "rich",
+              });
             }
-
-            // Embedded images (e.g. Twitter embeds with preview images)
-            const embedImgs = msgEl.querySelectorAll(
-              '[class*="embed"] img[src*="pbs.twimg.com"], ' +
-              '[class*="embed"] img[src*="cdn.discordapp.com"]'
-            );
-            for (const img of embedImgs) {
-              const src = img.src || "";
-              if (src && !src.includes("emoji") && !src.includes("avatar")) {
-                images.push({ type: "embed", url: src });
-              }
-            }
-
-            // Also check for Twitter embed links
-            const tweetLinks = msgEl.querySelectorAll('a[href*="x.com/"], a[href*="twitter.com/"]');
-            let tweetUrl = "";
-            for (const a of tweetLinks) {
-              if (/\/status\/\d+/.test(a.href)) {
-                tweetUrl = a.href;
-                break;
-              }
-            }
-
-            if (images.length > 0) {
-              results.push({ msgId, images, tweetUrl });
+            // Full image embed
+            if (embed.image?.proxy_url || embed.image?.url) {
+              images.push({
+                type: "embed",
+                url: embed.image.proxy_url || embed.image.url,
+                filename: null,
+                embedType: embed.type || "rich",
+              });
             }
           }
 
-          return results;
-        });
+          if (images.length === 0) continue;
 
-        let roundNew = 0;
-        for (const msg of messages) {
-          if (existingMsgIds.has(msg.msgId)) continue;
-          existingMsgIds.add(msg.msgId); // prevent dupes within this run
+          // Extract tweet URL if present
+          let tweetUrl = "";
+          if (msg.content) {
+            const tweetMatch = msg.content.match(/https?:\/\/(x\.com|twitter\.com)\/\w+\/status\/\d+/);
+            if (tweetMatch) tweetUrl = tweetMatch[0];
+          }
+          for (const embed of (msg.embeds || [])) {
+            if (!tweetUrl && embed.url && /\/(x\.com|twitter\.com)\/\w+\/status\/\d+/.test(embed.url)) {
+              tweetUrl = embed.url;
+            }
+          }
 
-          const timestamp = discordSnowflakeToDate(msg.msgId);
-          const ts = timestamp ? timestamp.toISOString() : "";
-          const month = ts ? ts.slice(0, 7) : "unknown";
+          const timestamp = msg.timestamp || "";
+          const month = timestamp ? timestamp.slice(0, 7) : "unknown";
 
-          for (const img of msg.images) {
-            // Build a filename from the URL
-            const urlPath = new URL(img.url).pathname;
-            const urlFilename = urlPath.split("/").pop() || "image.jpg";
-            const filenameLocal = `${channel.name}_${msg.msgId}_${urlFilename}`;
+          for (const img of images) {
+            let urlFilename = img.filename || "image.jpg";
+            if (!img.filename) {
+              try { urlFilename = new URL(img.url).pathname.split("/").pop() || "image.jpg"; } catch {}
+            }
+            const filenameLocal = `${channel.name}_${msg.id}_${urlFilename}`;
 
-            channelEntries.push({
+            allNewEntries.push({
               source: "discord",
               channel: channel.name,
-              msgId: msg.msgId,
-              author: "user",
-              timestamp: ts,
+              msgId: msg.id,
+              author: msg.author?.username || "user",
+              timestamp,
               month,
               type: img.type,
+              embedType: img.embedType || "",
               url: img.url,
-              tweetUrl: msg.tweetUrl || "",
+              tweetUrl,
               filename_local: filenameLocal,
               downloaded: false,
             });
-            roundNew++;
+            pageImages++;
+            channelImages++;
           }
+          existingMsgIds.add(msg.id);
         }
 
-        console.log(`    round ${round + 1}/${DISCORD_SCROLL_ROUNDS}: +${roundNew} images this round`);
+        console.log(`    page ${pageNum + 1}: ${messages.length} msgs, +${pageImages} images`);
 
-        // Scroll up to load older messages
-        await page.evaluate(() => {
-          const scroller = document.querySelector('[class*="scroller"][data-list-id="chat-messages"]')
-            || document.querySelector('[class*="messagesWrapper"] [class*="scroller"]');
-          if (scroller) scroller.scrollTop = 0;
-        });
-        await page.waitForTimeout(DISCORD_SCROLL_WAIT);
+        // Stop if we've reached messages we already have
+        if (reachedExisting) {
+          console.log(`    reached existing entries, stopping`);
+          break;
+        }
+
+        // Rate limit pause
+        await page.waitForTimeout(DISCORD_API_DELAY);
       }
 
-      console.log(`  #${channel.name}: ${channelEntries.length} new images`);
-      allNewEntries.push(...channelEntries);
-      totalNew += channelEntries.length;
+      console.log(`  #${channel.name}: ${channelImages} new images (${fetchedTotal} msgs scanned)`);
+      totalNew += channelImages;
 
     } catch (e) {
       console.warn(`  ⚠ failed to crawl #${channel.name}: ${e.message}`);
@@ -424,7 +543,6 @@ async function crawlDiscord(context) {
 
   if (!DRY_RUN && allNewEntries.length > 0) {
     const merged = [...existing, ...allNewEntries];
-    // Sort by timestamp
     merged.sort((a, b) => (a.timestamp ?? "").localeCompare(b.timestamp ?? ""));
     writeFileSync(DISCORD_REGISTRY_PATH, JSON.stringify(merged, null, 2) + "\n");
     console.log(`\n  ✅ wrote ${merged.length} entries to discord_registry.json (+${allNewEntries.length})`);
@@ -489,42 +607,75 @@ async function main() {
   console.log(`  twitter: ${!NO_TWITTER}, discord: ${!NO_DISCORD}, artists: ${CRAWL_ARTISTS}`);
   console.log(`${"=".repeat(60)}`);
 
-  if (!existsSync(CHROME_DEFAULT)) {
-    console.error("Chrome Default profile not found at:", CHROME_DEFAULT);
-    process.exit(1);
-  }
-
-  const profileDir = makeTempProfile();
-
-  const context = await chromium.launchPersistentContext(profileDir, {
-    channel: "chrome",  // use system Chrome, not bundled Chromium
-    headless: false,    // X and Discord require a visible browser
-    viewport: VIEWPORT,
-    args: ["--no-sandbox"],
-  });
-
   let totalNew = 0;
 
-  try {
-    if (!NO_TWITTER) {
-      totalNew += await crawlMidEvils(context);
-      totalNew += await crawlOfficialTweets(context);
+  // ── Twitter crawl (uses temp copy of Chrome Default profile) ──
+  if (!NO_TWITTER) {
+    if (!existsSync(CHROME_DEFAULT)) {
+      console.error("Chrome Default profile not found at:", CHROME_DEFAULT);
+      process.exit(1);
     }
 
-    if (!NO_DISCORD) {
-      totalNew += await crawlDiscord(context);
+    const profileDir = makeTempProfile();
+    const twitterCtx = await chromium.launchPersistentContext(profileDir, {
+      channel: "chrome",
+      headless: false,
+      viewport: VIEWPORT,
+      args: ["--no-sandbox"],
+    });
+
+    try {
+      totalNew += await crawlMidEvils(twitterCtx);
+      totalNew += await crawlOfficialTweets(twitterCtx);
+    } catch (e) {
+      console.error("Twitter crawl error:", e);
+    } finally {
+      await twitterCtx.close();
+      try { execSync(`rm -rf "${profileDir}"`); } catch {}
+    }
+  }
+
+  // ── Discord crawl (uses persistent profile — survives between runs) ──
+  if (!NO_DISCORD) {
+    const isFirstRun = ensureDiscordProfile();
+
+    if (isFirstRun) {
+      console.log("\n══════════════════════════════════════════════════════════════");
+      console.log("  FIRST RUN: Discord profile needs setup.");
+      console.log("  A browser will open — please log into Discord.");
+      console.log("  Once logged in and you can see your channels,");
+      console.log("  close the browser and re-run this script.");
+      console.log("══════════════════════════════════════════════════════════════\n");
     }
 
-    if (CRAWL_ARTISTS) {
-      console.log("\n── Artist crawl not yet implemented in this script ──");
-      console.log("  (use --artists when ready)");
+    const discordCtx = await chromium.launchPersistentContext(DISCORD_PROFILE_DIR, {
+      channel: "chrome",
+      headless: false,
+      viewport: VIEWPORT,
+      args: ["--no-sandbox"],
+    });
+
+    try {
+      if (isFirstRun) {
+        // Navigate to Discord so the user can log in
+        const setupPage = await discordCtx.newPage();
+        await setupPage.goto("https://discord.com/login", { waitUntil: "domcontentloaded" });
+        console.log("  Waiting for you to log in... (close the browser when done)");
+        // Wait for the browser to be closed by the user
+        await new Promise((resolve) => discordCtx.on("close", resolve));
+        console.log("  Discord profile saved. Re-run the script to start crawling.");
+      } else {
+        totalNew += await crawlDiscord(discordCtx);
+      }
+    } catch (e) {
+      console.error("Discord crawl error:", e);
+    } finally {
+      try { await discordCtx.close(); } catch {}
     }
-  } catch (e) {
-    console.error("Crawl error:", e);
-  } finally {
-    await context.close();
-    // Clean up temp profile
-    try { execSync(`rm -rf "${profileDir}"`); } catch {}
+  }
+
+  if (CRAWL_ARTISTS) {
+    console.log("\n── Artist crawl not yet implemented in this script ──");
   }
 
   rebuildAndDeploy(totalNew);

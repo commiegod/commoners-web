@@ -43,3 +43,4 @@ data/midevils/timeline-prebuilt.json
 *.tsbuildinfo
 next-env.d.ts
 mcp/node_modules
+.playwright-discord-profile/
