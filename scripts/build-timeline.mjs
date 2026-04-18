@@ -168,21 +168,22 @@ function build() {
 
     // Determine if this entry has a directly-servable URL
     const url = m.url ?? "";
-    const hasTwimg = url.includes("twimg.com");
-    const hasCdn   = url.includes("cdn.discordapp.com") || url.includes("media.discordapp.net");
-    const directUrl = hasTwimg ? url : null;
+    const hasTwimg  = url.includes("twimg.com");
+    const hasCdn    = url.includes("cdn.discordapp.com") || url.includes("media.discordapp.net");
+    const hasProxy  = url.includes("images-ext-") || url.includes("/external/");
+    const hasDirectUrl = hasTwimg || hasCdn || hasProxy;
 
-    // Include entry if: downloaded to R2, OR has a direct Twitter image URL, OR has a CDN URL
-    if (!m.downloaded && !directUrl && !hasCdn) continue;
-    if (!fn && !directUrl && !hasCdn) continue;
+    // Include entry if: downloaded to R2, OR has any directly-servable URL
+    if (!m.downloaded && !hasDirectUrl) continue;
+    if (!fn && !hasDirectUrl) continue;
 
     const wk = weekKey(dt);
     const bucket = ensureWeek(wk, dt);
     bucket.count++;
     bucket.channels[ch] = (bucket.channels[ch] ?? 0) + 1;
     bucket.images.push({
-      file: directUrl ?? (hasCdn ? url : `by-month/discord/${m.month}/${ch}/${fn}`),
-      direct: !!(directUrl || hasCdn), channel: ch, author: m.author ?? "", ts: ts.slice(0, 10),
+      file: hasDirectUrl ? url : `by-month/discord/${m.month}/${ch}/${fn}`,
+      direct: !!hasDirectUrl, channel: ch, author: m.author ?? "", ts: ts.slice(0, 10),
     });
   }
 
