@@ -44,4 +44,5 @@ data/midevils/timeline-prebuilt.json
 next-env.d.ts
 mcp/node_modules
 .playwright-discord-profile/
+.chrome-cdp-wrapper/
 mcp/.mcpregistry_*

@@ -25,12 +25,10 @@
 
 import { chromium } from "playwright";
 import {
-  readFileSync, writeFileSync, existsSync, mkdtempSync,
+  readFileSync, writeFileSync, existsSync,
 } from "fs";
 import { resolve, join, dirname } from "path";
-import { execSync } from "child_process";
-import { tmpdir } from "os";
-import os from "os";
+import { execSync, spawn } from "child_process";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,11 +40,6 @@ const MEME_REGISTRY_PATH = resolve(PROJECT_ROOT, "data/midevils/meme_registry.js
 const TOP_TWEETS_PATH = resolve(PROJECT_ROOT, "data/midevils/top_tweets/top_tweets_registry.json");
 const ARTIST_TWEETS_PATH = resolve(PROJECT_ROOT, "data/midevils/top_tweets/artist_tweets_registry.json");
 const DISCORD_REGISTRY_PATH = resolve(PROJECT_ROOT, "data/midevils/discord_registry.json");
-
-const CHROME_DEFAULT = resolve(
-  os.homedir(),
-  "Library/Application Support/Google/Chrome/Default"
-);
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const NO_PUSH = process.argv.includes("--no-push");
@@ -106,26 +99,95 @@ function tweetIdToISO(idStr) {
   return d ? d.toISOString() : null;
 }
 
-// ── Chrome profile setup ─────────────────────────────────────────────────────
+// ── Browser profile setup ────────────────────────────────────────────────────
 
-// Temp profile for Twitter (copied from Chrome Default — X sessions survive the copy)
-function makeTempProfile() {
-  const tmp = mkdtempSync(join(tmpdir(), "scrolls-chrome-"));
-  console.log(`  temp profile: ${tmp}`);
-  execSync(`cp -r "${CHROME_DEFAULT}" "${tmp}/Default"`, { stdio: "inherit" });
-  return tmp;
-}
-
-// Persistent profile for Discord (Discord sessions don't survive profile copies,
-// so we keep a dedicated Playwright profile that stays logged in between runs)
+// Discord: persistent Playwright profile (Discord doesn't block automated logins).
 const DISCORD_PROFILE_DIR = resolve(PROJECT_ROOT, ".playwright-discord-profile");
 
-function ensureDiscordProfile() {
-  const isNew = !existsSync(DISCORD_PROFILE_DIR);
+function ensureProfile(dir) {
+  const isNew = !existsSync(dir);
   if (isNew) {
-    execSync(`mkdir -p "${DISCORD_PROFILE_DIR}"`);
+    execSync(`mkdir -p "${dir}"`);
   }
   return isNew;
+}
+
+// ── Chrome CDP launcher (macOS) ─────────────────────────────────────────────
+//
+// Launches the real Google Chrome with --remote-debugging-port so Playwright
+// can connect via CDP. This gives us the actual Chrome profile with real
+// cookies and session — no extraction, no fake profiles, no Playwright login.
+// Chrome must not already be running (profile is locked to one instance).
+
+const CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const CDP_PORT = 9222;
+
+function isChromeRunning() {
+  try {
+    const out = execSync("pgrep -x 'Google Chrome'", { encoding: "utf8" });
+    return out.trim().length > 0;
+  } catch {
+    return false; // pgrep exit code 1 = no match = not running
+  }
+}
+
+async function launchChromeForTwitter() {
+  if (isChromeRunning()) {
+    console.error("  ⚠ Chrome is currently running.");
+    console.error("  Please close Chrome and re-run. (Chrome locks its profile to one instance.)");
+    return null;
+  }
+
+  // Chrome refuses --remote-debugging-port with its default data directory.
+  // Workaround: create a wrapper dir with a symlink to the real profile so
+  // Chrome sees a "non-default" path but reads the same profile data.
+  const realDataDir = resolve(process.env.HOME, "Library/Application Support/Google/Chrome");
+  const tmpDataDir = resolve(PROJECT_ROOT, ".chrome-cdp-wrapper");
+  execSync(`rm -rf "${tmpDataDir}"`);
+  execSync(`mkdir -p "${tmpDataDir}"`);
+  execSync(`ln -sf "${realDataDir}/Default" "${tmpDataDir}/Default"`);
+  try { execSync(`cp "${realDataDir}/Local State" "${tmpDataDir}/Local State"`); } catch {}
+
+  console.log("  launching Chrome with remote debugging...");
+  const chrome = spawn(CHROME_PATH, [
+    `--remote-debugging-port=${CDP_PORT}`,
+    `--user-data-dir=${tmpDataDir}`,
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-popup-blocking",
+  ], { stdio: ["ignore", "pipe", "pipe"] });
+
+  // Log Chrome stderr so we can debug launch failures
+  let chromeStderr = "";
+  chrome.stderr.on("data", (d) => { chromeStderr += d.toString(); });
+  chrome.on("exit", (code) => {
+    if (code) console.error(`  Chrome exited with code ${code}`);
+  });
+
+  // Wait for Chrome to be ready (poll the debug endpoint via curl)
+  let ready = false;
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      execSync(`curl -s -o /dev/null -w "%{http_code}" http://localhost:${CDP_PORT}/json/version`, {
+        encoding: "utf8", timeout: 3000,
+      });
+      ready = true;
+      break;
+    } catch {}
+    if (i === 5) console.log("  still waiting for Chrome...");
+  }
+
+  if (!ready) {
+    console.error("  ⚠ Chrome did not start in time.");
+    if (chromeStderr) console.error("  Chrome stderr:", chromeStderr.slice(0, 500));
+    try { chrome.kill(); } catch {}
+    return null;
+  }
+
+  console.log("  connecting via CDP...");
+  const browser = await chromium.connectOverCDP(`http://localhost:${CDP_PORT}`);
+  return { browser, chromeProcess: chrome };
 }
 
 // ── Scrape a Twitter/X media tab ─────────────────────────────────────────────
@@ -601,35 +663,83 @@ async function main() {
 
   let totalNew = 0;
 
-  // ── Twitter crawl (uses temp copy of Chrome Default profile) ──
+  // ── Twitter crawl (real Chrome via CDP — uses your actual logged-in session) ──
   if (!NO_TWITTER) {
-    if (!existsSync(CHROME_DEFAULT)) {
-      console.error("Chrome Default profile not found at:", CHROME_DEFAULT);
-      process.exit(1);
-    }
+    console.log("\n── Setting up Twitter crawl (Chrome CDP) ──");
+    const cdp = await launchChromeForTwitter();
 
-    const profileDir = makeTempProfile();
-    const twitterCtx = await chromium.launchPersistentContext(profileDir, {
-      channel: "chrome",
-      headless: false,
-      viewport: VIEWPORT,
-      args: ["--no-sandbox"],
-    });
+    if (!cdp) {
+      console.warn("  Skipping Twitter crawl.");
+    } else {
+      try {
+        // Use the default browser context (has real cookies/session)
+        const contexts = cdp.browser.contexts();
+        const twitterCtx = contexts[0];
 
-    try {
-      totalNew += await crawlMidEvils(twitterCtx);
-      totalNew += await crawlOfficialTweets(twitterCtx);
-    } catch (e) {
-      console.error("Twitter crawl error:", e);
-    } finally {
-      await twitterCtx.close();
-      try { execSync(`rm -rf "${profileDir}"`); } catch {}
+        // Check if we're logged into X — if not, prompt for manual login
+        const checkPage = await twitterCtx.newPage();
+        await checkPage.goto("https://x.com/home", { waitUntil: "domcontentloaded", timeout: 30000 });
+        await checkPage.waitForTimeout(3000);
+
+        const isLoggedIn = await checkPage.evaluate(() => {
+          // If we see a login prompt or redirect, we're not logged in
+          return !window.location.href.includes("/login")
+            && !window.location.href.includes("/i/flow")
+            && !document.querySelector('[data-testid="loginButton"]');
+        });
+
+        if (!isLoggedIn) {
+          console.log("\n══════════════════════════════════════════════════════════════");
+          console.log("  NOT LOGGED IN: Please sign into X in the Chrome window.");
+          console.log("  Once you see your feed, come back here and press Enter.");
+          console.log("══════════════════════════════════════════════════════════════\n");
+
+          // Navigate to x.com so user can click Sign In
+          await checkPage.goto("https://x.com", { waitUntil: "domcontentloaded" });
+
+          // Wait for user to press Enter in the terminal
+          await new Promise((resolve) => {
+            process.stdin.setRawMode?.(false);
+            process.stdin.resume();
+            process.stdin.once("data", resolve);
+          });
+
+          // Verify login worked
+          await checkPage.goto("https://x.com/home", { waitUntil: "domcontentloaded", timeout: 30000 });
+          await checkPage.waitForTimeout(3000);
+          const nowLoggedIn = await checkPage.evaluate(() =>
+            !window.location.href.includes("/login") && !window.location.href.includes("/i/flow")
+          );
+          if (!nowLoggedIn) {
+            console.error("  ⚠ Still not logged in. Skipping Twitter crawl.");
+            await checkPage.close();
+            throw new Error("Twitter login failed");
+          }
+          console.log("  ✅ Logged in to X!");
+        } else {
+          console.log("  ✅ Already logged in to X");
+        }
+        await checkPage.close();
+
+        totalNew += await crawlMidEvils(twitterCtx);
+        totalNew += await crawlOfficialTweets(twitterCtx);
+      } catch (e) {
+        console.error("Twitter crawl error:", e);
+      } finally {
+        await cdp.browser.close();
+        try { cdp.chromeProcess.kill(); } catch {}
+        // Clean up symlink wrapper
+        const wrapper = resolve(PROJECT_ROOT, ".chrome-cdp-wrapper");
+        try { execSync(`rm -rf "${wrapper}"`, { stdio: "ignore" }); } catch {}
+        // Give Chrome a moment to fully exit before Discord launches
+        await new Promise((r) => setTimeout(r, 2000));
+      }
     }
   }
 
   // ── Discord crawl (uses persistent profile — survives between runs) ──
   if (!NO_DISCORD) {
-    const isFirstRun = ensureDiscordProfile();
+    const isFirstRun = ensureProfile(DISCORD_PROFILE_DIR);
 
     if (isFirstRun) {
       console.log("\n══════════════════════════════════════════════════════════════");
@@ -644,7 +754,11 @@ async function main() {
       channel: "chrome",
       headless: false,
       viewport: VIEWPORT,
-      args: ["--no-sandbox"],
+      args: [
+        "--no-sandbox",
+        "--disable-blink-features=AutomationControlled",
+      ],
+      ignoreDefaultArgs: ["--enable-automation"],
     });
 
     try {
