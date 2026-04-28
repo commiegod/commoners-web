@@ -18,9 +18,9 @@
  * Flags:
  *   --dry-run       Print what would change, don't write
  *   --no-push       Update files but skip git push
- *   --no-discord    Skip Discord crawl (Twitter only)
- *   --no-twitter    Skip Twitter crawl (Discord only)
- *   --artists       Also crawl artist accounts (slower)
+ *   --no-discord    Skip Discord crawl
+ *   --no-twitter    Skip Twitter crawl (also skips artists)
+ *   --no-artists    Skip artist account crawl
  */
 
 import { chromium } from "playwright";
@@ -45,11 +45,19 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const NO_PUSH = process.argv.includes("--no-push");
 const NO_DISCORD = process.argv.includes("--no-discord");
 const NO_TWITTER = process.argv.includes("--no-twitter");
-const CRAWL_ARTISTS = process.argv.includes("--artists");
+const NO_ARTISTS = process.argv.includes("--no-artists");
 
 const VIEWPORT = { width: 1280, height: 900 };
 const SCROLL_WAIT = 2500;
 const SCROLL_ROUNDS = 8;
+
+// MidEvils project started Aug 2025 — skip anything older
+const TIMELINE_START = new Date("2025-08-01T00:00:00Z");
+
+const ARTIST_ACCOUNTS = [
+  { handle: "sircandyapple", username: "sircandyapple" },
+  { handle: "jonnydegods",   username: "jonnydegods"   },
+];
 
 // ── Discord config ───────────────────────────────────────────────────────────
 
@@ -192,15 +200,74 @@ async function launchChromeForTwitter() {
 
 // ── Scrape a Twitter/X media tab ─────────────────────────────────────────────
 
+// Wait until at least one /status/ link appears, OR a hard "no tweets" / error
+// signal shows up. Returns the link count we observed (0 only if we gave up).
+async function waitForMediaTabReady(page, maxMs = 20000) {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    const state = await page.evaluate(() => {
+      const links = document.querySelectorAll('a[href*="/status/"]');
+      const body = document.body?.innerText || "";
+      // Hard error signals — don't keep waiting
+      const errorMatch = /Something went wrong|Try again|Retry|Rate limit|Welcome to X|Sign in to X/i.exec(body);
+      // "No results" / empty media tab signal
+      const emptyMatch = /These posts are protected|hasn['’]t posted|This account doesn['’]t exist/i.exec(body);
+      return {
+        linkCount: links.length,
+        error: errorMatch?.[0] || null,
+        empty: emptyMatch?.[0] || null,
+      };
+    }).catch(() => ({ linkCount: 0, error: null, empty: null }));
+
+    if (state.linkCount > 0) return { ok: true, linkCount: state.linkCount, reason: null };
+    if (state.empty) return { ok: true, linkCount: 0, reason: `empty: ${state.empty}` };
+    if (state.error) return { ok: false, linkCount: 0, reason: `error: ${state.error}` };
+    await page.waitForTimeout(1000);
+  }
+  return { ok: false, linkCount: 0, reason: "timeout (no tweets, no error)" };
+}
+
 async function scrapeMediaTab(page, handle) {
   const url = `https://x.com/${handle}/media`;
-  console.log(`  navigating to ${url}`);
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
-  await page.waitForTimeout(5000);
+  const MAX_ATTEMPTS = 3;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    console.log(`  navigating to ${url}${attempt > 1 ? ` (attempt ${attempt}/${MAX_ATTEMPTS})` : ""}`);
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    } catch (e) {
+      console.warn(`  ⚠ navigation failed: ${e.message}`);
+      await page.waitForTimeout(5000);
+      continue;
+    }
+
+    const ready = await waitForMediaTabReady(page, 20000);
+    if (ready.linkCount > 0) {
+      console.log(`  media tab ready (${ready.linkCount} initial links)`);
+      break;
+    }
+    if (ready.ok && ready.linkCount === 0) {
+      // Genuinely empty — no point retrying
+      console.log(`  media tab is empty: ${ready.reason}`);
+      return new Set();
+    }
+    // Failed (error or timeout) — back off and retry
+    console.warn(`  ⚠ media tab not ready: ${ready.reason}`);
+    if (attempt < MAX_ATTEMPTS) {
+      const backoffMs = 5000 * attempt; // 5s, 10s
+      console.log(`  backing off ${backoffMs}ms before retry`);
+      await page.waitForTimeout(backoffMs);
+    } else {
+      console.warn(`  ⚠ giving up on @${handle} media tab after ${MAX_ATTEMPTS} attempts`);
+      return new Set();
+    }
+  }
 
   const seen = new Set();
+  let stalledRounds = 0;
 
   for (let round = 0; round < SCROLL_ROUNDS; round++) {
+    const beforeSize = seen.size;
     const links = await page.$$eval(
       'a[href*="/status/"]',
       (els) => els.map((a) => a.href).filter((h) => /\/status\/\d+/.test(h))
@@ -212,6 +279,17 @@ async function scrapeMediaTab(page, handle) {
     }
 
     console.log(`  round ${round + 1}/${SCROLL_ROUNDS}: ${seen.size} unique tweets so far`);
+
+    // If we made it to round 1 with 0 tweets, the load failed silently
+    if (round === 0 && seen.size === 0) {
+      console.warn(`  ⚠ first scroll round saw 0 tweets — page may have failed to load`);
+    }
+
+    if (seen.size === beforeSize) stalledRounds++; else stalledRounds = 0;
+    if (stalledRounds >= 3 && seen.size > 0) {
+      console.log(`  no new tweets for 3 rounds — stopping early at ${seen.size}`);
+      break;
+    }
 
     await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
     await page.waitForTimeout(SCROLL_WAIT);
@@ -264,9 +342,15 @@ async function crawlMidEvils(context) {
   const existingTweetIds = new Set(existing.map((e) => e.tweet_id));
 
   const tweetIds = await scrapeMediaTab(page, "MidEvilsNFT");
-  const newIds = [...tweetIds].filter((id) => !existingTweetIds.has(id));
+  // Filter: skip existing + skip tweets older than project start (Aug 2025)
+  const newIds = [...tweetIds].filter((id) => {
+    if (existingTweetIds.has(id)) return false;
+    const dt = tweetIdToDate(id);
+    if (dt && dt < TIMELINE_START) return false;
+    return true;
+  });
 
-  console.log(`  found ${tweetIds.size} total, ${newIds.length} new`);
+  console.log(`  found ${tweetIds.size} total, ${newIds.length} new (after date filter)`);
 
   if (newIds.length === 0) {
     console.log("  no new tweets, skipping");
@@ -309,30 +393,27 @@ async function crawlMidEvils(context) {
   return newEntries.length;
 }
 
-// ── Update top_tweets_registry with official tweets ──────────────────────────
+// ── Sync top_tweets_registry from meme_registry (no extra scrape needed) ─────
 
-async function crawlOfficialTweets(context) {
-  console.log("\n── Crawling @MidEvilsNFT for official tweet metadata ──");
-  const page = await context.newPage();
+async function updateOfficialFromMemeRegistry() {
+  console.log("\n── Syncing official tweets from meme registry ──");
 
+  const memes = JSON.parse(readFileSync(MEME_REGISTRY_PATH, "utf8"));
   const existing = JSON.parse(readFileSync(TOP_TWEETS_PATH, "utf8"));
   const existingIds = new Set(existing.map((e) => e.id));
 
-  const tweetIds = await scrapeMediaTab(page, "MidEvilsNFT");
-  const newIds = [...tweetIds].filter((id) => !existingIds.has(id));
-
-  console.log(`  ${newIds.length} new official tweets to index`);
-
-  if (newIds.length === 0) {
-    await page.close();
-    return 0;
+  // Group meme entries by tweet_id to build official tweet records
+  const byTweet = new Map();
+  for (const m of memes) {
+    if (!m.tweet_id || m.username !== "MidEvilsNFT") continue;
+    if (existingIds.has(m.tweet_id)) continue;
+    if (!byTweet.has(m.tweet_id)) byTweet.set(m.tweet_id, []);
+    byTweet.get(m.tweet_id).push(m);
   }
 
   const newEntries = [];
-  for (const id of newIds) {
-    const media = await extractTweetMedia(page, id, "MidEvilsNFT");
-    const images = media.map((m) => m.src);
-
+  for (const [id, items] of byTweet) {
+    const images = items.map((m) => m.img_url).filter(Boolean);
     newEntries.push({
       id,
       url: `https://x.com/MidEvilsNFT/status/${id}`,
@@ -344,15 +425,14 @@ async function crawlOfficialTweets(context) {
     });
   }
 
+  console.log(`  ${newEntries.length} new official tweets to sync`);
+
   if (!DRY_RUN && newEntries.length > 0) {
     const merged = [...existing, ...newEntries];
     merged.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
     writeFileSync(TOP_TWEETS_PATH, JSON.stringify(merged, null, 2) + "\n");
     console.log(`  ✅ wrote ${merged.length} entries to top_tweets_registry.json`);
   }
-
-  await page.close();
-  return newEntries.length;
 }
 
 // ── Discord channel crawl (API-based) ────────────────────────────────────────
@@ -658,12 +738,12 @@ async function main() {
   console.log(`\n${"=".repeat(60)}`);
   console.log(`  Scrolls Update — ${new Date().toISOString()}`);
   console.log(`  dry-run: ${DRY_RUN}, no-push: ${NO_PUSH}`);
-  console.log(`  twitter: ${!NO_TWITTER}, discord: ${!NO_DISCORD}, artists: ${CRAWL_ARTISTS}`);
+  console.log(`  twitter: ${!NO_TWITTER}, discord: ${!NO_DISCORD}, artists: ${!NO_ARTISTS}`);
   console.log(`${"=".repeat(60)}`);
 
   let totalNew = 0;
 
-  // ── Twitter crawl (real Chrome via CDP — uses your actual logged-in session) ──
+  // ── Twitter + Artist crawl (single Chrome CDP session) ──
   if (!NO_TWITTER) {
     console.log("\n── Setting up Twitter crawl (Chrome CDP) ──");
     const cdp = await launchChromeForTwitter();
@@ -672,7 +752,6 @@ async function main() {
       console.warn("  Skipping Twitter crawl.");
     } else {
       try {
-        // Use the default browser context (has real cookies/session)
         const contexts = cdp.browser.contexts();
         const twitterCtx = contexts[0];
 
@@ -682,7 +761,6 @@ async function main() {
         await checkPage.waitForTimeout(3000);
 
         const isLoggedIn = await checkPage.evaluate(() => {
-          // If we see a login prompt or redirect, we're not logged in
           return !window.location.href.includes("/login")
             && !window.location.href.includes("/i/flow")
             && !document.querySelector('[data-testid="loginButton"]');
@@ -694,17 +772,13 @@ async function main() {
           console.log("  Once you see your feed, come back here and press Enter.");
           console.log("══════════════════════════════════════════════════════════════\n");
 
-          // Navigate to x.com so user can click Sign In
           await checkPage.goto("https://x.com", { waitUntil: "domcontentloaded" });
-
-          // Wait for user to press Enter in the terminal
           await new Promise((resolve) => {
             process.stdin.setRawMode?.(false);
             process.stdin.resume();
             process.stdin.once("data", resolve);
           });
 
-          // Verify login worked
           await checkPage.goto("https://x.com/home", { waitUntil: "domcontentloaded", timeout: 30000 });
           await checkPage.waitForTimeout(3000);
           const nowLoggedIn = await checkPage.evaluate(() =>
@@ -721,17 +795,85 @@ async function main() {
         }
         await checkPage.close();
 
+        // ── @MidEvilsNFT media + official tweets (single scrape) ──
         totalNew += await crawlMidEvils(twitterCtx);
-        totalNew += await crawlOfficialTweets(twitterCtx);
+
+        // Update official tweets registry using the same tweet IDs we already found
+        // (avoids re-scraping the same media tab which X rate-limits)
+        await updateOfficialFromMemeRegistry(twitterCtx);
+
+        // ── Artist accounts (same session, with delay to avoid rate limits) ──
+        if (!NO_ARTISTS) {
+          console.log("\n── Crawling artist accounts ──");
+          await new Promise((r) => setTimeout(r, 5000)); // 5s cooldown
+
+          let artistRegistry = JSON.parse(readFileSync(ARTIST_TWEETS_PATH, "utf8"));
+          const existingIds = new Set(artistRegistry.map((e) => e.tweet_id).filter(Boolean));
+
+          for (const artist of ARTIST_ACCOUNTS) {
+            console.log(`\n  @${artist.handle}:`);
+            await new Promise((r) => setTimeout(r, 3000)); // pause between artists
+
+            let page;
+            try {
+              page = await twitterCtx.newPage();
+            } catch (e) {
+              console.warn(`  ⚠ browser closed, stopping artist crawl`);
+              break;
+            }
+
+            const tweetIds = await scrapeMediaTab(page, artist.handle);
+            // Filter: skip existing + skip tweets older than project start
+            const newIds = [...tweetIds].filter((id) => {
+              if (existingIds.has(id)) return false;
+              const dt = tweetIdToDate(id);
+              if (dt && dt < TIMELINE_START) return false;
+              return true;
+            });
+            console.log(`    ${tweetIds.size} total, ${newIds.length} new (after date filter)`);
+
+            const artistEntries = [];
+            for (const id of newIds) {
+              try {
+                const media = await extractTweetMedia(page, id, artist.handle);
+                const images = media.map((m) => m.src);
+                const dateISO = tweetIdToISO(id) ?? "";
+
+                artistEntries.push({
+                  tweet_id: id,
+                  url: `https://x.com/${artist.handle}/status/${id}`,
+                  username: artist.username,
+                  text: "",
+                  date: dateISO,
+                  likes: 0, views: 0, reposts: 0, replies: 0,
+                  images,
+                });
+                existingIds.add(id);
+              } catch (e) {
+                console.warn(`  ⚠ browser issue at ${id}, saving progress`);
+                break; // save what we have so far
+              }
+            }
+
+            // Save after each artist (crash-resilient)
+            if (!DRY_RUN && artistEntries.length > 0) {
+              artistRegistry = [...artistRegistry, ...artistEntries];
+              artistRegistry.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+              writeFileSync(ARTIST_TWEETS_PATH, JSON.stringify(artistRegistry, null, 2) + "\n");
+              console.log(`    ✅ saved +${artistEntries.length} entries (${artistRegistry.length} total)`);
+              totalNew += artistEntries.length;
+            }
+
+            try { await page.close(); } catch {}
+          }
+        }
       } catch (e) {
         console.error("Twitter crawl error:", e);
       } finally {
         await cdp.browser.close();
         try { cdp.chromeProcess.kill(); } catch {}
-        // Clean up symlink wrapper
         const wrapper = resolve(PROJECT_ROOT, ".chrome-cdp-wrapper");
         try { execSync(`rm -rf "${wrapper}"`, { stdio: "ignore" }); } catch {}
-        // Give Chrome a moment to fully exit before Discord launches
         await new Promise((r) => setTimeout(r, 2000));
       }
     }
@@ -778,10 +920,6 @@ async function main() {
     } finally {
       try { await discordCtx.close(); } catch {}
     }
-  }
-
-  if (CRAWL_ARTISTS) {
-    console.log("\n── Artist crawl not yet implemented in this script ──");
   }
 
   rebuildAndDeploy(totalNew);
