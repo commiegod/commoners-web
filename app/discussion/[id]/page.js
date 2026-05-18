@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { getCommonerCount } from "../../../lib/commoners";
 import { usePhantomDeeplink } from "../../context/PhantomDeeplinkContext";
+import Sigil from "../../components/Sigil";
+import PostBody, { TweetWidgetScript } from "../../components/PostBody";
 
 
 
@@ -216,6 +218,7 @@ function ThreadPageInner({ params }) {
 
   return (
     <div className="max-w-3xl">
+      <TweetWidgetScript />
       <Link
         href="/discussion"
         className="text-sm text-muted hover:text-foreground mb-8 inline-block cursor-pointer"
@@ -235,6 +238,7 @@ function ThreadPageInner({ params }) {
                 #{post.num}
               </span>
               <span>·</span>
+              <Sigil wallet={post.author} size={22} />
               <span className="font-mono">{shortAddr(post.author)}</span>
               <span>·</span>
               <span>{timeAgo(post.timestamp)}</span>
@@ -256,9 +260,7 @@ function ThreadPageInner({ params }) {
 
             {/* Body */}
             <div className="px-4 py-3">
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                {post.body}
-              </p>
+              <PostBody body={post.body} />
             </div>
           </div>
         ))}
@@ -296,27 +298,36 @@ function ThreadPageInner({ params }) {
           </p>
         ) : canPost ? (
           <form onSubmit={handleReply} className="space-y-3">
-            <p className="text-xs text-muted uppercase tracking-widest">
-              Reply as {shortAddr(walletAddress)}
-            </p>
+            <div className="flex items-center gap-2 text-xs text-muted uppercase tracking-widest">
+              <span>Reply as</span>
+              <Sigil wallet={walletAddress} size={20} />
+              <span className="font-mono normal-case tracking-normal">
+                {shortAddr(walletAddress)}
+              </span>
+            </div>
             <textarea
               required
               rows={4}
               maxLength={2000}
-              placeholder="Write a reply…"
+              placeholder="Write a reply… Paste a tweet or image URL on its own line to embed it."
               value={replyBody}
               onChange={(e) => setReplyBody(e.target.value)}
               className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold placeholder:text-muted/50 resize-y"
             />
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={submitting || !replyBody.trim()}
-                className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
-              >
-                {submitting ? "Posting…" : "Reply"}
-              </button>
-              <span className="text-xs text-muted">{replyBody.length} / 2000</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={submitting || !replyBody.trim()}
+                  className="px-4 py-1.5 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 cursor-pointer"
+                >
+                  {submitting ? "Posting…" : "Reply"}
+                </button>
+                <span className="text-xs text-muted">{replyBody.length} / 2000</span>
+              </div>
+              <p className="text-xs text-muted/70">
+                Tweet/image URL on its own line embeds inline.
+              </p>
             </div>
             {error && <p className="text-xs text-red-600">{error}</p>}
           </form>

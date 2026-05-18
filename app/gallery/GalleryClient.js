@@ -107,10 +107,16 @@ export default function GalleryClient({ nfts = [] }) {
 
       {/* ── Context header ── */}
       <div className="px-4 pt-6 pb-4 max-w-6xl mx-auto">
-        <h1 className="font-blackletter text-3xl text-gold mb-1">Gallery</h1>
-        <p className="text-sm text-muted">
-          {nfts.length} active Commoner NFTs — 3-trait MidEvils with exactly Background, Skin,
-          and one additional trait. Each grants one vote in the DAO.
+        <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted mb-2 uppercase">
+          — The Portrait Hall —
+        </p>
+        <h1 className="font-blackletter text-3xl md:text-4xl text-foreground mb-2">
+          Gallery
+        </h1>
+        <p className="text-sm text-muted leading-relaxed max-w-2xl">
+          {nfts.length} active Commoner NFTs — 3-trait MidEvils with exactly
+          Background, Skin, and one additional trait. Each grants one vote in
+          the DAO. Click any to see traits and the current owner.
         </p>
       </div>
 

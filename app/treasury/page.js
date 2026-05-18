@@ -5,6 +5,7 @@ import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { BorshAccountsCoder } from "@coral-xyz/anchor";
 import idl from "../../lib/idl.json";
 import { getConnection, PROGRAM_ID, configPDA, RPC_URL } from "../../lib/programClient";
+import Divider from "../components/Divider";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
@@ -16,7 +17,7 @@ const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 const LABEL_META = {
   "Auction Fee":         { cls: "bg-green-100 text-green-700 border-green-300",  sign: "+" },
   "Donation":            { cls: "bg-blue-100 text-blue-700 border-blue-300",    sign: "+" },
-  "Artist Bounty":       { cls: "bg-orange-100 text-orange-700 border-orange-300", sign: "−" },
+  "Bard Tribute":        { cls: "bg-orange-100 text-orange-700 border-orange-300", sign: "−" },
   "Holder Distribution": { cls: "bg-purple-100 text-purple-700 border-purple-300", sign: "−" },
   "Disbursement":        { cls: "bg-amber-100 text-amber-700 border-amber-300", sign: "−" },
 };
@@ -27,7 +28,7 @@ function classifyTx(programs, solChange, memo) {
   }
   if (memo) {
     const m = memo.toLowerCase();
-    if (m.includes("bounty") || m.includes("artist")) return "Artist Bounty";
+    if (m.includes("bounty") || m.includes("artist") || m.includes("bard") || m.includes("tribute")) return "Bard Tribute";
     if (m.includes("distribut") || m.includes("holder")) return "Holder Distribution";
   }
   return "Disbursement";
@@ -243,8 +244,13 @@ export default function TreasuryPage() {
 
   return (
     <div>
-      <div className="flex items-end justify-between mb-6">
-        <h1 className="font-blackletter text-3xl text-gold">Treasury</h1>
+      <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted mb-2 uppercase">
+        — The Coffers —
+      </p>
+      <div className="flex items-end justify-between mb-4">
+        <h1 className="font-blackletter text-3xl md:text-4xl text-foreground">
+          Treasury
+        </h1>
         <button
           onClick={() => load(true)}
           disabled={loading}
@@ -253,6 +259,21 @@ export default function TreasuryPage() {
           {loading ? "Loading…" : "Refresh"}
         </button>
       </div>
+      <p className="text-sm text-muted leading-relaxed max-w-2xl mb-6">
+        The Commoner&apos;s DAO holds a single on-chain wallet — fees from
+        auctions flow in, governance disbursements flow out. The address and
+        balance below are read from the auction program&apos;s config and
+        live transaction history.
+      </p>
+      {IS_DEVNET && (
+        <div className="mb-8 max-w-2xl px-4 py-3 border border-amber-300/60 rounded bg-amber-50/60 text-sm text-amber-800 leading-relaxed">
+          <span className="font-semibold">Devnet note.</span> The wallet shown
+          here is the test treasury used during devnet. On mainnet launch,
+          the program will be initialized with the DAO&apos;s Squads multi-sig
+          as the treasury — this page will reflect that wallet automatically
+          once the multi-sig is created and the program is deployed.
+        </div>
+      )}
 
       {/* Balance card */}
       <div className="bg-card border border-border p-6 mb-4">
@@ -309,8 +330,10 @@ export default function TreasuryPage() {
         <p className="text-red-600 text-sm mb-4">Failed to load: {error}</p>
       )}
 
+      <Divider variant="trefoil" className="my-10" />
+
       {/* Transaction feed */}
-      <h2 className="font-blackletter text-2xl text-gold mb-4">
+      <h2 className="font-blackletter text-2xl text-foreground mb-4">
         Transaction History
       </h2>
 

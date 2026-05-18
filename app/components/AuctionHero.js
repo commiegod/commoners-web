@@ -419,11 +419,11 @@ export default function AuctionHero() {
         </div>
       </div>
 
-      {/* Bounty Art Section */}
+      {/* Bard Tribute Section */}
       {allBounties.length > 0 && (
         <div className="mt-12">
-          <h2 className="font-blackletter text-2xl text-gold mb-6">
-            Artist Bounty
+          <h2 className="font-blackletter text-2xl text-foreground mb-6">
+            Bard Tributes
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {allBounties.map((b, i) => (
@@ -433,7 +433,7 @@ export default function AuctionHero() {
               >
                 <img
                   src={b.image}
-                  alt={b.artist || b.model || "Bounty art"}
+                  alt={b.artist || b.model || "Tribute art"}
                   className="w-full aspect-square object-cover"
                 />
                 <div className="p-3">

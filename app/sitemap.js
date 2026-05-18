@@ -4,7 +4,7 @@ export default function sitemap() {
 
   return [
     { url: base,                     lastModified: now, changeFrequency: "daily",   priority: 1.0 },
-    { url: `${base}/bounty`,         lastModified: now, changeFrequency: "daily",   priority: 0.9 },
+    { url: `${base}/bards`,          lastModified: now, changeFrequency: "daily",   priority: 0.9 },
     { url: `${base}/governance`,     lastModified: now, changeFrequency: "daily",   priority: 0.9 },
     { url: `${base}/discussion`,     lastModified: now, changeFrequency: "hourly",  priority: 0.8 },
     { url: `${base}/gallery`,        lastModified: now, changeFrequency: "monthly", priority: 0.7 },

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import commoners from "../../data/commoners.json";
 import { RPC_URL } from "../../lib/programClient";
 import { TOTAL_NFTS } from "../../lib/commoners";
+import Divider from "../components/Divider";
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
 
@@ -143,8 +144,13 @@ export default function HoldersPage() {
 
   return (
     <div>
-      <div className="flex items-end justify-between mb-6">
-        <h1 className="font-blackletter text-3xl text-gold">Holders</h1>
+      <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted mb-2 uppercase">
+        — The Roll —
+      </p>
+      <div className="flex items-end justify-between mb-4">
+        <h1 className="font-blackletter text-3xl md:text-4xl text-foreground">
+          Holders
+        </h1>
         <button
           onClick={() => fetch_(true)}
           disabled={loading}
@@ -153,6 +159,12 @@ export default function HoldersPage() {
           {loading ? "Refreshing…" : "Refresh"}
         </button>
       </div>
+      <p className="text-sm text-muted leading-relaxed max-w-2xl mb-6">
+        Every wallet holding a Commoner MidEvil is on this roll. Each
+        Commoner is one vote in DAO governance, so the leaderboard below is
+        also the rough shape of voting power. Live data via Helius — burned
+        Commoners are excluded from active supply.
+      </p>
 
       {/* Stat bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
@@ -219,6 +231,12 @@ export default function HoldersPage() {
       {error && (
         <p className="text-red-600 text-sm mb-4">Failed to load: {error}</p>
       )}
+
+      <Divider variant="trefoil" className="my-10" />
+
+      <h2 className="font-blackletter text-2xl text-foreground mb-4">
+        The Leaderboard
+      </h2>
 
       {/* Leaderboard */}
       {loading ? (

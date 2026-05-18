@@ -1,7 +1,12 @@
 "use client";
 
+// LandingAccordion — homepage FAQ. The intro heading + paragraph moved up
+// into page.js (DropCap-led story section) so this component is FAQ only.
+// COMMON token references are removed entirely — the token model is being
+// discussed on the board and shouldn't appear on the marketing surface
+// until the community has ratified it.
+
 import { useState } from "react";
-import feeConfig from "../../data/fee-config.json";
 
 function AccordionItem({ title, children }) {
   const [open, setOpen] = useState(false);
@@ -26,49 +31,79 @@ function AccordionItem({ title, children }) {
 
 export default function LandingAccordion() {
   return (
-    <section className="max-w-2xl">
-      <h2 className="font-blackletter text-2xl md:text-3xl text-gold mb-4">
-        Common Folk. Uncommon Purpose.
-      </h2>
-      <p className="text-muted leading-relaxed mb-8">
-        The Commoner&apos;s DAO turns individual self-interest into collective
-        good. Holders of 3-trait Commoner MidEvils govern a shared treasury,
-        run daily auctions, and commission artwork — building a
-        community-owned institution on Solana that rewards participation and
-        grows in value with every auction.
+    <section className="max-w-2xl mx-auto" id="faq">
+      <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted text-center mb-4 uppercase">
+        Questions from the Square
       </p>
+      <h2 className="font-blackletter text-2xl md:text-3xl text-foreground text-center mb-6 tracking-wide">
+        How it Works
+      </h2>
 
-      <div id="faq" className="border-t border-border">
+      <div className="border-t border-border">
         <AccordionItem title="Who Are Commoners">
           <p className="text-muted leading-relaxed">
             In the MidEvils collection, most NFTs carry 4–8 visible traits.
-            Commoners are the rare subset with exactly 3 non-&quot;None&quot; traits —
-            Background, Skin, and one additional trait — making them the
-            simplest, most minimal characters in the set. Each Commoner NFT
-            grants 1 vote in DAO governance.
+            Commoners are the rare subset with exactly 3 non-&quot;None&quot;
+            traits — Background, Skin, and one additional trait — making them
+            the simplest, most minimal characters in the set. Each Commoner
+            NFT grants 1 vote in DAO governance.
           </p>
         </AccordionItem>
 
-        <AccordionItem title="Daily Auctions">
+        <AccordionItem title="How Auctions Work">
           <div className="mb-4 px-3 py-2 border border-border/60 rounded text-xs text-muted bg-card">
-            The auction system is currently running on Solana devnet for testing.
-            Mainnet launch is the next milestone — auctions will go live once the
-            program is deployed and the first seller is onboarded.
+            The auction system is currently running on Solana devnet for
+            testing. Mainnet launch is the next milestone — auctions go live
+            once the program is deployed and the first mainnet listing is
+            settled.
           </div>
           <ul className="text-muted leading-relaxed space-y-2 list-disc list-inside">
-            <li>Any MidEvil NFT (not just Commoners) can be listed for auction.</li>
-            <li>Each auction runs for 24 hours starting at midnight UTC.</li>
             <li>
-              A fee on the final sale price is sent to the DAO treasury;
-              proceeds go to the seller.
+              <span className="text-foreground font-medium">
+                Any MidEvil can be listed.
+              </span>{" "}
+              The whole collection is eligible — Commoners and non-Commoners
+              alike. If you own one, you can list it. No curation, no waitlist.
             </li>
             <li>
-              During the bootstrapping phase, the founder curates the schedule.
-              Long-term, COMMON holders list directly.
+              <span className="text-foreground font-medium">
+                Listing is holder-gated.
+              </span>{" "}
+              You need to hold the MidEvil you&apos;re listing — that&apos;s
+              the only requirement. Even a single MidEvil qualifies you to
+              use the tool.
             </li>
             <li>
-              If no bids are placed, the auction ends with no fee charged and
-              the NFT returned to the seller.
+              <span className="text-foreground font-medium">
+                Bidding is wide open.
+              </span>{" "}
+              Anyone with a Solana wallet can bid. No DAO membership, no token
+              gate, no minimum balance.
+            </li>
+            <li>
+              <span className="text-foreground font-medium">
+                Free for the community.
+              </span>{" "}
+              No listing fee. No fee on sale. MidEvils holders keep the full
+              proceeds when an auction settles. The seller pays only the
+              standard Solana network rent on the listing PDA, which is
+              refunded automatically at settlement.
+            </li>
+            <li>
+              <span className="text-foreground font-medium">
+                Reserve protection.
+              </span>{" "}
+              If the seller&apos;s reserve isn&apos;t met by auction end,
+              the NFT returns to the seller&apos;s wallet automatically.
+              Nothing changes hands.
+            </li>
+            <li>
+              <span className="text-foreground font-medium">
+                Anti-snipe protection.
+              </span>{" "}
+              A bid placed in the final ten minutes automatically extends
+              the auction&apos;s close, so last-second bidders can&apos;t
+              steal the win.
             </li>
           </ul>
         </AccordionItem>
@@ -79,7 +114,9 @@ export default function LandingAccordion() {
           </p>
           <ul className="text-muted leading-relaxed space-y-2 list-disc list-inside mb-6">
             <li>
-              <span className="text-foreground font-medium">NFT Vote (Layer 1)</span>{" "}
+              <span className="text-foreground font-medium">
+                NFT Vote (Layer 1)
+              </span>{" "}
               — 51% yes majority, 24/120 quorum required. Standard proposals,
               parameter changes, bounties, and treasury requests under 5 SOL.
             </li>
@@ -87,8 +124,8 @@ export default function LandingAccordion() {
               <span className="text-foreground font-medium">
                 Futarchy Prioritization (Layer 2, planned)
               </span>{" "}
-              — Prediction markets rank competing proposals by expected impact.
-              Planned for a future phase.
+              — Prediction markets rank competing proposals by expected
+              impact. Planned for a future phase.
             </li>
             <li>
               <span className="text-foreground font-medium">
@@ -133,132 +170,29 @@ export default function LandingAccordion() {
           </div>
         </AccordionItem>
 
-        <AccordionItem title="COMMON Token">
-          <p className="text-muted leading-relaxed mb-4">
-            Fixed supply of 1,000,000,000 COMMON. No team or founder allocation —
-            all distribution is community-driven. Commoner NFT holders
-            receive the primary airdrop and hold governance rights. The broader
-            MidEvils community receives a smaller allocation for platform alignment
-            without diluting Commoner governance power. Purpose: auction fee reduction,
-            artist bounty rewards, DAO liquidity, and staking yield.
-          </p>
-
-          <div className="overflow-x-auto mb-6">
-            <table className="w-full text-sm border border-border">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Allocation
-                  </th>
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Amount
-                  </th>
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Purpose
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2">Commoner Airdrop</td>
-                  <td className="px-3 py-2 text-muted">600M (60%)</td>
-                  <td className="px-3 py-2 text-muted">
-                    ~5M per Commoner NFT — pro-rata to all Commoner NFT holders at Phase 3 snapshot
-                  </td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2">MidEvil Airdrop</td>
-                  <td className="px-3 py-2 text-muted">100M (10%)</td>
-                  <td className="px-3 py-2 text-muted">
-                    ~20,490 per non-Commoner MidEvil — platform alignment and future governance participation
-                  </td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2">Bounty Rewards</td>
-                  <td className="px-3 py-2 text-muted">150M (15%)</td>
-                  <td className="px-3 py-2 text-muted">
-                    Artist bounty pool; DAO can vote to replenish via open-market buys
-                  </td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="px-3 py-2">DAO Liquidity</td>
-                  <td className="px-3 py-2 text-muted">100M (10%)</td>
-                  <td className="px-3 py-2 text-muted">
-                    SOL/COMMON pool managed by treasury; LP fees build the treasury
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-2">Staking Emissions</td>
-                  <td className="px-3 py-2 text-muted">50M (5%)</td>
-                  <td className="px-3 py-2 text-muted">
-                    Earned by locking COMMON 30/90/180 days
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h3 className="text-sm font-medium mb-2">Auction Fee Tiers</h3>
-          <div className="overflow-x-auto mb-4">
-            <table className="w-full text-sm border border-border">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    COMMON Held
-                  </th>
-                  <th className="text-left px-3 py-2 text-xs text-muted tracking-widest font-normal uppercase">
-                    Auction Fee
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {feeConfig.tiers.map((tier, i) => (
-                  <tr
-                    key={i}
-                    className={i < feeConfig.tiers.length - 1 ? "border-b border-border" : ""}
-                  >
-                    <td className="px-3 py-2 text-muted">
-                      {tier.maxCommon === null
-                        ? `≥ ${tier.minCommon.toLocaleString()}`
-                        : tier.minCommon === 0
-                        ? `< ${(tier.maxCommon + 1).toLocaleString()}`
-                        : `${tier.minCommon.toLocaleString()} – ${tier.maxCommon.toLocaleString()}`}
-                    </td>
-                    <td className="px-3 py-2">
-                      {tier.feePercent === 0
-                        ? "0% (fee-free)"
-                        : `${tier.feePercent}% (${tier.label.toLowerCase()})`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-muted">
-            Listing requires a minimum of {feeConfig.listingMinimum.toLocaleString()} COMMON.
-            The zero-fee threshold is the first governance proposal — the community votes to
-            confirm or adjust the exact amounts.
-          </p>
-        </AccordionItem>
-
         <AccordionItem title="Burns & The Graveyard">
           <p className="text-muted leading-relaxed mb-4">
-            Burning a Commoner NFT is an irreversible action — and it carries a permanent consequence
-            for governance. If you burn your 3-trait MidEvil, you forfeit your membership in the
-            Commoner&apos;s DAO. The burned NFT no longer registers in the eligibility check, so the
-            wallet loses its vote immediately.
+            Burning a Commoner NFT is an irreversible action — and it carries
+            a permanent consequence for governance. If you burn your 3-trait
+            MidEvil, you forfeit your membership in the Commoner&apos;s DAO.
+            The burned NFT no longer registers in the eligibility check, so
+            the wallet loses its vote immediately.
           </p>
           <p className="text-muted leading-relaxed mb-4">
-            This is intentional. The DAO&apos;s health depends on active, participating holders. Locking
-            up governance tokens through burns sounds compelling, but it tends to concentrate power
-            without improving decisions — and it severs the holder from the community they helped
-            build. Keeping your Commoner means keeping your seat at the table, and keeping the asset
-            liquid for whatever comes next.
+            This is intentional. The DAO&apos;s health depends on active,
+            participating holders. Locking up governance tokens through burns
+            sounds compelling, but it tends to concentrate power without
+            improving decisions — and it severs the holder from the community
+            they helped build. Keeping your Commoner means keeping your seat
+            at the table, and keeping the asset liquid for whatever comes
+            next.
           </p>
           <p className="text-muted leading-relaxed mb-5">
-            Burned Commoners aren&apos;t forgotten. They live on as soulbound tokens in the{" "}
-            <strong className="text-foreground">MidEvil Graveyard</strong> collection — a permanent
-            on-chain record of every character that was sacrificed. We&apos;ve built a shrine to honor them.
+            Burned Commoners aren&apos;t forgotten. They live on as soulbound
+            tokens in the{" "}
+            <strong className="text-foreground">MidEvil Graveyard</strong>{" "}
+            collection — a permanent on-chain record of every character that
+            was sacrificed. We&apos;ve built a shrine to honor them.
           </p>
           <a
             href="/graveyard"

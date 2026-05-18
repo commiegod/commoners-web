@@ -104,7 +104,9 @@ async function fetchActiveAuctions(connection) {
 
 // ── Single auction panel ──────────────────────────────────────────────────────
 
-function AuctionPanel({ auctionData, slotMeta, connection, wallet, deeplink }) {
+// Exported so the homepage AuctionGrid can render the full bid/settle panel
+// for whichever auction the user has selected, without duplicating the logic.
+export function AuctionPanel({ auctionData, slotMeta, connection, wallet, deeplink }) {
   const { pubkey, state } = auctionData;
   const cluster = IS_DEVNET ? "?cluster=devnet" : "";
 

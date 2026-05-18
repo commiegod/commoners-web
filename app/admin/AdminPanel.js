@@ -1348,14 +1348,179 @@ function AuctionStatusSection({ onAuctionsLoaded }) {
   );
 }
 
+// ── Scrolls (Town Crier) section ─────────────────────────────────────────────
+//
+// Curates tweets that show up in the homepage Town Crier strip. Posts to
+// /api/admin/add-tweet, which validates + appends to top_tweets_registry.json
+// and triggers a Vercel rebuild.
+
+function ScrollsAdminSection({ token }) {
+  const [tweetUrl, setTweetUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [customDate, setCustomDate] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
+  const [error, setError] = useState(null);
+  const [lastAdded, setLastAdded] = useState(null);
+
+  async function submit(e) {
+    e.preventDefault();
+    setStatus("submitting");
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/add-tweet", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: tweetUrl.trim(),
+          image: imageUrl.trim(),
+          ...(customDate ? { date: customDate } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `Server error (${res.status})`);
+      }
+      setLastAdded(data.entry);
+      setTweetUrl("");
+      setImageUrl("");
+      setCustomDate("");
+      setStatus("success");
+    } catch (err) {
+      setError(err.message);
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-blackletter text-2xl text-gold">Scrolls — Town Crier</h2>
+      </div>
+
+      <p className="text-sm text-muted leading-relaxed mb-6 max-w-xl">
+        Add a tweet to the homepage Town Crier strip. Any account works —
+        official MidEvils, artists, or community members. The strip filters
+        to entries with an image and shows the five most recent by date.
+      </p>
+
+      <form
+        onSubmit={submit}
+        className="bg-card border border-border p-4 space-y-4 max-w-xl"
+      >
+        <div>
+          <label className="text-xs text-muted block mb-1">
+            Tweet URL <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="url"
+            required
+            placeholder="https://x.com/MidEvilsNFT/status/1234567890"
+            value={tweetUrl}
+            onChange={(e) => setTweetUrl(e.target.value)}
+            disabled={status === "submitting"}
+            className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold disabled:opacity-50"
+          />
+          <p className="text-xs text-muted/70 mt-1">
+            From x.com or twitter.com. Username and tweet ID auto-derive.
+          </p>
+        </div>
+
+        <div>
+          <label className="text-xs text-muted block mb-1">
+            Image URL <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="url"
+            required
+            placeholder="https://pbs.twimg.com/media/XXXXXX?format=jpg&name=large"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            disabled={status === "submitting"}
+            className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold disabled:opacity-50"
+          />
+          <p className="text-xs text-muted/70 mt-1">
+            On the tweet, right-click the image → &quot;Copy image
+            address&quot;. Paste the pbs.twimg.com URL here.
+          </p>
+        </div>
+
+        <div>
+          <label className="text-xs text-muted block mb-1">
+            Date (optional)
+          </label>
+          <input
+            type="datetime-local"
+            value={customDate}
+            onChange={(e) => setCustomDate(e.target.value)}
+            disabled={status === "submitting"}
+            className="bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold disabled:opacity-50"
+          />
+          <p className="text-xs text-muted/70 mt-1">
+            Defaults to now. Newest by date pops to the front of the strip —
+            override only if you want to backdate or pin order.
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-xs text-red-600 border border-red-300 bg-red-50 px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        {status === "success" && lastAdded && (
+          <div className="flex items-start gap-3 border border-green-300 bg-green-50 p-3">
+            {lastAdded.images?.[0] && (
+              <img
+                src={lastAdded.images[0]}
+                alt=""
+                className="w-16 h-16 object-cover border border-border flex-shrink-0"
+              />
+            )}
+            <div className="flex-1 min-w-0 text-xs text-green-800">
+              <p className="font-semibold mb-0.5">
+                Added @{lastAdded.username} ↗
+              </p>
+              <a
+                href={lastAdded.url}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-green-700 hover:text-green-900 break-all"
+              >
+                {lastAdded.url}
+              </a>
+              <p className="mt-1 text-green-700/80">
+                Vercel is rebuilding — the strip updates in ~30s.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            disabled={status === "submitting" || !tweetUrl || !imageUrl}
+            className="px-5 py-2 bg-gold text-card text-sm font-semibold rounded-full hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
+          >
+            {status === "submitting" ? "Adding…" : "Add to Crier"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 // ── Admin panel ───────────────────────────────────────────────────────────────
 
 const TABS = [
   { key: "bracket",    label: "Bracket" },
   { key: "auctions",   label: "Auctions" },
-  { key: "bounties",   label: "Bounties" },
+  { key: "bounties",   label: "Bards" },
   { key: "governance", label: "Governance" },
   { key: "discussion", label: "Discussion" },
+  { key: "scrolls",    label: "Scrolls" },
 ];
 
 function Badge({ count, variant = "default" }) {
@@ -1495,7 +1660,7 @@ export default function AdminPanel({ token }) {
       <div>
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-blackletter text-3xl text-gold">
-            Bounty Submissions
+            Bard Tributes
             {!loading && (
               <span className="ml-3 text-lg font-sans text-muted font-normal">
                 ({pending.length} pending)
@@ -1621,6 +1786,11 @@ export default function AdminPanel({ token }) {
       {/* ── Discussion ── */}
       {activeTab === "discussion" && (
         <DiscussionSection token={token} />
+      )}
+
+      {/* ── Scrolls (Town Crier) ── */}
+      {activeTab === "scrolls" && (
+        <ScrollsAdminSection token={token} />
       )}
 
       </div>

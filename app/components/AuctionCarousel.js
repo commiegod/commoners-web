@@ -198,7 +198,7 @@ export default function AuctionCarousel() {
           ) : currentSlide?.type === "bounty" ? (
             <>
               <div>
-                <p className="text-xs text-muted tracking-widest mb-2">ARTIST BOUNTY</p>
+                <p className="text-xs text-muted tracking-widest mb-2">BARD TRIBUTE</p>
                 <h2 className="font-blackletter text-2xl md:text-3xl text-gold mb-2">
                   {currentSlide.data.artistName ||
                     currentSlide.data.artist ||
@@ -212,9 +212,12 @@ export default function AuctionCarousel() {
                     <a
                       href={`https://twitter.com/${currentSlide.data.twitter.replace("@", "")}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="text-xs text-muted hover:text-foreground transition-colors"
+                      className="text-xs text-foreground hover:text-gold transition-colors font-medium"
                     >
-                      X / Twitter ↗
+                      {currentSlide.data.twitter.startsWith("@")
+                        ? currentSlide.data.twitter
+                        : `@${currentSlide.data.twitter}`}{" "}
+                      ↗
                     </a>
                   )}
                   {currentSlide.data.instagram && (
@@ -253,8 +256,8 @@ export default function AuctionCarousel() {
                         <div className="h-1 bg-gold transition-all duration-500" style={{ width: `${pct}%` }} />
                       </div>
                       <p className="text-xs text-muted">
-                        <a href="/bounty" className="hover:text-foreground transition-colors">
-                          {total === 0 ? "Be the first to vote ↗" : `${total} total votes · Vote on Bounty page ↗`}
+                        <a href="/bards" className="hover:text-foreground transition-colors">
+                          {total === 0 ? "Be the first to vote ↗" : `${total} total votes · Vote in the Bards' Hall ↗`}
                         </a>
                       </p>
                     </div>

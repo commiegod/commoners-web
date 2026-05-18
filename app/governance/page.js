@@ -20,6 +20,7 @@ import {
   TOTAL_NFTS,
 } from "../../lib/commoners";
 import proposalsData from "../../data/proposals.json";
+import Divider from "../components/Divider";
 
 
 const IS_DEVNET = !RPC_URL.includes("mainnet");
@@ -301,6 +302,9 @@ export default function GovernancePage() {
 
       <div className="max-w-3xl">
       {/* ── Header ── */}
+      <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted mb-2 uppercase">
+        — The Council —
+      </p>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 className="font-blackletter text-2xl sm:text-4xl text-foreground leading-tight">
@@ -443,6 +447,8 @@ export default function GovernancePage() {
           </div>
         ))}
       </div>
+
+      <Divider variant="trefoil" className="my-10" />
 
       {/* ── Active proposals ── */}
       <section className="mb-10">

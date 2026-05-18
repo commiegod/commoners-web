@@ -6,7 +6,7 @@ import { useState } from "react";
 import ConnectButton from "./ConnectButton";
 
 const links = [
-  { href: "/bounty", label: "Bounty" },
+  { href: "/bards", label: "Bards" },
   { href: "/governance", label: "Governance" },
   { href: "/discussion", label: "The Board" },
   { href: "/gallery", label: "Gallery" },

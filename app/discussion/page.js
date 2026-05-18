@@ -9,6 +9,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { getCommonerCount } from "../../lib/commoners";
 import { usePhantomDeeplink } from "../context/PhantomDeeplinkContext";
+import Sigil from "../components/Sigil";
+import { TweetWidgetScript } from "../components/PostBody";
 
 
 
@@ -199,6 +201,7 @@ function DiscussionPageInner() {
 
   return (
     <div>
+      <TweetWidgetScript />
       {/* Hero banner — full-bleed */}
       <div
         style={{
@@ -214,16 +217,13 @@ function DiscussionPageInner() {
 
       <div className="max-w-3xl">
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-y-2 mb-6">
-        <div>
-          <h1 className="font-blackletter text-4xl text-foreground">The Board</h1>
-          <p className="text-xs text-muted mt-1">
-            Commoner NFT holders only
-            {!loading && (
-              <span> · {threads.length} thread{threads.length !== 1 ? "s" : ""}</span>
-            )}
-          </p>
-        </div>
+      <p className="font-blackletter text-[11px] tracking-[0.3em] text-muted mb-2 uppercase">
+        — The Commons —
+      </p>
+      <div className="flex flex-wrap items-end justify-between gap-y-2 mb-4">
+        <h1 className="font-blackletter text-3xl md:text-4xl text-foreground">
+          The Board
+        </h1>
 
         <div className="shrink-0 pb-1">
           {!connected ? (
@@ -249,6 +249,17 @@ function DiscussionPageInner() {
           ) : null}
         </div>
       </div>
+      <p className="text-sm text-muted leading-relaxed max-w-2xl mb-6">
+        A public message board for the Commoner&apos;s DAO. Anyone can read.
+        Only Commoner NFT holders can post — sign-in is your wallet
+        signature, no email or account needed. Drop a tweet URL or image
+        link on its own line and it embeds inline.
+        {!loading && (
+          <span className="block mt-1 text-xs text-muted/70">
+            {threads.length} thread{threads.length !== 1 ? "s" : ""} on the board.
+          </span>
+        )}
+      </p>
 
       {/* New thread form */}
       {showForm && (
@@ -282,12 +293,17 @@ function DiscussionPageInner() {
               required
               rows={5}
               maxLength={2000}
-              placeholder="What's on your mind?"
+              placeholder="What's on your mind? Paste a tweet or image URL on its own line to embed it."
               value={body}
               onChange={(e) => setBody(e.target.value)}
               className="w-full bg-background border border-border px-3 py-2 text-sm focus:outline-none focus:border-gold placeholder:text-muted/50 resize-y"
             />
-            <p className="text-right text-xs text-muted mt-1">{body.length} / 2000</p>
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-xs text-muted/70">
+                Tip: an X tweet URL or image link on its own line renders inline.
+              </p>
+              <p className="text-xs text-muted">{body.length} / 2000</p>
+            </div>
           </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
@@ -353,6 +369,7 @@ function DiscussionPageInner() {
               <p className="font-semibold text-foreground mb-1 truncate">{thread.subject}</p>
               <p className="text-sm text-muted line-clamp-2 mb-2.5 leading-snug">{thread.body}</p>
               <div className="flex items-center gap-2 text-xs text-muted">
+                <Sigil wallet={thread.author} size={20} />
                 <span className="font-mono">{shortAddr(thread.author)}</span>
                 <span>·</span>
                 <span>{timeAgo(thread.timestamp)}</span>
